@@ -1,0 +1,42 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model menu_group {
+  id         Int      @id @default(autoincrement())
+  menu_group String   @unique
+  urut       Int?
+  group      Boolean?
+  parent_id  String?
+  menu       menu[]
+
+  @@index([menu_group, urut, parent_id])
+}
+
+model menu {
+  id            Int        @id @default(autoincrement())
+  menu          String?
+  path          String?
+  last_path     String?
+  urut          Int?
+  menu_group_id Int
+  menu_group    menu_group @relation(fields: [menu_group_id], references: [id])
+
+  @@index([urut, menu_group_id])
+}
+
+model roles {
+  id        Int    @id @default(autoincrement())
+  role_name String @unique
+}

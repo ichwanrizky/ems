@@ -1,0 +1,11 @@
+.table-responsive {
+    position: relative; /* Ensure dropdowns are positioned relative to the table container */
+  }
+
+  .table-responsive .dropdown-menu {
+    z-index: 1050; /* Ensure dropdowns appear above other elements */
+  }
+
+  .table-responsive .dropdown-menu.show {
+    transform: translateY(5px); /* Fine-tune dropdown position */
+  }
