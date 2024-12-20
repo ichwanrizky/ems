@@ -66,7 +66,6 @@ export default function MenuGroupView() {
         });
       }
     } catch (error) {
-      console.log("🚀 ~ fetchData ~ error:", error);
       setAlertPage({
         status: true,
         color: "danger",

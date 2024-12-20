@@ -66,7 +66,6 @@ export default function RolesView() {
         });
       }
     } catch (error) {
-      console.log("🚀 ~ fetchData ~ error:", error);
       setAlertPage({
         status: true,
         color: "danger",

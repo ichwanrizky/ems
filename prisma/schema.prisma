@@ -40,3 +40,23 @@ model roles {
   id        Int    @id @default(autoincrement())
   role_name String @unique
 }
+
+model department {
+  id              Int              @id @default(autoincrement())
+  nama_department String           @unique
+  latitude        String?
+  longitude       String?
+  radius          String?
+  created_at      DateTime?        @db.DateTime(0)
+  is_deleted      Boolean          @default(false)
+  sub_department  sub_department[]
+}
+
+model sub_department {
+  id                  Int        @id @default(autoincrement())
+  nama_sub_department String     @unique
+  created_at          DateTime?  @db.DateTime(0)
+  is_deleted          Boolean    @default(false)
+  department_id       Int
+  department          department @relation(fields: [department_id], references: [id])
+}

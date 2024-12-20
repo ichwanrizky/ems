@@ -1,29 +1,35 @@
 "use server";
 
+import { DateNowFormat } from "@/libs/DateFormat";
 import { HandleError } from "@/libs/Error";
 import prisma from "@/libs/Prisma";
-import { RolesProps } from "@/types";
+import { DepartmentProps } from "@/types";
 
-export const getRoles = async (
+export const getDepartment = async (
   search?: string
 ): Promise<{
   status: boolean;
   message: string;
-  data: RolesProps[] | [];
+  data: DepartmentProps[] | [];
 }> => {
   try {
-    const result = (await prisma.roles.findMany({
+    const result = (await prisma.department.findMany({
+      select: {
+        id: true,
+        nama_department: true,
+        latitude: true,
+        longitude: true,
+        radius: true,
+      },
       where: {
+        is_deleted: false,
         ...(search && {
-          role_name: {
+          nama_department: {
             contains: search,
           },
         }),
       },
-      orderBy: {
-        role_name: "asc",
-      },
-    })) as RolesProps[];
+    })) as DepartmentProps[];
 
     if (!result) {
       return {
@@ -43,19 +49,26 @@ export const getRoles = async (
   }
 };
 
-export const getRolesId = async (
+export const getDepartmentId = async (
   id: number
 ): Promise<{
   status: boolean;
   message: string;
-  data: RolesProps | null;
+  data: DepartmentProps | null;
 }> => {
   try {
-    const result = (await prisma.roles.findFirst({
-      where: {
-        id,
+    const result = (await prisma.department.findFirst({
+      select: {
+        id: true,
+        nama_department: true,
+        latitude: true,
+        longitude: true,
+        radius: true,
       },
-    })) as RolesProps;
+      where: {
+        is_deleted: false,
+      },
+    })) as DepartmentProps;
 
     if (!result) {
       return {
@@ -75,16 +88,20 @@ export const getRolesId = async (
   }
 };
 
-export const createRoles = async (
-  data: RolesProps
+export const createDepartment = async (
+  data: DepartmentProps
 ): Promise<{
   status: boolean;
   message: string;
 }> => {
   try {
-    const result = await prisma.roles.create({
+    const result = await prisma.department.create({
       data: {
-        role_name: data.role_name?.toUpperCase(),
+        nama_department: data.nama_department?.toUpperCase(),
+        latitude: data.latitude || null,
+        longitude: data.longitude || null,
+        radius: data.radius || null,
+        created_at: DateNowFormat(),
       },
     });
 
@@ -104,19 +121,23 @@ export const createRoles = async (
   }
 };
 
-export const editRoles = async (
-  data: RolesProps
+export const editDepartment = async (
+  data: DepartmentProps
 ): Promise<{
   status: boolean;
   message: string;
 }> => {
   try {
-    const result = await prisma.roles.update({
-      data: {
-        role_name: data.role_name?.toUpperCase(),
-      },
+    const result = await prisma.department.update({
       where: {
         id: data.id,
+        is_deleted: false,
+      },
+      data: {
+        nama_department: data.nama_department?.toUpperCase(),
+        latitude: data.latitude || null,
+        longitude: data.longitude || null,
+        radius: data.radius || null,
       },
     });
 
@@ -136,16 +157,20 @@ export const editRoles = async (
   }
 };
 
-export const deleteRoles = async (
+export const deleteDepartment = async (
   id: number
 ): Promise<{
   status: boolean;
   message: string;
 }> => {
   try {
-    const result = await prisma.roles.delete({
+    const result = await prisma.department.update({
       where: {
         id,
+        is_deleted: false,
+      },
+      data: {
+        is_deleted: true,
       },
     });
 

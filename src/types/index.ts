@@ -31,3 +31,18 @@ export type RolesProps = {
   id: number;
   role_name: string;
 };
+
+export type DepartmentProps = {
+  id: number;
+  nama_department: string;
+  latitude: string;
+  longitude: string;
+  radius: string;
+};
+
+export type SubDepartmentProps = {
+  id: number;
+  nama_sub_department: string;
+  department_id: number;
+  department?: DepartmentProps;
+};

@@ -1,14 +1,18 @@
 "use client";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
-import { isLoadingProps, MenuGroupProps, MenuProps } from "@/types";
+import { DepartmentProps, isLoadingProps } from "@/types";
 import React, { useEffect, useState } from "react";
-import { deleteMenu, getMenu, getMenuId } from "../_libs/action";
-import MenuCreate from "./MenuCreate";
-import { getMenuGroup } from "../../menu_group/_libs/action";
-import MenuEdit from "./MenuEdit";
 
-export default function MenuView() {
+import {
+  deleteDepartment,
+  getDepartment,
+  getDepartmentId,
+} from "../_libs/action";
+import DepartmentEdit from "./DepartmentEdit";
+import DepartmentCreate from "./DepartmentCreate";
+
+export default function DepartmentView() {
   const [loadingPage, setLoadingPage] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
   const [alertPage, setAlertPage] = useState({
@@ -21,13 +25,9 @@ export default function MenuView() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [filter, setFilter] = useState({
-    menu_group: "",
-  });
 
-  const [menuData, setMenuData] = useState([] as MenuProps[]);
-  const [menuEdit, setMenuEdit] = useState({} as MenuProps);
-  const [menuGroupData, setMenuGroupData] = useState([] as MenuGroupProps[]);
+  const [departmentData, setDepartmentData] = useState([] as DepartmentProps[]);
+  const [departmentEdit, setDepartmentEdit] = useState({} as DepartmentProps);
 
   useEffect(() => {
     if (alertPage.status) {
@@ -53,44 +53,15 @@ export default function MenuView() {
   }, [searchTerm]);
 
   useEffect(() => {
-    fetchData(debouncedSearchTerm, filter.menu_group);
-  }, [debouncedSearchTerm, filter]);
+    fetchData(debouncedSearchTerm);
+  }, [debouncedSearchTerm]);
 
-  useEffect(() => {
-    fetchMenuGroup();
-  }, []);
-
-  const fetchMenuGroup = async () => {
+  const fetchData = async (search = "") => {
     setLoadingPage(true);
     try {
-      const result = await getMenuGroup();
+      const result = await getDepartment(search);
       if (result.status) {
-        setMenuGroupData(result.data as MenuGroupProps[]);
-      } else {
-        setAlertPage({
-          status: true,
-          color: "danger",
-          message: "Failed",
-          subMessage: result.message,
-        });
-      }
-    } catch (error) {
-      setAlertPage({
-        status: true,
-        color: "danger",
-        message: "Error",
-        subMessage: "Something went wrong, please refresh and try again",
-      });
-    } finally {
-      setLoadingPage(false);
-    }
-  };
-  const fetchData = async (search = "", menu_group = "") => {
-    setLoadingPage(true);
-    try {
-      const result = await getMenu(search, menu_group);
-      if (result.status) {
-        setMenuData(result.data as MenuProps[]);
+        setDepartmentData(result.data as DepartmentProps[]);
       } else {
         setAlertPage({
           status: true,
@@ -118,9 +89,9 @@ export default function MenuView() {
   const handleGetEdit = async (id: number) => {
     setIsLoadingAction({ ...isLoadingAction, [id]: true });
     try {
-      const result = await getMenuId(id);
+      const result = await getDepartmentId(id);
       if (result.status) {
-        setMenuEdit(result.data as MenuProps);
+        setDepartmentEdit(result.data as DepartmentProps);
         setIsEditOpen(true);
       } else {
         setAlertPage({
@@ -146,7 +117,7 @@ export default function MenuView() {
     if (confirm("Delete this data?")) {
       setIsLoadingAction({ ...isLoadingAction, [id]: true });
       try {
-        const result = await deleteMenu(id);
+        const result = await deleteDepartment(id);
         if (result.status) {
           setAlertPage({
             status: true,
@@ -195,23 +166,7 @@ export default function MenuView() {
             </span>
           </div>
         </div>
-        <div className="col-auto flex-grow-1 overflow-auto">
-          <div className="btn-group position-static">
-            <select
-              className="form-select"
-              onChange={(e) =>
-                setFilter({ ...filter, menu_group: e.target.value })
-              }
-            >
-              <option value="">-- Menu Group --</option>
-              {menuGroupData?.map((item, index: number) => (
-                <option key={index} value={item.id}>
-                  {item.menu_group}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
+        <div className="col-auto flex-grow-1 overflow-auto"></div>
 
         <div className="col-auto">
           <div className="d-flex align-items-center gap-2 justify-content-lg-end">
@@ -237,16 +192,15 @@ export default function MenuView() {
                   <tr>
                     <th style={{ width: "1%" }}></th>
                     <th style={{ width: "1%" }}>NO</th>
-                    <th>MENU</th>
-                    <th style={{ width: "15%" }}>PATH</th>
-                    <th style={{ width: "15%" }}>GROUP</th>
-                    <th style={{ width: "10%" }}>URUT</th>
+                    <th>DEPARTMENT</th>
+                    <th style={{ width: "30%" }}>COORDINATE</th>
+                    <th style={{ width: "15%" }}>RADIUS</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingPage ? (
                     <tr>
-                      <td colSpan={6} align="center">
+                      <td colSpan={5} align="center">
                         <div
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
@@ -256,8 +210,8 @@ export default function MenuView() {
                         Loading...
                       </td>
                     </tr>
-                  ) : menuData.length > 0 ? (
-                    menuData.map((item, index) => (
+                  ) : departmentData.length > 0 ? (
+                    departmentData.map((item, index) => (
                       <tr key={index}>
                         <td align="center">
                           <Button
@@ -271,15 +225,18 @@ export default function MenuView() {
                           </Button>
                         </td>
                         <td align="center">{index + 1}</td>
-                        <td>{item.menu}</td>
-                        <td align="left">{item.path}</td>
-                        <td align="center">{item.menu_group?.menu_group}</td>
-                        <td align="center">{item.urut}</td>
+                        <td>{item.nama_department}</td>
+                        <td align="center">
+                          {item.latitude &&
+                            item.longitude &&
+                            `${item.latitude}, ${item.longitude}`}
+                        </td>
+                        <td align="center">{item.radius}</td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={6} align="center">
+                      <td colSpan={5} align="center">
                         No data available
                       </td>
                     </tr>
@@ -292,25 +249,23 @@ export default function MenuView() {
       </div>
 
       {isCreateOpen && (
-        <MenuCreate
+        <DepartmentCreate
           isOpen={isCreateOpen}
           onClose={() => {
             setIsCreateOpen(false);
             fetchData();
           }}
-          menuGroupData={menuGroupData}
         />
       )}
 
       {isEditOpen && (
-        <MenuEdit
+        <DepartmentEdit
           isOpen={isEditOpen}
           onClose={() => {
             setIsEditOpen(false);
             fetchData();
           }}
-          menuGroupData={menuGroupData}
-          menuEdit={menuEdit}
+          departmentEdit={departmentEdit}
         />
       )}
     </>
