@@ -32,31 +32,68 @@ model menu {
   urut          Int?
   menu_group_id Int
   menu_group    menu_group @relation(fields: [menu_group_id], references: [id])
+  access        access[]
 
   @@index([urut, menu_group_id])
 }
 
 model roles {
-  id        Int    @id @default(autoincrement())
-  role_name String @unique
+  id                    Int                     @id @default(autoincrement())
+  role_name             String                  @unique
+  access_department     access_department[]
+  access_sub_department access_sub_department[]
+  access                access[]
 }
 
 model department {
-  id              Int              @id @default(autoincrement())
-  nama_department String           @unique
-  latitude        String?
-  longitude       String?
-  radius          String?
-  created_at      DateTime?        @db.DateTime(0)
-  is_deleted      Boolean          @default(false)
-  sub_department  sub_department[]
+  id                Int                 @id @default(autoincrement())
+  nama_department   String              @unique
+  latitude          String?
+  longitude         String?
+  radius            String?
+  created_at        DateTime?           @db.DateTime(0)
+  is_deleted        Boolean             @default(false)
+  sub_department    sub_department[]
+  access_department access_department[]
 }
 
 model sub_department {
-  id                  Int        @id @default(autoincrement())
-  nama_sub_department String     @unique
-  created_at          DateTime?  @db.DateTime(0)
-  is_deleted          Boolean    @default(false)
-  department_id       Int
-  department          department @relation(fields: [department_id], references: [id])
+  id                    Int                     @id @default(autoincrement())
+  nama_sub_department   String                  @unique
+  created_at            DateTime?               @db.DateTime(0)
+  is_deleted            Boolean                 @default(false)
+  department_id         Int
+  department            department              @relation(fields: [department_id], references: [id])
+  access_sub_department access_sub_department[]
+}
+
+model access_department {
+  role_id       Int
+  roles         roles      @relation(fields: [role_id], references: [id])
+  department_id Int
+  department    department @relation(fields: [department_id], references: [id])
+
+  @@id([role_id, department_id])
+}
+
+model access_sub_department {
+  role_id           Int
+  roles             roles          @relation(fields: [role_id], references: [id])
+  sub_department_id Int
+  sub_department    sub_department @relation(fields: [sub_department_id], references: [id])
+
+  @@id([role_id, sub_department_id])
+}
+
+model access {
+  role_id Int
+  roles   roles   @relation(fields: [role_id], references: [id])
+  menu_id Int
+  menu    menu    @relation(fields: [menu_id], references: [id])
+  view    Boolean @default(false)
+  insert  Boolean @default(false)
+  update  Boolean @default(false)
+  delete  Boolean @default(false)
+
+  @@id([role_id, menu_id])
 }
