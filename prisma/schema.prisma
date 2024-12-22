@@ -43,6 +43,7 @@ model roles {
   access_department     access_department[]
   access_sub_department access_sub_department[]
   access                access[]
+  user                  user[]
 }
 
 model department {
@@ -96,4 +97,19 @@ model access {
   delete  Boolean @default(false)
 
   @@id([role_id, menu_id])
+}
+
+model user {
+  id         Int       @id @default(autoincrement())
+  username   String    @unique
+  password   String
+  name       String?
+  telp       String?
+  role_id    Int?
+  roles      roles?    @relation(fields: [role_id], references: [id])
+  created_at DateTime? @db.DateTime(0)
+  is_deleted Boolean   @default(false)
+
+  @@index([username], map: "user_username")
+  @@index([role_id], map: "user_role_id")
 }
