@@ -2,6 +2,7 @@ import DashboardHeader from "@/components/DashboardHeader";
 import DashboardSidebar from "@/components/DashboardSidebar";
 import { authOptions } from "@/libs/AuthOptions";
 import { getServerSession } from "next-auth/next";
+import { redirect } from "next/navigation";
 import Script from "next/script";
 
 export default async function DashboardLayout({
@@ -10,7 +11,8 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const session: any = await getServerSession(authOptions);
-  console.log("🚀 ~ session:", session);
+
+  if (!session) redirect("/auth/logout");
 
   return (
     <>
@@ -67,7 +69,7 @@ export default async function DashboardLayout({
         <link href="/sass/responsive.css" rel="stylesheet" />
       </head>
       <body>
-        <DashboardSidebar />
+        <DashboardSidebar menu={session.user.menu} />
         <DashboardHeader />
         <main className="main-wrapper">{children}</main>
 

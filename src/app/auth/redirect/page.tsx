@@ -5,13 +5,12 @@ import { useEffect } from "react";
 
 export default function Redirect() {
   const { data: session, status }: any = useSession();
-  console.log(session);
 
   useEffect(() => {
     if (status === "unauthenticated") {
       redirect("/auth/login");
     } else if (status === "authenticated") {
-      const path = session.user.roles.access?.[0].menu.path;
+      const path = session.user.menu[0].menu[0].path;
       redirect(`/${path}`);
     }
   }, [status]);

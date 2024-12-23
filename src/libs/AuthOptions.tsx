@@ -24,77 +24,92 @@ export const authOptions: NextAuthOptions = {
           password: string;
         };
 
-        const result = await prisma.user.findFirst({
-          select: {
-            id: true,
-            username: true,
-            roles: {
-              select: {
-                role_name: true,
-                access_department: {
-                  select: {
-                    department: {
-                      select: {
-                        id: true,
-                        nama_department: true,
-                      },
-                    },
-                  },
-                },
-                access_sub_department: {
-                  select: {
-                    sub_department: {
-                      select: {
-                        id: true,
-                        nama_sub_department: true,
-                      },
-                    },
-                  },
-                },
-                access: {
-                  select: {
-                    menu: {
-                      select: {
-                        id: true,
-                        menu: true,
-                        path: true,
-                      },
-                    },
-                    view: true,
-                    insert: true,
-                    update: true,
-                    delete: true,
-                  },
-                  orderBy: [
-                    {
-                      menu: {
-                        menu_group: {
-                          urut: "asc",
+        const result = await prisma.$transaction(async (prisma) => {
+          const user = await prisma.user.findFirst({
+            select: {
+              id: true,
+              username: true,
+              roles: {
+                select: {
+                  id: true,
+                  role_name: true,
+                  access_department: {
+                    select: {
+                      department: {
+                        select: {
+                          id: true,
+                          nama_department: true,
                         },
                       },
                     },
-                    {
-                      menu: {
-                        urut: "asc",
+                  },
+                  access_sub_department: {
+                    select: {
+                      sub_department: {
+                        select: {
+                          id: true,
+                          nama_sub_department: true,
+                        },
                       },
                     },
-                  ],
+                  },
                 },
               },
             },
-          },
-          where: {
-            username,
-            password,
-            is_deleted: false,
-          },
+            where: {
+              username,
+              password,
+              is_deleted: false,
+            },
+          });
+
+          const menu = await prisma.menu_group.findMany({
+            select: {
+              id: true,
+              menu_group: true,
+              group: true,
+              parent_id: true,
+              menu: {
+                select: {
+                  id: true,
+                  menu: true,
+                  path: true,
+                },
+                orderBy: {
+                  urut: "asc",
+                },
+              },
+            },
+            where: {
+              menu: {
+                some: {
+                  access: {
+                    some: {
+                      role_id: user?.roles?.id,
+                    },
+                  },
+                },
+              },
+            },
+            orderBy: [
+              {
+                urut: "asc",
+              },
+            ],
+          });
+
+          return { user, menu };
         });
 
-        if (result) {
+        if (result.user && result.menu) {
           return {
-            id: result.id.toString(),
-            username: result.username,
-            roles: result.roles,
+            id: result.user.id.toString(),
+            username: result.user.username,
+            role_id: result.user.roles?.id,
+            role_name: result.user.roles?.role_name,
+            access_department: result.user.roles?.access_department,
+            access_sub_department: result.user.roles?.access_sub_department,
+            menu: result.menu,
           };
         }
 
@@ -107,7 +122,13 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === "credentials") {
         token.id = user.id;
         token.username = user.username;
-        token.roles = user.roles;
+        token.role_id = user.role_id;
+        token.role_name = user.role_name;
+        token.access_department = user.access_department;
+        token.access_sub_department = user.access_sub_department;
+        token.menu = user.menu;
+
+        return token;
       }
 
       return token;
@@ -126,8 +147,24 @@ export const authOptions: NextAuthOptions = {
         session.user.username = token.username;
       }
 
-      if ("roles" in token) {
-        session.user.roles = token.roles;
+      if ("role_id" in token) {
+        session.user.role_id = token.role_id;
+      }
+
+      if ("role_name" in token) {
+        session.user.role_name = token.role_name;
+      }
+
+      if ("access_department" in token) {
+        session.user.access_department = token.access_department;
+      }
+
+      if ("access_sub_department" in token) {
+        session.user.access_sub_department = token.access_sub_department;
+      }
+
+      if ("menu" in token) {
+        session.user.menu = token.menu;
       }
 
       return session;

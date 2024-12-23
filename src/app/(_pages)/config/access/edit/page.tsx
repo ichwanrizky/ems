@@ -16,9 +16,9 @@ const getAccess = async (role_id: number) => {
 export default async function AccessEditPage({
   searchParams,
 }: {
-  searchParams: {
-    role_id?: string;
-  };
+  searchParams: Promise<{
+    role_id: string;
+  }>;
 }) {
   const role_id = (await searchParams).role_id;
   if (!role_id) redirect("/config/access");
