@@ -1,12 +1,17 @@
 import DashboardHeader from "@/components/DashboardHeader";
 import DashboardSidebar from "@/components/DashboardSidebar";
+import { authOptions } from "@/libs/AuthOptions";
+import { getServerSession } from "next-auth/next";
 import Script from "next/script";
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session: any = await getServerSession(authOptions);
+  console.log("🚀 ~ session:", session);
+
   return (
     <>
       <head>

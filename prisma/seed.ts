@@ -129,6 +129,18 @@ async function main() {
       ],
     });
 
+    await prisma.user.deleteMany();
+    await prisma.user.create({
+      data: {
+        id: 1,
+        username: "ichwan",
+        password: "sarutobi11",
+        name: "ICHWAN RIZKY",
+        telp: "08117779914",
+        role_id: 1,
+      },
+    });
+
     console.log("Seeding Complete");
   } catch (error) {
     console.log("Seeding Error: ", error);
