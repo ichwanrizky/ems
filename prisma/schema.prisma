@@ -56,6 +56,7 @@ model department {
   is_deleted        Boolean             @default(false)
   sub_department    sub_department[]
   access_department access_department[]
+  shift             shift[]
 }
 
 model sub_department {
@@ -112,4 +113,15 @@ model user {
 
   @@index([username], map: "user_username")
   @@index([role_id], map: "user_role_id")
+}
+
+model shift {
+  id            Int        @id @default(autoincrement())
+  jam_masuk     DateTime?  @db.Time(0)
+  jam_pulang    DateTime?  @db.Time(0)
+  keterangan    String?
+  different_day Boolean    @default(false)
+  cond_friday   Int        @default(0)
+  department_id Int
+  department    department @relation(fields: [department_id], references: [id])
 }

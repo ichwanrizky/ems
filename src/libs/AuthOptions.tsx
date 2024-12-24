@@ -74,6 +74,21 @@ export const authOptions: NextAuthOptions = {
                   id: true,
                   menu: true,
                   path: true,
+                  access: {
+                    select: {
+                      view: true,
+                      insert: true,
+                      update: true,
+                      delete: true,
+                    },
+                  },
+                },
+                where: {
+                  access: {
+                    some: {
+                      role_id: user?.roles?.id,
+                    },
+                  },
                 },
                 orderBy: {
                   urut: "asc",

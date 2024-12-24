@@ -46,3 +46,65 @@ export type SubDepartmentProps = {
   department_id: number;
   department?: DepartmentProps;
 };
+
+export type SeesionProps = {
+  user: {
+    id: string;
+    username: string;
+    role_id: number;
+    role_name: string;
+    access_department: AccessDepartmentProps;
+    access_sub_department: AccessSubDepartmentProps;
+    menu: {
+      id: number;
+      menu_group: string;
+      group: boolean;
+      parent_id: string;
+      menu: {
+        id: number;
+        menu: string;
+        path: string;
+        access: {
+          view: boolean;
+          insert: boolean;
+          update: boolean;
+          delete: boolean;
+        }[];
+      }[];
+    }[];
+  };
+};
+
+export type AccessDepartmentProps = {
+  department: {
+    id: number;
+    nama_department: string;
+  };
+}[];
+
+export type AccessSubDepartmentProps = {
+  sub_department: {
+    id: number;
+    nama_sub_department: string;
+  };
+}[];
+
+export type AccessProps = {
+  view: boolean;
+  insert: boolean;
+  update: boolean;
+  delete: boolean;
+};
+
+export type ShiftMaster = {
+  id: number;
+  jam_masuk: Date;
+  jam_pulang: Date;
+  keterangan: string;
+  different_day: boolean;
+  cond_friday: number;
+  department: {
+    id: number;
+    nama_department: string;
+  };
+};
