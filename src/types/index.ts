@@ -86,6 +86,7 @@ export type AccessSubDepartmentProps = {
   sub_department: {
     id: number;
     nama_sub_department: string;
+    department_id: number;
   };
 }[];
 

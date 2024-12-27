@@ -49,6 +49,7 @@ export const authOptions: NextAuthOptions = {
                         select: {
                           id: true,
                           nama_sub_department: true,
+                          department_id: true,
                         },
                       },
                     },
