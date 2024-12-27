@@ -116,7 +116,7 @@ export const authOptions: NextAuthOptions = {
           return { user, menu };
         });
 
-        if (result.user && result.menu) {
+        if (result.user && result.menu.length > 0) {
           return {
             id: result.user.id.toString(),
             username: result.user.username,

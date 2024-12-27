@@ -14,6 +14,12 @@ async function main() {
           urut: 99,
           parent_id: "config",
         },
+        {
+          id: 2,
+          menu_group: "hr".toUpperCase(),
+          urut: 99,
+          parent_id: "hr",
+        },
       ],
     });
 
@@ -129,6 +135,7 @@ async function main() {
       ],
     });
 
+    // user
     await prisma.user.deleteMany();
     await prisma.user.create({
       data: {
@@ -139,6 +146,83 @@ async function main() {
         telp: "08117779914",
         role_id: 1,
       },
+    });
+
+    // access
+    await prisma.access.deleteMany();
+    await prisma.access.createMany({
+      data: [
+        {
+          role_id: 1,
+          menu_id: 1,
+          view: true,
+          insert: true,
+          update: true,
+          delete: true,
+        },
+        {
+          role_id: 1,
+          menu_id: 2,
+          view: true,
+          insert: true,
+          update: true,
+          delete: true,
+        },
+        {
+          role_id: 1,
+          menu_id: 3,
+          view: true,
+          insert: true,
+          update: true,
+          delete: true,
+        },
+        {
+          role_id: 1,
+          menu_id: 4,
+          view: true,
+          insert: true,
+          update: true,
+          delete: true,
+        },
+        {
+          role_id: 1,
+          menu_id: 5,
+          view: true,
+          insert: true,
+          update: true,
+          delete: true,
+        },
+        {
+          role_id: 1,
+          menu_id: 6,
+          view: true,
+          insert: true,
+          update: true,
+          delete: true,
+        },
+      ],
+    });
+
+    // access department
+    await prisma.access_department.deleteMany();
+    await prisma.access_department.createMany({
+      data: [
+        {
+          role_id: 1,
+          department_id: 1,
+        },
+      ],
+    });
+
+    // access sub department
+    await prisma.access_sub_department.deleteMany();
+    await prisma.access_sub_department.createMany({
+      data: [
+        {
+          role_id: 1,
+          sub_department_id: 1,
+        },
+      ],
     });
 
     console.log("Seeding Complete");
