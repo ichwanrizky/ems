@@ -2,9 +2,21 @@
 
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
-import { AccessDepartmentProps, AccessProps, isLoadingProps } from "@/types";
+import {
+  AccessDepartmentProps,
+  AccessProps,
+  isLoadingProps,
+  ShiftMasterProps,
+} from "@/types";
 import React, { useEffect, useState } from "react";
 import ShiftMasterCrete from "./ShiftMasterCrete";
+import {
+  deleteShiftMaster,
+  getShiftMaster,
+  getShiftMasterId,
+} from "../_libs/action";
+import { DisplayHour } from "@/libs/DisplayDate";
+import ShiftMasterEdit from "./ShiftMasterEdit";
 
 type ShiftMasterViewProps = {
   accessDepartment: AccessDepartmentProps;
@@ -27,8 +39,12 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [filter, setFilter] = useState({ department: "" });
 
-  const [shiftMasterData, setShiftMasterData] = useState([] as any[]);
-  const [shiftMasterEdit, setShiftMasterEdit] = useState({} as any);
+  const [shiftMasterData, setShiftMasterData] = useState(
+    [] as ShiftMasterProps[]
+  );
+  const [shiftMasterEdit, setShiftMasterEdit] = useState(
+    {} as ShiftMasterProps
+  );
 
   useEffect(() => {
     if (alertPage.status) {
@@ -54,37 +70,100 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
   }, [searchTerm]);
 
   useEffect(() => {
-    fetchData(debouncedSearchTerm);
-  }, [debouncedSearchTerm]);
+    fetchData(debouncedSearchTerm, filter.department);
+  }, [debouncedSearchTerm, filter]);
 
-  const fetchData = async (search = "") => {
+  const fetchData = async (search = "", department = "") => {
     setLoadingPage(true);
-    // try {
-    //   const result = await getMenuGroup(search);
-    //   if (result.status) {
-    //     setMenuGroupData(result.data as MenuGroupProps[]);
-    //   } else {
-    //     setAlertPage({
-    //       status: true,
-    //       color: "danger",
-    //       message: "Failed",
-    //       subMessage: result.message,
-    //     });
-    //   }
-    // } catch (error) {
-    //   setAlertPage({
-    //     status: true,
-    //     color: "danger",
-    //     message: "Error",
-    //     subMessage: "Something went wrong, please refresh and try again",
-    //   });
-    // } finally {
-    //   setLoadingPage(false);
-    // }
+    try {
+      const result = await getShiftMaster(search, department);
+      if (result.status) {
+        setShiftMasterData(result.data as ShiftMasterProps[]);
+      } else {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Failed",
+          subMessage: result.message,
+        });
+      }
+    } catch (error) {
+      setAlertPage({
+        status: true,
+        color: "danger",
+        message: "Error",
+        subMessage: "Something went wrong, please refresh and try again",
+      });
+    } finally {
+      setLoadingPage(false);
+    }
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+  };
+
+  const handleGetEdit = async (id: number) => {
+    setIsLoadingAction({ ...isLoadingAction, [id]: true });
+    try {
+      const result = await getShiftMasterId(id);
+      if (result.status) {
+        setShiftMasterEdit(result.data as ShiftMasterProps);
+        setIsEditOpen(true);
+      } else {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Failed",
+          subMessage: result.message,
+        });
+      }
+    } catch (error) {
+      setAlertPage({
+        status: true,
+        color: "danger",
+        message: "Error",
+        subMessage: "Something went wrong, please refresh and try again",
+      });
+    } finally {
+      setIsLoadingAction({ ...isLoadingAction, [id]: false });
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (confirm("Delete this data?")) {
+      setIsLoadingAction({ ...isLoadingAction, [id]: true });
+      try {
+        const result = await deleteShiftMaster(id);
+        if (result.status) {
+          setAlertPage({
+            status: true,
+            color: "success",
+            message: "Success",
+            subMessage: result.message,
+          });
+          fetchData();
+        } else {
+          setAlertPage({
+            status: true,
+            color: "danger",
+            message: "Failed",
+            subMessage: result.message,
+          });
+        }
+      } catch (error) {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
+        });
+      } finally {
+        setIsLoadingAction({ ...isLoadingAction, [id]: false });
+      }
+    }
+
+    return;
   };
 
   return (
@@ -152,14 +231,14 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
                   <tr>
                     <th style={{ width: "1%" }}></th>
                     <th style={{ width: "1%" }}>NO</th>
-                    <th>DEPARTMENT</th>
-                    <th style={{ width: "20%" }}>KETERANGAN</th>
+                    <th style={{ width: "20%" }}>DEPARTMENT</th>
+                    <th>KETERANGAN</th>
                     <th style={{ width: "20%" }}>JAM MASUK</th>
                     <th style={{ width: "20%" }}>JAM PULANG</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {/* {loadingPage ? (
+                  {loadingPage ? (
                     <tr>
                       <td colSpan={6} align="center">
                         <div
@@ -171,8 +250,8 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
                         Loading...
                       </td>
                     </tr>
-                  ) : menuGroupData.length > 0 ? (
-                    menuGroupData.map((item, index) => (
+                  ) : shiftMasterData.length > 0 ? (
+                    shiftMasterData.map((item, index) => (
                       <tr key={index}>
                         <td align="center">
                           <Button
@@ -186,18 +265,18 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
                           </Button>
                         </td>
                         <td align="center">{index + 1}</td>
-                        <td>{item.menu_group}</td>
-                        <td align="center">{item.urut}</td>
+                        <td>{item.department.nama_department}</td>
+                        <td>{item.keterangan}</td>
                         <td align="center">
-                          {item.group ? (
-                            <span className="badge bg-grd-info text-dark">
-                              GROUP
-                            </span>
-                          ) : (
-                            <span className="badge bg-grd-danger">FALSE</span>
-                          )}
+                          {new Date(item.jam_masuk)
+                            .toLocaleString("id-ID", DisplayHour)
+                            .replaceAll(".", ":")}
                         </td>
-                        <td>{item.parent_id}</td>
+                        <td align="center">
+                          {new Date(item.jam_pulang)
+                            .toLocaleString("id-ID", DisplayHour)
+                            .replaceAll(".", ":")}
+                        </td>
                       </tr>
                     ))
                   ) : (
@@ -206,7 +285,7 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
                         No data available
                       </td>
                     </tr>
-                  )} */}
+                  )}
                 </tbody>
               </table>
             </div>
@@ -222,6 +301,18 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
             fetchData();
           }}
           departmentData={accessDepartment}
+        />
+      )}
+
+      {isEditOpen && (
+        <ShiftMasterEdit
+          isOpen={isEditOpen}
+          onClose={() => {
+            setIsEditOpen(false);
+            fetchData();
+          }}
+          departmentData={accessDepartment}
+          shiftMasterEdit={shiftMasterEdit}
         />
       )}
     </>

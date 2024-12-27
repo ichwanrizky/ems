@@ -11,14 +11,16 @@ async function main() {
         {
           id: 1,
           menu_group: "config".toUpperCase(),
-          urut: 99,
+          urut: 1,
           parent_id: "config",
+          group: true,
         },
         {
           id: 2,
           menu_group: "hr".toUpperCase(),
           urut: 99,
           parent_id: "hr",
+          group: true,
         },
       ],
     });

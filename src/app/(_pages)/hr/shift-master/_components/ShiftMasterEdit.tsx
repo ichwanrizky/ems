@@ -1,21 +1,23 @@
 "use client";
 
 import Modal from "@/components/Modal";
-import { AccessDepartmentProps } from "@/types";
+import { AccessDepartmentProps, ShiftMasterProps } from "@/types";
 import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "../styles.module.css";
-import { createShiftMaster } from "../_libs/action";
+import { editShiftMaster } from "../_libs/action";
+import { DateMinus7Format } from "@/libs/ConvertDate";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
   departmentData: AccessDepartmentProps;
+  shiftMasterEdit: ShiftMasterProps;
 };
 
-export default function ShiftMasterCrete(props: Props) {
-  const { isOpen, onClose, departmentData } = props;
+export default function ShiftMasterEdit(props: Props) {
+  const { isOpen, onClose, departmentData, shiftMasterEdit } = props;
 
   const [alertModal, setAlertModal] = useState({
     status: false,
@@ -26,11 +28,14 @@ export default function ShiftMasterCrete(props: Props) {
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
 
   const [formData, setFormData] = useState({
-    department_id: null as number | null,
-    jam_masuk: null as Date | null,
-    jam_pulang: null as Date | null,
-    keterangan: "",
-    cond_friday: 0 as number | string,
+    id: shiftMasterEdit.id as number | null,
+    department_id: shiftMasterEdit.department_id || (null as number | null),
+    jam_masuk:
+      DateMinus7Format(shiftMasterEdit.jam_masuk) || (null as Date | null),
+    jam_pulang:
+      DateMinus7Format(shiftMasterEdit.jam_pulang) || (null as Date | null),
+    keterangan: shiftMasterEdit.keterangan || "",
+    cond_friday: shiftMasterEdit.cond_friday || ("" as number | string),
   });
 
   if (!isOpen) return null;
@@ -40,7 +45,7 @@ export default function ShiftMasterCrete(props: Props) {
     if (confirm("Submit this data?")) {
       setIsLoadingSubmit(true);
       try {
-        const result = await createShiftMaster(formData as any);
+        const result = await editShiftMaster(formData as any);
         if (result.status) {
           setAlertModal({
             status: true,
@@ -77,7 +82,7 @@ export default function ShiftMasterCrete(props: Props) {
 
   return (
     <Modal
-      modalTitle="ADD DATA"
+      modalTitle="EDIT DATA"
       onClose={onClose}
       alert={alertModal}
       isLoadingModal={false}

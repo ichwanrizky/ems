@@ -96,13 +96,14 @@ export type AccessProps = {
   delete: boolean;
 };
 
-export type ShiftMaster = {
+export type ShiftMasterProps = {
   id: number;
   jam_masuk: Date;
   jam_pulang: Date;
   keterangan: string;
   different_day: boolean;
   cond_friday: number;
+  department_id: number;
   department: {
     id: number;
     nama_department: string;
