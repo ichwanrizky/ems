@@ -2,13 +2,13 @@ import { authOptions } from "@/libs/AuthOptions";
 import { AccessProps, SeesionProps } from "@/types";
 import { getServerSession } from "next-auth";
 import React from "react";
-import ShiftMasterView from "../shift-master/_components/ShiftMasterView";
+import DataKaryawanView from "./_components/DataKaryawanView";
 export default async function ShiftMasterPage() {
   const session: SeesionProps | null = await getServerSession(authOptions);
 
   if (!session) return null;
 
-  const targetPath = "hr/datakaryawans";
+  const targetPath = "hr/datakaryawan";
 
   const allMenus =
     session.user.menu?.map((group) => group.menu || []).flat() || [];
@@ -29,8 +29,9 @@ export default async function ShiftMasterPage() {
       </div>
 
       {foundMenu ? (
-        <ShiftMasterView
+        <DataKaryawanView
           accessDepartment={session.user.access_department || []}
+          accessSubDepartment={session.user.access_sub_department || []}
           accessMenu={foundMenu.access[0] || {}}
         />
       ) : (

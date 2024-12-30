@@ -59,20 +59,20 @@ export default function Button(props: ButtonProps) {
             }}
           >
             <li>
-              <a className="dropdown-item" href="#" onClick={onEdit}>
+              <button type="button" className="dropdown-item" onClick={onEdit}>
                 <i className="bi bi-pencil me-2"></i>
                 EDIT
-              </a>
+              </button>
             </li>
             <li>
-              <a
+              <button
+                type="button"
                 className="dropdown-item text-danger"
-                href="#"
                 onClick={onDelete}
               >
                 <i className="bi bi-trash me-2"></i>
                 DELETE
-              </a>
+              </button>
             </li>
           </ul>
         </div>

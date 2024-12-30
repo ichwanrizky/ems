@@ -5,8 +5,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "@/styles/styles.module.css";
 import { AccessDepartmentProps, AccessSubDepartmentProps } from "@/types";
+import { createDataKaryawan } from "../_libs/action";
+import { useRouter } from "next/navigation";
 
-export default function DataKaryawanCreate({
+export default function DataKaryawanCreateView({
   accessDepartment,
   accessSubDepartment,
 }: {
@@ -21,6 +23,8 @@ export default function DataKaryawanCreate({
   });
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [isLoadingPage, setIsLoadingPage] = useState(false);
+  const { push } = useRouter();
+
   const [selectedSubDepartment, setSelectedSubDepartment] = useState(
     [] as AccessSubDepartmentProps
   );
@@ -28,13 +32,13 @@ export default function DataKaryawanCreate({
   const [formData, setFormData] = useState({
     department_id: null as number | null,
     sub_department_id: null as number | null,
-    id_karyawan: "",
-    nama_karyawan: "",
-    nik: "" as string | number,
-    posisi: "",
-    tempat_lahir: "",
-    tanggal_lahir: null as Date | null,
-    jenis_kelamin: "",
+    panji_id: "",
+    nama: "",
+    nik_ktp: "" as string | number,
+    position: "",
+    tmp_lahir: "",
+    tgl_lahir: null as Date | null,
+    jk: "",
     agama: "",
     telp: "" as string | number,
     email: "",
@@ -46,10 +50,10 @@ export default function DataKaryawanCreate({
     kota: "",
     kebangsaan: "INDONESIA",
     status_nikah: "",
-    tanggal_join: null as Date | null,
+    tgl_join: null as Date | null,
     npwp: "",
     jenis_bank: "",
-    no_rekening: "",
+    no_rek: "",
     bpjs_tk: "",
     bpjs_kes: "",
   });
@@ -62,10 +66,51 @@ export default function DataKaryawanCreate({
     setSelectedSubDepartment(subDepartments as AccessSubDepartmentProps);
   };
 
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (confirm("Submit this data?")) {
+      window.scrollTo(0, 0);
+      setIsLoadingSubmit(true);
+      try {
+        const result = await createDataKaryawan(formData as any);
+        if (result.status) {
+          setAlert({
+            status: true,
+            color: "success",
+            message: "Success",
+            subMessage: result.message,
+          });
+          setTimeout(() => {
+            push("/hr/datakaryawan");
+          }, 1000);
+        } else {
+          setAlert({
+            status: true,
+            color: "danger",
+            message: "Failed",
+            subMessage: result.message,
+          });
+
+          setIsLoadingSubmit(false);
+        }
+      } catch (error) {
+        setAlert({
+          status: true,
+          color: "danger",
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
+        });
+        setIsLoadingSubmit(false);
+      }
+    }
+
+    return;
+  };
+
   return (
     <div className="row">
       <div className="col-12 col-lg-12">
-        <form>
+        <form onSubmit={handleSubmit}>
           <div className="card">
             {alert.status && (
               <div className="px-3 mt-3">
@@ -96,6 +141,7 @@ export default function DataKaryawanCreate({
                           DEPT.
                         </label>
                         <select
+                          autoComplete="off"
                           className="form-select"
                           id="department"
                           required
@@ -126,6 +172,7 @@ export default function DataKaryawanCreate({
                           SUB DEPT.
                         </label>
                         <select
+                          autoComplete="off"
                           className="form-select"
                           id="sub_department"
                           value={formData.sub_department_id || ""}
@@ -157,15 +204,16 @@ export default function DataKaryawanCreate({
                         <input
                           type="text"
                           id="id_karyawan"
+                          autoComplete="off"
                           className="form-control text-uppercase"
                           required
                           onChange={(e) =>
                             setFormData({
                               ...formData,
-                              id_karyawan: e.target.value,
+                              panji_id: e.target.value,
                             })
                           }
-                          value={formData.id_karyawan}
+                          value={formData.panji_id}
                         />
                       </div>
 
@@ -176,15 +224,16 @@ export default function DataKaryawanCreate({
                         <input
                           type="text"
                           id="nama_karyawan"
+                          autoComplete="off"
                           className="form-control text-uppercase"
                           required
                           onChange={(e) =>
                             setFormData({
                               ...formData,
-                              nama_karyawan: e.target.value,
+                              nama: e.target.value,
                             })
                           }
-                          value={formData.nama_karyawan}
+                          value={formData.nama}
                         />
                       </div>
                     </div>
@@ -199,16 +248,17 @@ export default function DataKaryawanCreate({
                         <input
                           type="number"
                           id="nik"
+                          autoComplete="off"
                           className="form-control"
                           onWheelCapture={(e: any) => e.target.blur()}
                           required
                           onChange={(e) =>
                             setFormData({
                               ...formData,
-                              nik: e.target.value,
+                              nik_ktp: e.target.value,
                             })
                           }
-                          value={formData.nik}
+                          value={formData.nik_ktp}
                         />
                       </div>
 
@@ -219,15 +269,16 @@ export default function DataKaryawanCreate({
                         <input
                           type="text"
                           id="posisi"
+                          autoComplete="off"
                           className="form-control text-uppercase"
                           required
                           onChange={(e) =>
                             setFormData({
                               ...formData,
-                              posisi: e.target.value,
+                              position: e.target.value,
                             })
                           }
-                          value={formData.posisi}
+                          value={formData.position}
                         />
                       </div>
                     </div>
@@ -242,15 +293,16 @@ export default function DataKaryawanCreate({
                         <input
                           type="text"
                           id="tempat_lahir"
+                          autoComplete="off"
                           className="form-control text-uppercase"
                           required
                           onChange={(e) =>
                             setFormData({
                               ...formData,
-                              tempat_lahir: e.target.value,
+                              tmp_lahir: e.target.value,
                             })
                           }
-                          value={formData.tempat_lahir}
+                          value={formData.tmp_lahir}
                         />
                       </div>
 
@@ -259,18 +311,22 @@ export default function DataKaryawanCreate({
                           TANGGAL LAHIR
                         </label>
                         <DatePicker
+                          autoComplete="off"
                           id="tanggal_lahir"
                           dropdownMode="select"
                           wrapperClassName={styles.datePicker}
                           className="form-select"
-                          selected={formData.tanggal_lahir}
+                          selected={formData.tgl_lahir}
                           onChange={(date: any) =>
-                            setFormData({ ...formData, tanggal_lahir: date })
+                            setFormData({ ...formData, tgl_lahir: date })
                           }
                           scrollableYearDropdown
                           dateFormat={"yyyy-MM-dd"}
                           showMonthDropdown
                           showYearDropdown
+                          onKeyDown={(e) => {
+                            e.preventDefault();
+                          }}
                         />
                       </div>
                     </div>
@@ -283,16 +339,17 @@ export default function DataKaryawanCreate({
                           JENIS KELAMIN
                         </label>
                         <select
+                          autoComplete="off"
                           className="form-select"
                           id="jk"
                           required
                           onChange={(e) =>
                             setFormData({
                               ...formData,
-                              jenis_kelamin: e.target.value,
+                              jk: e.target.value,
                             })
                           }
-                          value={formData.jenis_kelamin}
+                          value={formData.jk}
                         >
                           <option value="">- SELECT -</option>
                           <option value="L">LAKI-LAKI</option>
@@ -305,6 +362,7 @@ export default function DataKaryawanCreate({
                           AGAMA
                         </label>
                         <select
+                          autoComplete="off"
                           className="form-select"
                           id="agama"
                           required
@@ -341,6 +399,7 @@ export default function DataKaryawanCreate({
                         <input
                           type="number"
                           id="telp"
+                          autoComplete="off"
                           className="form-control"
                           onWheelCapture={(e: any) => e.target.blur()}
                           required
@@ -361,6 +420,7 @@ export default function DataKaryawanCreate({
                         <input
                           type="email"
                           id="email"
+                          autoComplete="off"
                           className="form-control text-lowercase"
                           onChange={(e) =>
                             setFormData({
@@ -379,6 +439,7 @@ export default function DataKaryawanCreate({
                       ALAMAT
                     </label>
                     <textarea
+                      autoComplete="off"
                       className="form-control"
                       rows={4}
                       id="alamat"
@@ -401,6 +462,7 @@ export default function DataKaryawanCreate({
                         <input
                           type="text"
                           id="rt"
+                          autoComplete="off"
                           className="form-control text-uppercase"
                           onChange={(e) =>
                             setFormData({
@@ -419,6 +481,7 @@ export default function DataKaryawanCreate({
                         <input
                           type="text"
                           id="rw"
+                          autoComplete="off"
                           className="form-control text-uppercase"
                           onChange={(e) =>
                             setFormData({
@@ -441,6 +504,7 @@ export default function DataKaryawanCreate({
                         <input
                           type="text"
                           id="kel"
+                          autoComplete="off"
                           className="form-control text-uppercase"
                           onChange={(e) =>
                             setFormData({
@@ -459,6 +523,7 @@ export default function DataKaryawanCreate({
                         <input
                           type="text"
                           id="kec"
+                          autoComplete="off"
                           className="form-control text-uppercase"
                           onChange={(e) =>
                             setFormData({
@@ -481,6 +546,7 @@ export default function DataKaryawanCreate({
                         <input
                           type="text"
                           id="kota"
+                          autoComplete="off"
                           className="form-control text-uppercase"
                           onChange={(e) =>
                             setFormData({
@@ -499,6 +565,7 @@ export default function DataKaryawanCreate({
                         <input
                           type="text"
                           id="kebangsaan"
+                          autoComplete="off"
                           className="form-control text-uppercase"
                           disabled
                           onChange={(e) =>
@@ -520,6 +587,7 @@ export default function DataKaryawanCreate({
                           STATUS NIKAH
                         </label>
                         <select
+                          autoComplete="off"
                           className="form-select"
                           id="status_nikah"
                           required
@@ -532,6 +600,15 @@ export default function DataKaryawanCreate({
                           value={formData.status_nikah}
                         >
                           <option value="">- SELECT -</option>
+                          <option value="TK">TK</option>
+                          <option value="K0">K0</option>
+                          <option value="K1">K1</option>
+                          <option value="K2">K2</option>
+                          <option value="K3">K3</option>
+                          <option value="TK/0">TK/0</option>
+                          <option value="TK/1">TK/1</option>
+                          <option value="TK/2">TK/2</option>
+                          <option value="TK/3">TK/3</option>
                         </select>
                       </div>
 
@@ -540,18 +617,23 @@ export default function DataKaryawanCreate({
                           TANGGAL JOIN
                         </label>
                         <DatePicker
+                          autoComplete="off"
                           id="tanggal_join"
                           dropdownMode="select"
                           wrapperClassName={styles.datePicker}
                           className="form-select"
-                          selected={formData.tanggal_join}
+                          selected={formData.tgl_join}
                           onChange={(date: any) =>
-                            setFormData({ ...formData, tanggal_join: date })
+                            setFormData({ ...formData, tgl_join: date })
                           }
                           scrollableYearDropdown
                           dateFormat={"yyyy-MM-dd"}
                           showMonthDropdown
                           showYearDropdown
+                          isClearable
+                          onKeyDown={(e) => {
+                            e.preventDefault();
+                          }}
                         />
                       </div>
                     </div>
@@ -564,6 +646,7 @@ export default function DataKaryawanCreate({
                     <input
                       type="text"
                       id="npwp"
+                      autoComplete="off"
                       className="form-control text-uppercase"
                       onChange={(e) =>
                         setFormData({
@@ -582,6 +665,7 @@ export default function DataKaryawanCreate({
                           JENIS BANK
                         </label>
                         <select
+                          autoComplete="off"
                           className="form-select"
                           id="jenis_bank"
                           onChange={(e) =>
@@ -605,14 +689,15 @@ export default function DataKaryawanCreate({
                         <input
                           type="text"
                           id="rekening"
+                          autoComplete="off"
                           className="form-control text-uppercase"
                           onChange={(e) =>
                             setFormData({
                               ...formData,
-                              no_rekening: e.target.value,
+                              no_rek: e.target.value,
                             })
                           }
-                          value={formData.no_rekening}
+                          value={formData.no_rek}
                         />
                       </div>
                     </div>
@@ -627,6 +712,7 @@ export default function DataKaryawanCreate({
                         <input
                           type="number"
                           id="rekening"
+                          autoComplete="off"
                           className="form-control"
                           onWheelCapture={(e) => e.currentTarget.blur()}
                           onChange={(e) =>
@@ -646,6 +732,7 @@ export default function DataKaryawanCreate({
                         <input
                           type="number"
                           id="bpjs_kes"
+                          autoComplete="off"
                           className="form-control"
                           onWheelCapture={(e) => e.currentTarget.blur()}
                           onChange={(e) =>

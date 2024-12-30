@@ -57,6 +57,7 @@ model department {
   sub_department    sub_department[]
   access_department access_department[]
   shift             shift[]
+  pegawai           pegawai[]
 }
 
 model sub_department {
@@ -67,6 +68,7 @@ model sub_department {
   department_id         Int
   department            department              @relation(fields: [department_id], references: [id])
   access_sub_department access_sub_department[]
+  pegawai               pegawai[]
 }
 
 model access_department {
@@ -110,6 +112,8 @@ model user {
   roles      roles?    @relation(fields: [role_id], references: [id])
   created_at DateTime? @db.DateTime(0)
   is_deleted Boolean   @default(false)
+  pegawai_id Int?
+  pegawai    pegawai?  @relation(fields: [pegawai_id], references: [id])
 
   @@index([username], map: "user_username")
   @@index([role_id], map: "user_role_id")
@@ -124,4 +128,55 @@ model shift {
   cond_friday   Int        @default(0)
   department_id Int
   department    department @relation(fields: [department_id], references: [id])
+  pegawai       pegawai[]
+}
+
+model pegawai {
+  id                Int               @id @default(autoincrement())
+  panji_id          String?
+  nama              String
+  nik_ktp           String
+  tmp_lahir         String?
+  tgl_lahir         DateTime?         @db.Date
+  jk                String
+  agama             String?
+  kebangsaan        String?
+  alamat            String?
+  rt                String?
+  rw                String?
+  kel               String?
+  kec               String?
+  kota              String?
+  telp              String
+  status_nikah      String
+  email             String?
+  position          String?
+  npwp              String?
+  jenis_bank        String?
+  no_rek            String?
+  bpjs_tk           String?
+  bpjs_kes          String?
+  is_active         Boolean           @default(true)
+  is_deleted        Boolean           @default(false)
+  department_id     Int
+  department        department        @relation(fields: [department_id], references: [id])
+  sub_department_id Int?
+  sub_department    sub_department?   @relation(fields: [sub_department_id], references: [id])
+  shift_id          Int?
+  shift             shift?            @relation(fields: [shift_id], references: [id])
+  user              user[]
+  pegawai_history   pegawai_history[]
+}
+
+model pegawai_history {
+  id         Int                   @id @default(autoincrement())
+  pegawai_id Int
+  pegawai    pegawai               @relation(fields: [pegawai_id], references: [id])
+  tanggal    DateTime              @db.Date
+  jenis      pegawai_history_jenis
+}
+
+enum pegawai_history_jenis {
+  JOIN
+  REGISN
 }

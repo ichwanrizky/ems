@@ -110,3 +110,77 @@ export type ShiftMasterProps = {
     nama_department: string;
   };
 };
+
+export type PegawaiProps = {
+  id: number;
+  panji_id?: string;
+  nama: string;
+  nik_ktp: string;
+  tmp_lahir?: string;
+  tgl_lahir?: Date;
+  jk: string;
+  agama?: string;
+  kebangsaan?: string;
+  alamat?: string;
+  rt?: string;
+  rw?: string;
+  kel?: string;
+  kec?: string;
+  kota?: string;
+  telp: string;
+  status_nikah: string;
+  email?: string;
+  position?: string;
+  npwp?: string;
+  jenis_bank?: string;
+  no_rek?: string;
+  bpjs_tk?: string;
+  bpjs_kes?: string;
+  department_id: number;
+  department: {
+    id: number;
+    nama_department: string;
+  };
+  sub_department_id?: number;
+  sub_department?: {
+    id: number;
+    nama_sub_department: string;
+  };
+  shift_id?: number;
+  shift?: {
+    id: number;
+    nama_shift: string;
+  };
+  tgl_join?: Date;
+  is_active: boolean;
+};
+
+export type PegawaiCreateProps = {
+  id: number;
+  department_id: number;
+  sub_department_id: number | null;
+  panji_id: string;
+  nama: string;
+  nik_ktp: string | number;
+  position: string;
+  tmp_lahir: string;
+  tgl_lahir: Date | null;
+  jk: string;
+  agama: string;
+  telp: string | number;
+  email: string;
+  alamat: string;
+  rt: string;
+  rw: string;
+  kel: string;
+  kec: string;
+  kota: string;
+  kebangsaan: string;
+  status_nikah: string;
+  tgl_join: Date | null;
+  npwp: string;
+  jenis_bank: string;
+  no_rek: string;
+  bpjs_tk: string;
+  bpjs_kes: string;
+};

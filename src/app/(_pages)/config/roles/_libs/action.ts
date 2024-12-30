@@ -123,13 +123,13 @@ export const editRoles = async (
     if (!result) {
       return {
         status: false,
-        message: "Update data failed",
+        message: "Edit data failed",
       };
     }
 
     return {
       status: true,
-      message: "Update data successfully",
+      message: "Edit data successfully",
     };
   } catch (error) {
     return HandleError(error);
