@@ -529,7 +529,7 @@ export default function AccessCreateView() {
                         disabled
                       >
                         <span
-                          className="spinner-border spinner-border-sm"
+                          className="spinner-border spinner-border-sm me-2"
                           role="status"
                           aria-hidden="true"
                         ></span>
