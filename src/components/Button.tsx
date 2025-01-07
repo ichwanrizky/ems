@@ -98,6 +98,27 @@ export default function Button(props: ButtonProps) {
           ADD DATA
         </button>
       );
+
+    case "saveTable":
+      return isLoading ? (
+        <button className="btn btn-primary px-4" type="button" disabled>
+          <span
+            className="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          LOADING ...
+        </button>
+      ) : (
+        <button
+          className="btn btn-primary px-4"
+          type="button"
+          onClick={onClick}
+        >
+          <i className="bi bi-save me-2" />
+          SAVE DATA
+        </button>
+      );
   }
 
   return null;

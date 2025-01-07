@@ -184,3 +184,9 @@ export type PegawaiCreateProps = {
   bpjs_tk: string;
   bpjs_kes: string;
 };
+
+export type PegawaiShiftProps = {
+  id: number;
+  nama: string;
+  shift_id: number;
+};

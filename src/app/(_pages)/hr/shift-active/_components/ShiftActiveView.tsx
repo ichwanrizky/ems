@@ -6,11 +6,13 @@ import {
   AccessDepartmentProps,
   AccessProps,
   isLoadingProps,
+  PegawaiShiftProps,
   ShiftMasterProps,
 } from "@/types";
 import React, { useEffect, useState } from "react";
 import { getShiftMaster } from "../../shift-master/_libs/action";
 import { DisplayHour } from "@/libs/DisplayDate";
+import { getPegawaiShift, SavePegawaiShift } from "../_libs/action";
 
 type ShiftActiveViewProps = {
   accessDepartment: AccessDepartmentProps;
@@ -20,17 +22,12 @@ type ShiftActiveViewProps = {
 export default function ShiftActiveView(props: ShiftActiveViewProps) {
   const { accessDepartment, accessMenu } = props;
   const [loadingPage, setLoadingPage] = useState(true);
-  const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
   const [alertPage, setAlertPage] = useState({
     status: false,
     color: "",
     message: "",
     subMessage: "",
   });
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
   const [filter, setFilter] = useState({
     department: accessDepartment[0].department.id?.toString() || "",
   });
@@ -38,7 +35,9 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
   const [shiftMasterData, setShiftMasterData] = useState(
     [] as ShiftMasterProps[]
   );
-  console.log(shiftMasterData);
+  const [pegawaiShiftData, setPegawaiShiftData] = useState(
+    [] as PegawaiShiftProps[]
+  );
 
   useEffect(() => {
     if (alertPage.status) {
@@ -56,29 +55,23 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
   }, [alertPage]);
 
   useEffect(() => {
-    const handler = setTimeout(() => {
-      setDebouncedSearchTerm(searchTerm);
-    }, 500);
+    fetchData(filter.department);
+  }, [filter]);
 
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
-
-  useEffect(() => {
-    fetchData(debouncedSearchTerm, filter.department);
-  }, [debouncedSearchTerm, filter]);
-
-  const fetchData = async (search = "", department = "") => {
+  const fetchData = async (department = "") => {
     setLoadingPage(true);
     try {
-      const result = await getShiftMaster(search, department);
-      if (result.status) {
+      const result = await getShiftMaster("", department);
+      const result2 = await getPegawaiShift(department);
+      if (result.status && result2.status) {
         setShiftMasterData(result.data as ShiftMasterProps[]);
+        setPegawaiShiftData(result2.data as PegawaiShiftProps[]);
       } else {
         setAlertPage({
           status: true,
           color: "danger",
           message: "Failed",
-          subMessage: result.message,
+          subMessage: !result.status ? result.message : result2.message,
         });
       }
     } catch (error) {
@@ -93,27 +86,55 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
     }
   };
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+  const toggleShiftActive = (pegawaiId: number, shiftId: number) => {
+    setPegawaiShiftData(
+      pegawaiShiftData.map((item: PegawaiShiftProps) =>
+        item.id === pegawaiId ? { ...item, shift_id: shiftId } : item
+      )
+    );
+  };
+
+  const toogleSelectAll = (shiftId: number) => {
+    setPegawaiShiftData(
+      pegawaiShiftData.map((item: PegawaiShiftProps) => ({
+        ...item,
+        shift_id: shiftId,
+      }))
+    );
+  };
+
+  const handleSubmit = async () => {
+    if (confirm("Save this data?")) {
+      setLoadingPage(true);
+      try {
+        const result = await SavePegawaiShift(pegawaiShiftData);
+        if (result.status) {
+          setAlertPage({
+            status: true,
+            color: result.status ? "success" : "danger",
+            message: result.status ? "Success" : "Failed",
+            subMessage: result.message,
+          });
+        }
+      } catch (error) {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
+        });
+      } finally {
+        setLoadingPage(false);
+      }
+    }
+
+    return;
   };
 
   return (
     <>
       <div className="row g-3">
-        <div className="col-auto">
-          <div className="position-relative">
-            <input
-              className="form-control px-5"
-              type="search"
-              placeholder="Search"
-              value={searchTerm}
-              onChange={handleSearch}
-            />
-            <span className="material-icons-outlined position-absolute ms-3 translate-middle-y start-0 top-50 fs-5">
-              search
-            </span>
-          </div>
-        </div>
+        <div className="col-auto"></div>
         <div className="col-auto flex-grow-1 overflow-auto">
           <div className="btn-group position-static">
             <select
@@ -122,7 +143,6 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
                 setFilter({ ...filter, department: e.target.value })
               }
             >
-              <option value="">-- DEPT --</option>
               {accessDepartment?.map((item, index: number) => (
                 <option value={item.department.id} key={index}>
                   {item.department.nama_department}
@@ -136,10 +156,7 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
         <div className="col-auto">
           <div className="d-flex align-items-center gap-2 justify-content-lg-end">
             {accessMenu.insert && (
-              <Button
-                type="createTable"
-                onClick={() => setIsCreateOpen(true)}
-              />
+              <Button type="saveTable" onClick={() => handleSubmit()} />
             )}
           </div>
         </div>
@@ -177,7 +194,11 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
                         {" - "}
                         {new Date(item.jam_pulang)
                           .toLocaleString("id-ID", DisplayHour)
-                          .replaceAll(".", ":")}
+                          .replaceAll(".", ":")}{" "}
+                        <br />
+                        <a href="#!" onClick={() => toogleSelectAll(item.id)}>
+                          CHECK ALL
+                        </a>
                       </th>
                     ))}
                   </tr>
@@ -185,7 +206,7 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
                 <tbody>
                   {loadingPage ? (
                     <tr>
-                      <td colSpan={6} align="center">
+                      <td colSpan={2 + shiftMasterData.length} align="center">
                         <div
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
@@ -195,15 +216,30 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
                         Loading...
                       </td>
                     </tr>
-                  ) : shiftMasterData.length > 0 ? (
-                    shiftMasterData.map((item, index) => (
+                  ) : pegawaiShiftData.length > 0 ? (
+                    pegawaiShiftData.map((item, index) => (
                       <tr key={index}>
                         <td align="center">{index + 1}</td>
+                        <td>{item.nama}</td>
+                        {shiftMasterData?.map((item2, index: number) => (
+                          <td align="center" key={index}>
+                            <input
+                              type="radio"
+                              name={item.id.toString()}
+                              onChange={() =>
+                                toggleShiftActive(item.id, item2.id)
+                              }
+                              checked={
+                                item.shift_id === item2.id ? true : false
+                              }
+                            />
+                          </td>
+                        ))}
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={6} align="center">
+                      <td colSpan={2 + shiftMasterData.length} align="center">
                         No data available
                       </td>
                     </tr>
