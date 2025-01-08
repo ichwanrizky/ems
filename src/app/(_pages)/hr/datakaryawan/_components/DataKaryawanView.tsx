@@ -11,6 +11,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { deleteDataKaryawan, getPegawai } from "../_libs/action";
 import { useRouter } from "next/navigation";
+import Pagination from "@/components/Pagination";
 
 type DataKaryawanViewProps = {
   accessDepartment: AccessDepartmentProps;
@@ -22,6 +23,8 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
   const { accessDepartment, accessSubDepartment, accessMenu } = props;
 
   const { push } = useRouter();
+  const [currentPage, setCurrentPage] = useState(1 as number);
+  const [totalData, setTotalData] = useState(0 as number);
 
   const [loadingPage, setLoadingPage] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
@@ -69,11 +72,12 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
   }, [searchTerm]);
 
   useEffect(() => {
-    fetchData(debouncedSearchTerm, filter);
-  }, [debouncedSearchTerm, filter]);
+    fetchData(debouncedSearchTerm, currentPage, filter);
+  }, [debouncedSearchTerm, currentPage, filter]);
 
   const fetchData = async (
     search = "",
+    currentPage = 1,
     filter = {
       department: "",
       sub_department: "",
@@ -82,9 +86,10 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
   ) => {
     setLoadingPage(true);
     try {
-      const result = await getPegawai(search, filter);
+      const result = await getPegawai(search, currentPage, filter);
       if (result.status) {
         setPegawaiData(result.data as PegawaiProps[]);
+        setTotalData(result.total_data);
       } else {
         setAlertPage({
           status: true,
@@ -144,6 +149,10 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
 
     return;
   };
+
+  const maxPagination = 5;
+  const itemPerPage = 10;
+  const totalPage = Math.ceil(totalData / itemPerPage);
 
   return (
     <>
@@ -249,12 +258,12 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                   <tr>
                     <th style={{ width: "1%" }}></th>
                     <th style={{ width: "1%" }}>NO</th>
-                    <th>ID</th>
+                    <th style={{ width: "5%" }}>ID</th>
                     <th>NAMA</th>
-                    <th>DEPT.</th>
-                    <th>SUB DEPT.</th>
-                    <th>POSISI</th>
-                    <th>ACTIVE</th>
+                    <th style={{ width: "10%" }}>DEPT.</th>
+                    <th style={{ width: "10%" }}>SUB DEPT.</th>
+                    <th style={{ width: "5%" }}>POSISI</th>
+                    <th style={{ width: "5%" }}>ACTIVE</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -308,16 +317,18 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                             <i className="bi bi-three-dots" />
                           </Button>
                         </td>
-                        <td align="center">{index + 1}</td>
-                        <td align="center">{item.panji_id}</td>
-                        <td>{item.nama}</td>
+                        <td align="center">{item.number}</td>
+                        <td align="center" style={{ whiteSpace: "nowrap" }}>
+                          {item.panji_id}
+                        </td>
+                        <td>{item.nama?.toUpperCase()}</td>
                         <td align="center">
                           {item.department.nama_department}
                         </td>
                         <td align="center">
                           {item.sub_department?.nama_sub_department}
                         </td>
-                        <td align="center">{item.position}</td>
+                        <td align="center">{item.position?.toUpperCase()}</td>
                         <td align="center">
                           {item.is_active ? "ACTIVE" : "INACTIVE"}
                         </td>
@@ -332,6 +343,12 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                   )}
                 </tbody>
               </table>
+              <Pagination
+                currentPage={currentPage}
+                totalPage={totalPage}
+                maxPagination={maxPagination}
+                setCurrentPage={setCurrentPage}
+              />
             </div>
           </div>
         </div>

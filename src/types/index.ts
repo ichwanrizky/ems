@@ -112,6 +112,7 @@ export type ShiftMasterProps = {
 };
 
 export type PegawaiProps = {
+  number?: number;
   id: number;
   panji_id?: string;
   nama: string;

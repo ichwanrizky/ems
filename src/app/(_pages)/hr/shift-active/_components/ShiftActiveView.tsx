@@ -5,7 +5,6 @@ import Button from "@/components/Button";
 import {
   AccessDepartmentProps,
   AccessProps,
-  isLoadingProps,
   PegawaiShiftProps,
   ShiftMasterProps,
 } from "@/types";

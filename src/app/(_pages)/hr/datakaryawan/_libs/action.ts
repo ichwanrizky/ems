@@ -9,6 +9,7 @@ const bcrypt = require("bcrypt");
 
 export const getPegawai = async (
   search?: string,
+  currentPage?: number,
   filter: {
     department?: string;
     sub_department?: string;
@@ -18,8 +19,37 @@ export const getPegawai = async (
   status: boolean;
   message: string;
   data: PegawaiProps[] | [];
+  total_data: number;
 }> => {
   try {
+    const condition = {
+      where: {
+        is_deleted: false,
+        is_active: filter.active,
+        ...(filter.department && {
+          department_id: Number(filter.department),
+        }),
+        ...(filter.sub_department && {
+          sub_department_id: Number(filter.sub_department),
+        }),
+        ...(search && {
+          OR: [
+            {
+              nama: {
+                contains: search,
+              },
+            },
+          ],
+        }),
+      },
+    };
+
+    const totalData = await prisma.pegawai.count({
+      ...condition,
+    });
+
+    const itemPerPage = currentPage ? 10 : totalData;
+
     const result = (await prisma.pegawai.findMany({
       select: {
         id: true,
@@ -40,25 +70,20 @@ export const getPegawai = async (
         },
         is_active: true,
       },
-      where: {
-        is_deleted: false,
-        is_active: filter.active,
-        ...(filter.department && {
-          department_id: Number(filter.department),
-        }),
-        ...(filter.sub_department && {
-          sub_department_id: Number(filter.sub_department),
-        }),
-        ...(search && {
-          OR: [
-            {
-              nama: {
-                contains: search,
-              },
-            },
-          ],
-        }),
-      },
+      ...condition,
+      orderBy: [
+        {
+          department_id: "asc",
+        },
+        {
+          sub_department_id: "asc",
+        },
+        {
+          nama: "asc",
+        },
+      ],
+      skip: currentPage ? (currentPage - 1) * itemPerPage : 0,
+      take: itemPerPage,
     })) as PegawaiProps[];
 
     if (!result) {
@@ -66,13 +91,22 @@ export const getPegawai = async (
         status: false,
         message: "Data not found",
         data: [],
+        total_data: 0,
       };
     }
+
+    const newData = result.map((item, index) => ({
+      number: currentPage
+        ? (Number(currentPage) - 1) * itemPerPage + index + 1
+        : index + 1,
+      ...item,
+    }));
 
     return {
       status: true,
       message: "Data fetched successfully",
-      data: result,
+      data: newData,
+      total_data: totalData,
     };
   } catch (error) {
     return HandleError(error) as any;

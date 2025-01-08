@@ -67,8 +67,29 @@ model sub_department {
   is_deleted            Boolean                 @default(false)
   department_id         Int
   department            department              @relation(fields: [department_id], references: [id])
+  leader                Int?
+  leader_user           user?                   @relation("leader_user", fields: [leader], references: [id])
+  supervisor            Int?
+  supervisor_user       user?                   @relation("supervisor_user", fields: [supervisor], references: [id])
+  manager               Int?
+  manager_user          user?                   @relation("manager_user", fields: [manager], references: [id])
   access_sub_department access_sub_department[]
   pegawai               pegawai[]
+  akses_izin            akses_izin[]
+}
+
+model jenis_izin {
+  kode       String       @id @unique
+  jenis      String
+  akses_izin akses_izin[]
+}
+
+model akses_izin {
+  id                Int            @id @default(autoincrement())
+  sub_department_id Int
+  sub_department    sub_department @relation(fields: [sub_department_id], references: [id])
+  jenis_izin_kode   String
+  jenis_izin        jenis_izin     @relation(fields: [jenis_izin_kode], references: [kode])
 }
 
 model access_department {
@@ -103,17 +124,20 @@ model access {
 }
 
 model user {
-  id         Int       @id @default(autoincrement())
-  username   String    @unique
-  password   String
-  name       String?
-  telp       String?
-  role_id    Int?
-  roles      roles?    @relation(fields: [role_id], references: [id])
-  created_at DateTime? @db.DateTime(0)
-  is_deleted Boolean   @default(false)
-  pegawai_id Int?
-  pegawai    pegawai?  @relation(fields: [pegawai_id], references: [id])
+  id              Int              @id @default(autoincrement())
+  username        String           @unique
+  password        String
+  name            String?
+  telp            String?
+  role_id         Int?
+  roles           roles?           @relation(fields: [role_id], references: [id])
+  created_at      DateTime?        @db.DateTime(0)
+  is_deleted      Boolean          @default(false)
+  pegawai_id      Int?
+  pegawai         pegawai?         @relation(fields: [pegawai_id], references: [id])
+  leader_user     sub_department[] @relation("leader_user")
+  supervisor_user sub_department[] @relation("supervisor_user")
+  manager_user    sub_department[] @relation("manager_user")
 
   @@index([username], map: "user_username")
   @@index([role_id], map: "user_role_id")
@@ -129,6 +153,7 @@ model shift {
   department_id Int
   department    department @relation(fields: [department_id], references: [id])
   pegawai       pegawai[]
+  absen         absen[]
 }
 
 model pegawai {
@@ -158,6 +183,8 @@ model pegawai {
   bpjs_kes          String?
   is_active         Boolean           @default(true)
   is_deleted        Boolean           @default(false)
+  type_gaji         String            @default("nonfixed")
+  is_overtime       Boolean           @default(false)
   department_id     Int
   department        department        @relation(fields: [department_id], references: [id])
   sub_department_id Int?
@@ -166,6 +193,7 @@ model pegawai {
   shift             shift?            @relation(fields: [shift_id], references: [id])
   user              user[]
   pegawai_history   pegawai_history[]
+  absen             absen[]
 }
 
 model pegawai_history {
@@ -179,4 +207,24 @@ model pegawai_history {
 enum pegawai_history_jenis {
   JOIN
   REGISN
+}
+
+model absen {
+  id           Int       @id @default(autoincrement())
+  tanggal      DateTime? @db.Date()
+  absen_masuk  DateTime? @db.Time()
+  absen_pulang DateTime? @db.Time()
+  late         Int       @default(0)
+  early        Int       @default(0)
+  bulan        Int
+  tahun        Int
+  latitude     String?
+  longitude    String?
+  ket_masuk    String?
+  ket_pulang   String?
+  is_manual    Boolean   @default(false)
+  pegawai_id   Int
+  pegawai      pegawai   @relation(fields: [pegawai_id], references: [id])
+  shift_id     Int?
+  shift        shift?    @relation(fields: [shift_id], references: [id])
 }
