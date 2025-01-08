@@ -9,7 +9,11 @@ import {
   PegawaiProps,
 } from "@/types";
 import React, { useEffect, useState } from "react";
-import { deleteDataKaryawan, getPegawai } from "../_libs/action";
+import {
+  createUserPegawai,
+  deleteDataKaryawan,
+  getPegawai,
+} from "../_libs/action";
 import { useRouter } from "next/navigation";
 import Pagination from "@/components/Pagination";
 
@@ -66,6 +70,7 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
     }, 500);
 
     return () => clearTimeout(handler);
@@ -150,6 +155,38 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
     return;
   };
 
+  const handleCreateUser = async (id: number) => {
+    setIsLoadingAction({ ...isLoadingAction, [id]: true });
+    try {
+      const result = await createUserPegawai(id);
+      if (result.status) {
+        setAlertPage({
+          status: true,
+          color: "success",
+          message: "Success",
+          subMessage: result.message,
+        });
+        fetchData();
+      } else {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Failed",
+          subMessage: result.message,
+        });
+      }
+    } catch (error) {
+      setAlertPage({
+        status: true,
+        color: "danger",
+        message: "Error",
+        subMessage: "Something went wrong, please refresh and try again",
+      });
+    } finally {
+      setIsLoadingAction({ ...isLoadingAction, [id]: false });
+    }
+  };
+
   const maxPagination = 5;
   const itemPerPage = 10;
   const totalPage = Math.ceil(totalData / itemPerPage);
@@ -190,6 +227,7 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                     subDepartments as AccessSubDepartmentProps
                   );
                 }
+                setCurrentPage(1);
               }}
             >
               <option value="">-- DEPT --</option>
@@ -202,9 +240,10 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
 
             <select
               className="form-select me-2"
-              onChange={(e) =>
-                setFilter({ ...filter, sub_department: e.target.value })
-              }
+              onChange={(e) => {
+                setFilter({ ...filter, sub_department: e.target.value });
+                setCurrentPage(1);
+              }}
             >
               <option value="">-- SUB DEPT --</option>
               {selectedSubDepartment?.map((item, index: number) => (
@@ -216,12 +255,13 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
 
             <select
               className="form-select"
-              onChange={(e) =>
+              onChange={(e) => {
                 setFilter({
                   ...filter,
                   active: e.target.value === "1" ? true : false,
-                })
-              }
+                });
+                setCurrentPage(1);
+              }}
             >
               <option value="1">ACTIVE</option>
               <option value="0">INACTIVE</option>
@@ -264,6 +304,7 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                     <th style={{ width: "10%" }}>SUB DEPT.</th>
                     <th style={{ width: "5%" }}>POSISI</th>
                     <th style={{ width: "5%" }}>ACTIVE</th>
+                    <th style={{ width: "5%" }}>AKUN</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -331,6 +372,34 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                         <td align="center">{item.position?.toUpperCase()}</td>
                         <td align="center">
                           {item.is_active ? "ACTIVE" : "INACTIVE"}
+                        </td>
+                        <td align="center">
+                          {item.user.length === 0 ? (
+                            isLoadingAction[item.id] ? (
+                              <button
+                                type="button"
+                                className="btn btn-success btn-sm"
+                                disabled
+                              >
+                                <span
+                                  className="spinner-border spinner-border-sm me-2"
+                                  role="status"
+                                  aria-hidden="true"
+                                ></span>
+                                LOADING ...
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                className="btn btn-success btn-sm"
+                                onClick={() => handleCreateUser(item.id)}
+                              >
+                                CREATE
+                              </button>
+                            )
+                          ) : (
+                            <i className="bi bi-check-circle-fill text-success"></i>
+                          )}
                         </td>
                       </tr>
                     ))

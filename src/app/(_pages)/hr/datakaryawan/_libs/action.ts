@@ -69,6 +69,12 @@ export const getPegawai = async (
           },
         },
         is_active: true,
+        user: {
+          select: {
+            id: true,
+          },
+          take: 1,
+        },
       },
       ...condition,
       orderBy: [
@@ -228,6 +234,7 @@ export const createDataKaryawan = async (
           name: data.nama?.toUpperCase(),
           telp: data.telp.toString(),
           pegawai_id: createPegawai.id,
+          created_at: DateNowFormat(),
         },
       });
 
@@ -342,6 +349,56 @@ export const deleteDataKaryawan = async (
     return {
       status: true,
       message: "Delete data successfully",
+    };
+  } catch (error) {
+    return HandleError(error);
+  }
+};
+
+export const createUserPegawai = async (
+  pegawaiId: number
+): Promise<{
+  status: boolean;
+  message: string;
+}> => {
+  try {
+    const getPegawai = await prisma.pegawai.findFirst({
+      where: {
+        id: pegawaiId,
+        // user: {
+        //   none: {},
+        // },
+      },
+    });
+
+    if (!getPegawai) {
+      return {
+        status: false,
+        message: "Pegawai not found",
+      };
+    }
+
+    const result = await prisma.user.create({
+      data: {
+        username: getPegawai.telp.toString(),
+        password: await bcrypt.hash(getPegawai.telp, 10),
+        name: getPegawai.nama?.toUpperCase(),
+        telp: getPegawai.telp.toString(),
+        pegawai_id: getPegawai.id,
+        created_at: DateNowFormat(),
+      },
+    });
+
+    if (!result) {
+      return {
+        status: false,
+        message: "Create user failed",
+      };
+    }
+
+    return {
+      status: true,
+      message: "Create user successfully",
     };
   } catch (error) {
     return HandleError(error);

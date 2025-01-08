@@ -154,6 +154,9 @@ export type PegawaiProps = {
   };
   tgl_join?: Date;
   is_active: boolean;
+  user: {
+    id: number;
+  }[];
 };
 
 export type PegawaiCreateProps = {
@@ -190,4 +193,13 @@ export type PegawaiShiftProps = {
   id: number;
   nama: string;
   shift_id: number;
+};
+
+export type AtasanProps = {
+  id?: number;
+  username?: string;
+  pegawai: {
+    id: number;
+    nama: string;
+  };
 };

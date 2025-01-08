@@ -3,8 +3,15 @@ import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import { DepartmentProps, isLoadingProps } from "@/types";
 import React, { useEffect, useState } from "react";
+import SubDepartmentCreate from "./SubDepartmentCreate";
 
-export default function SubDepartmentView() {
+type SubDepartmentViewProps = {
+  departmentData: DepartmentProps[];
+};
+
+export default function SubDepartmentView(props: SubDepartmentViewProps) {
+  const { departmentData } = props;
+
   const [loadingPage, setLoadingPage] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
   const [alertPage, setAlertPage] = useState({
@@ -18,7 +25,9 @@ export default function SubDepartmentView() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
 
-  const [departmentData, setDepartmentData] = useState([] as DepartmentProps[]);
+  const [sdepartmentData, setDepartmentData] = useState(
+    [] as DepartmentProps[]
+  );
   const [departmentEdit, setDepartmentEdit] = useState({} as DepartmentProps);
 
   useEffect(() => {
@@ -184,9 +193,11 @@ export default function SubDepartmentView() {
                   <tr>
                     <th style={{ width: "1%" }}></th>
                     <th style={{ width: "1%" }}>NO</th>
-                    <th>DEPARTMENT</th>
-                    <th style={{ width: "30%" }}>COORDINATE</th>
-                    <th style={{ width: "15%" }}>RADIUS</th>
+                    <th>DEPT.</th>
+                    <th>SUB DEPT.</th>
+                    <th>LEADER</th>
+                    <th>SUPERVISOR</th>
+                    <th>MANAGER</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -240,15 +251,16 @@ export default function SubDepartmentView() {
         </div>
       </div>
 
-      {/* {isCreateOpen && (
-        <DepartmentCreate
+      {isCreateOpen && (
+        <SubDepartmentCreate
           isOpen={isCreateOpen}
           onClose={() => {
             setIsCreateOpen(false);
             fetchData();
           }}
+          departmentData={departmentData}
         />
-      )} */}
+      )}
 
       {/* {isEditOpen && (
         <DepartmentEdit
