@@ -29,6 +29,8 @@ export default function SubDepartmentCreate(props: Props) {
   );
 
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+  const [isLoadingPage, setIsLoadingPage] = useState(true);
+
   const [formData, setFormData] = useState({
     department: null as number | null,
     nama_sub_department: "",
@@ -45,6 +47,7 @@ export default function SubDepartmentCreate(props: Props) {
   if (!isOpen) return null;
 
   const fetchData = async () => {
+    setIsLoadingPage(true);
     try {
       const result = await getAtasan();
       const result2 = await getJenisIzin();
@@ -71,6 +74,8 @@ export default function SubDepartmentCreate(props: Props) {
         message: "Error",
         subMessage: "Something went wrong, please refresh and try again",
       });
+    } finally {
+      setIsLoadingPage(false);
     }
   };
 
@@ -113,6 +118,28 @@ export default function SubDepartmentCreate(props: Props) {
 
     return;
   };
+
+  if (isLoadingPage) {
+    return (
+      <Modal
+        modalTitle="EDIT DATA"
+        onClose={onClose}
+        alert={alertModal}
+        isLoadingModal={false}
+        isLoadingSubmit={isLoadingSubmit}
+        onSubmit={handleSubmit}
+      >
+        <div className="d-flex justify-content-center">
+          <span
+            className="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          LOADING ...
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal

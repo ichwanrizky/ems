@@ -45,6 +45,24 @@ export type SubDepartmentProps = {
   nama_sub_department: string;
   department_id: number;
   department?: DepartmentProps;
+  leader_user?: {
+    id: number;
+    name: string;
+  };
+  supervisor_user?: {
+    id: number;
+    name: string;
+  };
+  manager_user?: {
+    id: number;
+    name: string;
+  };
+  akses_izin?: {
+    jenis_izin: {
+      kode: string;
+      jenis: string;
+    };
+  }[];
 };
 
 export type SeesionProps = {

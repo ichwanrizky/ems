@@ -1,9 +1,16 @@
 "use client";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
-import { DepartmentProps, isLoadingProps } from "@/types";
+import { DepartmentProps, isLoadingProps, SubDepartmentProps } from "@/types";
 import React, { useEffect, useState } from "react";
 import SubDepartmentCreate from "./SubDepartmentCreate";
+import {
+  deleteSubDepartment,
+  getSubDepartment,
+  getSubDepartmentId,
+} from "../_libs/action";
+import Pagination from "@/components/Pagination";
+import SubDepartmentEdit from "./SubDepartmentEdit";
 
 type SubDepartmentViewProps = {
   departmentData: DepartmentProps[];
@@ -24,11 +31,16 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [filter, setFilter] = useState({
+    department: "",
+  });
 
-  const [sdepartmentData, setDepartmentData] = useState(
-    [] as DepartmentProps[]
+  const [subDepartmentData, setSubDepartmentData] = useState(
+    [] as SubDepartmentProps[]
   );
-  const [departmentEdit, setDepartmentEdit] = useState({} as DepartmentProps);
+  const [subDepartmentEdit, setSubDepartmentEdit] = useState(
+    {} as SubDepartmentProps
+  );
 
   useEffect(() => {
     if (alertPage.status) {
@@ -54,33 +66,33 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
   }, [searchTerm]);
 
   useEffect(() => {
-    fetchData(debouncedSearchTerm);
-  }, [debouncedSearchTerm]);
+    fetchData(debouncedSearchTerm, filter.department);
+  }, [debouncedSearchTerm, filter]);
 
-  const fetchData = async (search = "") => {
-    // setLoadingPage(true);
-    // try {
-    //   const result = await getDepartment(search);
-    //   if (result.status) {
-    //     setDepartmentData(result.data as DepartmentProps[]);
-    //   } else {
-    //     setAlertPage({
-    //       status: true,
-    //       color: "danger",
-    //       message: "Failed",
-    //       subMessage: result.message,
-    //     });
-    //   }
-    // } catch (error) {
-    //   setAlertPage({
-    //     status: true,
-    //     color: "danger",
-    //     message: "Error",
-    //     subMessage: "Something went wrong, please refresh and try again",
-    //   });
-    // } finally {
-    //   setLoadingPage(false);
-    // }
+  const fetchData = async (search = "", department = "") => {
+    setLoadingPage(true);
+    try {
+      const result = await getSubDepartment(search, department);
+      if (result.status) {
+        setSubDepartmentData(result.data as SubDepartmentProps[]);
+      } else {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Failed",
+          subMessage: result.message,
+        });
+      }
+    } catch (error) {
+      setAlertPage({
+        status: true,
+        color: "danger",
+        message: "Error",
+        subMessage: "Something went wrong, please refresh and try again",
+      });
+    } finally {
+      setLoadingPage(false);
+    }
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -89,63 +101,63 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
 
   const handleGetEdit = async (id: number) => {
     setIsLoadingAction({ ...isLoadingAction, [id]: true });
-    // try {
-    //   const result = await getDepartmentId(id);
-    //   if (result.status) {
-    //     setDepartmentEdit(result.data as DepartmentProps);
-    //     setIsEditOpen(true);
-    //   } else {
-    //     setAlertPage({
-    //       status: true,
-    //       color: "danger",
-    //       message: "Failed",
-    //       subMessage: result.message,
-    //     });
-    //   }
-    // } catch (error) {
-    //   setAlertPage({
-    //     status: true,
-    //     color: "danger",
-    //     message: "Error",
-    //     subMessage: "Something went wrong, please refresh and try again",
-    //   });
-    // } finally {
-    //   setIsLoadingAction({ ...isLoadingAction, [id]: false });
-    // }
+    try {
+      const result = await getSubDepartmentId(id);
+      if (result.status) {
+        setSubDepartmentEdit(result.data as SubDepartmentProps);
+        setIsEditOpen(true);
+      } else {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Failed",
+          subMessage: result.message,
+        });
+      }
+    } catch (error) {
+      setAlertPage({
+        status: true,
+        color: "danger",
+        message: "Error",
+        subMessage: "Something went wrong, please refresh and try again",
+      });
+    } finally {
+      setIsLoadingAction({ ...isLoadingAction, [id]: false });
+    }
   };
 
   const handleDelete = async (id: number) => {
-    // if (confirm("Delete this data?")) {
-    //   setIsLoadingAction({ ...isLoadingAction, [id]: true });
-    //   try {
-    //     const result = await deleteDepartment(id);
-    //     if (result.status) {
-    //       setAlertPage({
-    //         status: true,
-    //         color: "success",
-    //         message: "Success",
-    //         subMessage: result.message,
-    //       });
-    //       fetchData();
-    //     } else {
-    //       setAlertPage({
-    //         status: true,
-    //         color: "danger",
-    //         message: "Failed",
-    //         subMessage: result.message,
-    //       });
-    //     }
-    //   } catch (error) {
-    //     setAlertPage({
-    //       status: true,
-    //       color: "danger",
-    //       message: "Error",
-    //       subMessage: "Something went wrong, please refresh and try again",
-    //     });
-    //   } finally {
-    //     setIsLoadingAction({ ...isLoadingAction, [id]: false });
-    //   }
-    // }
+    if (confirm("Delete this data?")) {
+      setIsLoadingAction({ ...isLoadingAction, [id]: true });
+      try {
+        const result = await deleteSubDepartment(id);
+        if (result.status) {
+          setAlertPage({
+            status: true,
+            color: "success",
+            message: "Success",
+            subMessage: result.message,
+          });
+          fetchData();
+        } else {
+          setAlertPage({
+            status: true,
+            color: "danger",
+            message: "Failed",
+            subMessage: result.message,
+          });
+        }
+      } catch (error) {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
+        });
+      } finally {
+        setIsLoadingAction({ ...isLoadingAction, [id]: false });
+      }
+    }
 
     return;
   };
@@ -167,7 +179,23 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
             </span>
           </div>
         </div>
-        <div className="col-auto flex-grow-1 overflow-auto"></div>
+        <div className="col-auto flex-grow-1 overflow-auto">
+          <div className="btn-group position-static">
+            <select
+              className="form-select"
+              onChange={(e) =>
+                setFilter({ ...filter, department: e.target.value })
+              }
+            >
+              <option value="">--DEPT--</option>
+              {departmentData?.map((item, index: number) => (
+                <option value={item.id} key={index}>
+                  {item.nama_department?.toUpperCase()}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
         <div className="col-auto">
           <div className="d-flex align-items-center gap-2 justify-content-lg-end">
@@ -195,15 +223,16 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
                     <th style={{ width: "1%" }}>NO</th>
                     <th>DEPT.</th>
                     <th>SUB DEPT.</th>
-                    <th>LEADER</th>
-                    <th>SUPERVISOR</th>
-                    <th>MANAGER</th>
+                    <th style={{ width: "10%" }}>LEADER</th>
+                    <th style={{ width: "10%" }}>SUPERVISOR</th>
+                    <th style={{ width: "10%" }}>MANAGER</th>
+                    <th style={{ width: "10%" }}>AKSES IZIN</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingPage ? (
                     <tr>
-                      <td colSpan={5} align="center">
+                      <td colSpan={8} align="center">
                         <div
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
@@ -213,8 +242,8 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
                         Loading...
                       </td>
                     </tr>
-                  ) : departmentData.length > 0 ? (
-                    departmentData.map((item, index) => (
+                  ) : subDepartmentData.length > 0 ? (
+                    subDepartmentData.map((item, index) => (
                       <tr key={index}>
                         <td align="center">
                           <Button
@@ -228,24 +257,36 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
                           </Button>
                         </td>
                         <td align="center">{index + 1}</td>
-                        <td>{item.nama_department}</td>
-                        <td align="center">
-                          {item.latitude &&
-                            item.longitude &&
-                            `${item.latitude}, ${item.longitude}`}
+                        <td>
+                          {item.department?.nama_department?.toUpperCase()}
                         </td>
-                        <td align="center">{item.radius}</td>
+                        <td>{item.nama_sub_department?.toUpperCase()}</td>
+                        <td>{item.leader_user?.name?.toUpperCase()}</td>
+                        <td>{item.supervisor_user?.name?.toUpperCase()}</td>
+                        <td>{item.manager_user?.name?.toUpperCase()}</td>
+                        <td align="center">
+                          {item.akses_izin
+                            ?.map((e) => e.jenis_izin.kode)
+                            .join(", ")}
+                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={5} align="center">
+                      <td colSpan={8} align="center">
                         No data available
                       </td>
                     </tr>
                   )}
                 </tbody>
               </table>
+
+              <Pagination
+                currentPage={1}
+                maxPagination={1}
+                totalPage={1}
+                setCurrentPage={() => {}}
+              />
             </div>
           </div>
         </div>
@@ -262,16 +303,17 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
         />
       )}
 
-      {/* {isEditOpen && (
-        <DepartmentEdit
+      {isEditOpen && (
+        <SubDepartmentEdit
           isOpen={isEditOpen}
           onClose={() => {
             setIsEditOpen(false);
             fetchData();
           }}
-          departmentEdit={departmentEdit}
+          departmentData={departmentData}
+          subDepartmentEdit={subDepartmentEdit}
         />
-      )} */}
+      )}
     </>
   );
 }

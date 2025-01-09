@@ -1,6 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "@/libs/Prisma";
+const bcrypt = require("bcrypt");
 
 export const authOptions: NextAuthOptions = {
   session: {
@@ -29,6 +30,7 @@ export const authOptions: NextAuthOptions = {
             select: {
               id: true,
               username: true,
+              password: true,
               roles: {
                 select: {
                   id: true,
@@ -59,10 +61,12 @@ export const authOptions: NextAuthOptions = {
             },
             where: {
               username,
-              password,
               is_deleted: false,
             },
           });
+
+          // check password
+          const checkPassword = await bcrypt.compare(password, user?.password);
 
           const menu = await prisma.menu_group.findMany({
             select: {
@@ -114,10 +118,10 @@ export const authOptions: NextAuthOptions = {
             ],
           });
 
-          return { user, menu };
+          return { user, menu, checkPassword };
         });
 
-        if (result.user && result.menu.length > 0) {
+        if (result.user && result.menu.length > 0 && result.checkPassword) {
           return {
             id: result.user.id.toString(),
             username: result.user.username,
