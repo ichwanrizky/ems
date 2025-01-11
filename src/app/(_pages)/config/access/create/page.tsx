@@ -1,5 +1,5 @@
 import React from "react";
-import AccessCreateView from "../_components/AccessCreateView";
+import AccessCreate from "../_components/AccessCreate";
 
 export default function AccessCreatePage() {
   return (
@@ -17,7 +17,7 @@ export default function AccessCreatePage() {
         </div>
       </div>
 
-      <AccessCreateView />
+      <AccessCreate />
     </div>
   );
 }

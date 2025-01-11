@@ -8,7 +8,7 @@ import { AccessDepartmentProps, AccessSubDepartmentProps } from "@/types";
 import { createDataKaryawan } from "../_libs/action";
 import { useRouter } from "next/navigation";
 
-export default function DataKaryawanCreateView({
+export default function DataKaryawanCreate({
   accessDepartment,
   accessSubDepartment,
 }: {

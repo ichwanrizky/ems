@@ -18,7 +18,7 @@ type DataKaryawanEditProps = {
   pegawaiData: PegawaiProps;
 };
 
-export default function DataKaryawanEditView(props: DataKaryawanEditProps) {
+export default function DataKaryawanEdit(props: DataKaryawanEditProps) {
   const { accessDepartment, accessSubDepartment, pegawaiData } = props;
   const [alert, setAlert] = useState({
     status: false,

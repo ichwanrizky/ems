@@ -7,6 +7,7 @@ import { deleteMenu, getMenu, getMenuId } from "../_libs/action";
 import MenuCreate from "./MenuCreate";
 import { getMenuGroup } from "../../menu_group/_libs/action";
 import MenuEdit from "./MenuEdit";
+import Pagination from "@/components/Pagination";
 
 export default function MenuView() {
   const [loadingPage, setLoadingPage] = useState(true);
@@ -286,6 +287,13 @@ export default function MenuView() {
                   )}
                 </tbody>
               </table>
+
+              <Pagination
+                currentPage={1}
+                maxPagination={1}
+                totalPage={1}
+                setCurrentPage={() => {}}
+              />
             </div>
           </div>
         </div>

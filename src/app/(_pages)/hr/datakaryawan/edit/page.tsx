@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import React from "react";
 import { redirect } from "next/navigation";
 import { getPegawaiId } from "../_libs/action";
-import DataKaryawanEditView from "../_components/DataKaryawanEditView";
+import DataKaryawanEdit from "../_components/DataKaryawanEdit";
 
 const getPegawai = async (karyawan_id: number) => {
   try {
@@ -63,7 +63,7 @@ export default async function DataKaryawanEditPage({
       </div>
 
       {foundMenu && foundMenu.access[0].update ? (
-        <DataKaryawanEditView
+        <DataKaryawanEdit
           accessDepartment={session.user.access_department || []}
           accessSubDepartment={session.user.access_sub_department || []}
           pegawaiData={pegawaiData}

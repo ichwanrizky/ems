@@ -17,6 +17,7 @@ import {
 } from "../_libs/action";
 import { DisplayHour } from "@/libs/DisplayDate";
 import ShiftMasterEdit from "./ShiftMasterEdit";
+import Pagination from "@/components/Pagination";
 
 type ShiftMasterViewProps = {
   accessDepartment: AccessDepartmentProps;
@@ -288,6 +289,13 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
                   )}
                 </tbody>
               </table>
+
+              <Pagination
+                currentPage={1}
+                maxPagination={1}
+                totalPage={1}
+                setCurrentPage={() => {}}
+              />
             </div>
           </div>
         </div>

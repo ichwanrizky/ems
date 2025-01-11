@@ -45,36 +45,10 @@ export default function DashboardHeader() {
               >
                 <i className="material-icons-outlined">person_outline</i>Profile
               </a>
-              <a
-                className="dropdown-item d-flex align-items-center gap-2 py-2"
-                href="#"
-              >
-                <i className="material-icons-outlined">local_bar</i>Setting
-              </a>
-              <a
-                className="dropdown-item d-flex align-items-center gap-2 py-2"
-                href="#"
-              >
-                <i className="material-icons-outlined">dashboard</i>Dashboard
-              </a>
-              <a
-                className="dropdown-item d-flex align-items-center gap-2 py-2"
-                href="#"
-              >
-                <i className="material-icons-outlined">account_balance</i>
-                Earning
-              </a>
-              <a
-                className="dropdown-item d-flex align-items-center gap-2 py-2"
-                href="#"
-              >
-                <i className="material-icons-outlined">cloud_download</i>
-                Downloads
-              </a>
               <hr className="dropdown-divider" />
               <a
                 className="dropdown-item d-flex align-items-center gap-2 py-2"
-                href="#"
+                href="/auth/logout"
               >
                 <i className="material-icons-outlined">power_settings_new</i>
                 Logout

@@ -2,14 +2,14 @@ import { authOptions } from "@/libs/AuthOptions";
 import { AccessProps, SeesionProps } from "@/types";
 import { getServerSession } from "next-auth";
 import React from "react";
-import DataKaryawanCreate from "../_components/DataKaryawanCreate";
-
-export default async function DataKaryawanCreatePage() {
+import AbsensiView from "./_components/AbsensiView";
+// import DataKaryawanView from "./_components/DataKaryawanView";
+export default async function ShiftMasterPage() {
   const session: SeesionProps | null = await getServerSession(authOptions);
 
   if (!session) return null;
 
-  const targetPath = "hr/datakaryawan";
+  const targetPath = "hr/absensi";
 
   const allMenus =
     session.user.menu?.map((group) => group.menu || []).flat() || [];
@@ -26,20 +26,11 @@ export default async function DataKaryawanCreatePage() {
   return (
     <div className="main-content" style={{ height: "90vh", overflowY: "auto" }}>
       <div className="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-        <div className="breadcrumb-title pe-3">Data Karyawan</div>
-        <div className="ps-3">
-          <nav aria-label="breadcrumb">
-            <ol className="breadcrumb mb-0 p-0">
-              <li className="breadcrumb-item active" aria-current="page">
-                Create
-              </li>
-            </ol>
-          </nav>
-        </div>
+        <div className="breadcrumb-title pe-3">Absensi</div>
       </div>
 
-      {foundMenu && foundMenu.access[0].insert ? (
-        <DataKaryawanCreate
+      {foundMenu ? (
+        <AbsensiView
           accessDepartment={session.user.access_department || []}
           accessSubDepartment={session.user.access_sub_department || []}
         />

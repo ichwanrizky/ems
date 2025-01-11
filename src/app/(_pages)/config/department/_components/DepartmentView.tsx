@@ -9,8 +9,9 @@ import {
   getDepartment,
   getDepartmentId,
 } from "../_libs/action";
-import DepartmentEdit from "./DepartmentEdit";
+import Pagination from "@/components/Pagination";
 import DepartmentCreate from "./DepartmentCreate";
+import DepartmentEdit from "./DepartmentEdit";
 
 export default function DepartmentView() {
   const [loadingPage, setLoadingPage] = useState(true);
@@ -243,6 +244,13 @@ export default function DepartmentView() {
                   )}
                 </tbody>
               </table>
+
+              <Pagination
+                currentPage={1}
+                maxPagination={1}
+                totalPage={1}
+                setCurrentPage={() => {}}
+              />
             </div>
           </div>
         </div>

@@ -219,7 +219,7 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
                     pegawaiShiftData.map((item, index) => (
                       <tr key={index}>
                         <td align="center">{index + 1}</td>
-                        <td>{item.nama}</td>
+                        <td>{item.nama?.toUpperCase()}</td>
                         {shiftMasterData?.map((item2, index: number) => (
                           <td align="center" key={index}>
                             <input

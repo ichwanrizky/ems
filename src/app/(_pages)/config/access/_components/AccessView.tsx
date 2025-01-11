@@ -5,6 +5,7 @@ import { isLoadingProps, RolesProps } from "@/types";
 import React, { useEffect, useState } from "react";
 import { deleteAccess, getAccess } from "../_libs/action";
 import { useRouter } from "next/navigation";
+import Pagination from "@/components/Pagination";
 
 export default function AccessView() {
   const { push } = useRouter();
@@ -205,6 +206,13 @@ export default function AccessView() {
                   )}
                 </tbody>
               </table>
+
+              <Pagination
+                currentPage={1}
+                maxPagination={1}
+                totalPage={1}
+                setCurrentPage={() => {}}
+              />
             </div>
           </div>
         </div>

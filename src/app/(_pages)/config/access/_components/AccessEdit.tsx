@@ -5,7 +5,8 @@ import { DepartmentProps, RolesProps, SubDepartmentProps } from "@/types";
 import { getDepartment } from "../../department/_libs/action";
 import { getSubDepartmentMultipleDepartment } from "../../sub_department/_libs/action";
 import {
-  createAccess,
+  CreateAccessProps,
+  editAccess,
   getMenuAccess,
   getRolesAccess,
   MenuAccessProps,
@@ -13,7 +14,13 @@ import {
 import { useRouter } from "next/navigation";
 import Alert from "@/components/Alert";
 
-export default function AccessCreateView() {
+export default function AccessEdit({
+  role_id,
+  accessData,
+}: {
+  role_id: number;
+  accessData: CreateAccessProps;
+}) {
   const [alert, setAlert] = useState({
     status: false,
     color: "",
@@ -32,10 +39,13 @@ export default function AccessCreateView() {
   const [menuAccessData, setMenuAccessData] = useState([] as MenuAccessProps[]);
 
   const [formData, setFormData] = useState({
-    role_id: null as number | null,
-    department_id: [] as { value: number; label: string }[],
-    sub_department_id: [] as { value: number; label: string }[],
-    access: [] as any[],
+    role_id: accessData.role_id || (null as number | null),
+    department_id:
+      accessData.department_id || ([] as { value: number; label: string }[]),
+    sub_department_id:
+      accessData.sub_department_id ||
+      ([] as { value: number; label: string }[]),
+    access: (accessData.access as any[]) || ([] as any[]),
   });
 
   useEffect(() => {
@@ -57,12 +67,13 @@ export default function AccessCreateView() {
     handleGetRoles();
     handleGetDepartment();
     handleGetMenuAccess();
+    handleGetSubDepartment(formData.department_id);
   }, []);
 
   const handleGetRoles = async () => {
     setIsLoadingPage(true);
     try {
-      const result = await getRolesAccess();
+      const result = await getRolesAccess(role_id);
       if (result.status) setRolesData(result.data as RolesProps[]);
     } catch (error) {
       setAlert({
@@ -182,7 +193,7 @@ export default function AccessCreateView() {
     if (confirm("Submit this data?")) {
       setIsLoadingSubmit(true);
       try {
-        const result = await createAccess(formData as any);
+        const result = await editAccess(formData as any);
         if (result.status) {
           setAlert({
             status: true,

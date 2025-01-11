@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import React from "react";
-import AccessEditView from "../_components/AccessEditView";
 import { CreateAccessProps, getAccessByRoles } from "../_libs/action";
+import AccessEdit from "../_components/AccessEdit";
 
 const getAccess = async (role_id: number) => {
   try {
@@ -41,7 +41,7 @@ export default async function AccessEditPage({
         </div>
       </div>
 
-      <AccessEditView role_id={Number(role_id)} accessData={accessData} />
+      <AccessEdit role_id={Number(role_id)} accessData={accessData} />
     </div>
   );
 }

@@ -6,8 +6,7 @@ const bcrypt = require("bcrypt");
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
-    // 1h
-    maxAge: 60 * 60 * 8,
+    maxAge: 60 * 60 * 8, // 8 hours
   },
   secret: process.env.JWT,
   providers: [

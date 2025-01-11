@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { deleteMenuGroup, getMenuGroup, getMenuGroupId } from "../_libs/action";
 import MenuGroupCreate from "./MenuGroupCreate";
 import MenuGroupEdit from "./MenuGroupEdit";
+import Pagination from "@/components/Pagination";
 
 export default function MenuGroupView() {
   const [loadingPage, setLoadingPage] = useState(true);
@@ -244,6 +245,13 @@ export default function MenuGroupView() {
                   )}
                 </tbody>
               </table>
+
+              <Pagination
+                currentPage={1}
+                maxPagination={1}
+                totalPage={1}
+                setCurrentPage={() => {}}
+              />
             </div>
           </div>
         </div>

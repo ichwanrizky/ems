@@ -23,6 +23,9 @@ export const getPegawaiShift = async (
         is_deleted: false,
         department_id: Number(department_id),
       },
+      orderBy: {
+        nama: "asc",
+      },
     })) as PegawaiShiftProps[];
 
     if (!result) {

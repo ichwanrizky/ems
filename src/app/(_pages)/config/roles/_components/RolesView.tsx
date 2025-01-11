@@ -6,6 +6,7 @@ import React, { useEffect, useState } from "react";
 import { deleteRoles, getRoles, getRolesId } from "../_libs/action";
 import MenuGroupEdit from "./RolesEdit";
 import RolesCreate from "./RolesCreate";
+import Pagination from "@/components/Pagination";
 
 export default function RolesView() {
   const [loadingPage, setLoadingPage] = useState(true);
@@ -230,6 +231,13 @@ export default function RolesView() {
                   )}
                 </tbody>
               </table>
+
+              <Pagination
+                currentPage={1}
+                maxPagination={1}
+                totalPage={1}
+                setCurrentPage={() => {}}
+              />
             </div>
           </div>
         </div>
