@@ -221,3 +221,15 @@ export type AtasanProps = {
     nama: string;
   };
 };
+
+export type AbsenProps = {
+  id: number;
+  nama: string;
+  absen: {
+    id: number;
+    tanggal: Date;
+    absen_masuk: Date;
+    absen_pulang: Date;
+    late: number;
+  }[];
+};

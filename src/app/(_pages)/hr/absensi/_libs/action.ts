@@ -1,36 +1,80 @@
 "use server";
 
+import { ConvertDate, ConvertDateZeroHours } from "@/libs/ConvertDate";
 import { HandleError } from "@/libs/Error";
 import prisma from "@/libs/Prisma";
+import { AbsenProps } from "@/types";
 
 export const getAbsensi = async (
-  search?: string,
-  filter?: {
-    department?: string;
-    sub_department?: string;
+  filter: {
+    department: string | number;
+    sub_department: string;
+    status_absen: string;
     date: Date;
-  }
+  },
+  search?: string
 ): Promise<{
   status: boolean;
   message: string;
-  data: any[] | [];
+  data: AbsenProps[] | [];
 }> => {
   try {
-    const result = await prisma.absen.findMany({
+    const result = (await prisma.pegawai.findMany({
       select: {
         id: true,
-        tanggal: true,
-        absen_masuk: true,
-        absen_pulang: true,
-        late: true,
-        pegawai: {
+        nama: true,
+        absen: {
           select: {
             id: true,
-            nama: true,
+            tanggal: true,
+            absen_masuk: true,
+            absen_pulang: true,
+            late: true,
+          },
+          where: {
+            tanggal: ConvertDateZeroHours(filter.date),
           },
         },
       },
-    });
+      where: {
+        is_active: true,
+        is_deleted: false,
+        department_id: Number(filter.department),
+        ...(filter.sub_department && {
+          sub_department_id: Number(filter.sub_department),
+        }),
+        ...(filter.status_absen && {
+          absen:
+            filter.status_absen === "1"
+              ? {
+                  some: {
+                    tanggal: ConvertDateZeroHours(filter.date),
+                  },
+                }
+              : {
+                  none: {
+                    tanggal: ConvertDateZeroHours(filter.date),
+                  },
+                },
+        }),
+        ...(search && {
+          nama: {
+            contains: search,
+          },
+        }),
+      },
+      orderBy: {
+        nama: "asc",
+      },
+    })) as AbsenProps[];
+
+    if (!result) {
+      return {
+        status: false,
+        message: "Data not found",
+        data: [],
+      };
+    }
 
     return {
       status: true,
