@@ -283,7 +283,6 @@ export async function POST(request: Request) {
       }
     );
   } catch (error) {
-    console.log("🚀 ~ POST ~ error:", error);
     return new NextResponse(
       JSON.stringify({
         status: false,

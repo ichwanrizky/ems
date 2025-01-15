@@ -20,3 +20,22 @@ export const DisplayFullDate: Intl.DateTimeFormatOptions = {
   day: "numeric",
   timeZone: "UTC",
 };
+
+export const DisplayMonthName = (month: number) => {
+  const monthNames = [
+    "Januari",
+    "Februari",
+    "Maret",
+    "April",
+    "Mei",
+    "Juni",
+    "Juli",
+    "Augustus",
+    "September",
+    "Oktober",
+    "November",
+    "Desember",
+  ];
+
+  return monthNames[month - 1];
+};
