@@ -167,6 +167,8 @@ export default function TanggalMerahView(props: Props) {
             message: "Success",
             subMessage: result.message,
           });
+
+          fetchData(filter);
         } else {
           setAlertPage({
             status: true,

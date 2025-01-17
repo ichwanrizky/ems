@@ -52,10 +52,16 @@ export default function TanggalMerahEdit(props: Props) {
   });
 
   const [dateMonth, setDateMonth] = useState([] as string[]);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   if (!isOpen) return null;
 
   useEffect(() => {
+    if (!isInitialized) {
+      setIsInitialized(true);
+      return;
+    }
+
     if (formData.tahun !== "" && formData.bulan !== "") {
       getTanggalMerahApi(formData.tahun, formData.bulan);
     } else {
