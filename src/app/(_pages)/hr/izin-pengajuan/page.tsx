@@ -2,6 +2,7 @@ import { authOptions } from "@/libs/AuthOptions";
 import { AccessProps, SeesionProps } from "@/types";
 import { getServerSession } from "next-auth";
 import React from "react";
+import IzinPengajuanView from "./_components/IzinPengajuanView";
 
 export default async function IzinPengajuanPage() {
   const session: SeesionProps | null = await getServerSession(authOptions);
@@ -29,12 +30,10 @@ export default async function IzinPengajuanPage() {
       </div>
 
       {foundMenu ? (
-        // <DataKaryawanView
-        //   accessDepartment={session.user.access_department || []}
-        //   accessSubDepartment={session.user.access_sub_department || []}
-        //   accessMenu={foundMenu.access[0] || {}}
-        // />
-        <div></div>
+        <IzinPengajuanView
+          accessDepartment={session.user.access_department || []}
+          accessMenu={foundMenu.access[0] || {}}
+        />
       ) : (
         <div className="d-flex justify-content-center align-items-center text-danger">
           Access Denied

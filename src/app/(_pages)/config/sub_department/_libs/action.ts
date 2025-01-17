@@ -113,7 +113,9 @@ export const getJenisIzin = async (): Promise<{
 
 export const getSubDepartment = async (
   search?: string,
-  department?: string | number
+  filter?: {
+    department: string | number;
+  }
 ): Promise<{
   status: boolean;
   message: string;
@@ -177,7 +179,7 @@ export const getSubDepartment = async (
             },
           ],
         }),
-        ...(department && { department_id: Number(department) }),
+        department_id: Number(filter?.department),
       },
       orderBy: [
         {

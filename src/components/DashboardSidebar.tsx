@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import React from "react";
 
 type MenuProps = {
@@ -36,10 +37,10 @@ export default function DashboardSidebar({ menu }: { menu: MenuProps }) {
               <ul>
                 {item.menu.map((e) => (
                   <li key={e.id}>
-                    <a href={`/${e.path}`}>
+                    <Link href={`/${e.path}`}>
                       <i className="material-icons-outlined">arrow_right</i>
                       {e.menu}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

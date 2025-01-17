@@ -6,13 +6,13 @@ import prisma from "@/libs/Prisma";
 import { AbsenProps } from "@/types";
 
 export const getAbsensi = async (
-  filter: {
+  search?: string,
+  filter?: {
     department: string | number;
     sub_department: string;
     status_absen: string;
     date: Date;
-  },
-  search?: string
+  }
 ): Promise<{
   status: boolean;
   message: string;
@@ -32,28 +32,28 @@ export const getAbsensi = async (
             late: true,
           },
           where: {
-            tanggal: ConvertDateZeroHours(filter.date),
+            tanggal: ConvertDateZeroHours(filter!.date),
           },
         },
       },
       where: {
         is_active: true,
         is_deleted: false,
-        department_id: Number(filter.department),
-        ...(filter.sub_department && {
-          sub_department_id: Number(filter.sub_department),
+        department_id: Number(filter!.department),
+        ...(filter!.sub_department && {
+          sub_department_id: Number(filter!.sub_department),
         }),
-        ...(filter.status_absen && {
+        ...(filter!.status_absen && {
           absen:
-            filter.status_absen === "1"
+            filter!.status_absen === "1"
               ? {
                   some: {
-                    tanggal: ConvertDateZeroHours(filter.date),
+                    tanggal: ConvertDateZeroHours(filter!.date),
                   },
                 }
               : {
                   none: {
-                    tanggal: ConvertDateZeroHours(filter.date),
+                    tanggal: ConvertDateZeroHours(filter!.date),
                   },
                 },
         }),

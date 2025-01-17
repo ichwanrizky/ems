@@ -54,7 +54,7 @@ export default function MenuView() {
   }, [searchTerm]);
 
   useEffect(() => {
-    fetchData(debouncedSearchTerm, filter.menu_group);
+    fetchData(debouncedSearchTerm, filter);
   }, [debouncedSearchTerm, filter]);
 
   useEffect(() => {
@@ -86,10 +86,13 @@ export default function MenuView() {
       setLoadingPage(false);
     }
   };
-  const fetchData = async (search = "", menu_group = "") => {
+  const fetchData = async (
+    search = "",
+    filter: { menu_group?: string } = {}
+  ) => {
     setLoadingPage(true);
     try {
-      const result = await getMenu(search, menu_group);
+      const result = await getMenu(search, filter);
       if (result.status) {
         setMenuData(result.data as MenuProps[]);
       } else {
@@ -155,7 +158,7 @@ export default function MenuView() {
             message: "Success",
             subMessage: result.message,
           });
-          fetchData();
+          fetchData("", filter);
         } else {
           setAlertPage({
             status: true,
@@ -304,7 +307,7 @@ export default function MenuView() {
           isOpen={isCreateOpen}
           onClose={() => {
             setIsCreateOpen(false);
-            fetchData();
+            fetchData("", filter);
           }}
           menuGroupData={menuGroupData}
         />
@@ -315,7 +318,7 @@ export default function MenuView() {
           isOpen={isEditOpen}
           onClose={() => {
             setIsEditOpen(false);
-            fetchData();
+            fetchData("", filter);
           }}
           menuGroupData={menuGroupData}
           menuEdit={menuEdit}

@@ -32,7 +32,7 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [filter, setFilter] = useState({
-    department: "",
+    department: departmentData[0].id || "",
   });
 
   const [subDepartmentData, setSubDepartmentData] = useState(
@@ -66,13 +66,18 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
   }, [searchTerm]);
 
   useEffect(() => {
-    fetchData(debouncedSearchTerm, filter.department);
+    fetchData(debouncedSearchTerm, filter);
   }, [debouncedSearchTerm, filter]);
 
-  const fetchData = async (search = "", department = "") => {
+  const fetchData = async (
+    search = "",
+    filter = {
+      department: "" as string | number,
+    }
+  ) => {
     setLoadingPage(true);
     try {
-      const result = await getSubDepartment(search, department);
+      const result = await getSubDepartment(search, filter);
       if (result.status) {
         setSubDepartmentData(result.data as SubDepartmentProps[]);
       } else {
@@ -186,6 +191,7 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
               onChange={(e) =>
                 setFilter({ ...filter, department: e.target.value })
               }
+              value={filter.department}
             >
               <option value="">--DEPT--</option>
               {departmentData?.map((item, index: number) => (

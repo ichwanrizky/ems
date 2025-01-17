@@ -74,21 +74,21 @@ export default function AbsensiView(props: AbsensiViewProps) {
   }, [searchTerm]);
 
   useEffect(() => {
-    fetchData(filter, debouncedSearchTerm);
+    fetchData(debouncedSearchTerm, filter);
   }, [debouncedSearchTerm, filter]);
 
   const fetchData = async (
+    search = "",
     filter = {
       department: "" as string | number,
       sub_department: "",
       status_absen: "",
       date: new Date(),
-    },
-    search = ""
+    }
   ) => {
     setLoadingPage(true);
     try {
-      const result = await getAbsensi(filter, search);
+      const result = await getAbsensi(search, filter);
       if (result.status) {
         setAbsensiData(result.data as AbsenProps[]);
       } else {

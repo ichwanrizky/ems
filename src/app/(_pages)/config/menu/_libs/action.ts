@@ -6,7 +6,9 @@ import { MenuProps } from "@/types";
 
 export const getMenu = async (
   search?: string,
-  menuGroup?: string
+  filter?: {
+    menu_group?: string;
+  }
 ): Promise<{
   status: boolean;
   message: string;
@@ -24,7 +26,7 @@ export const getMenu = async (
         },
       },
       where: {
-        ...(menuGroup && { menu_group_id: Number(menuGroup) }),
+        ...(filter?.menu_group && { menu_group_id: Number(filter.menu_group) }),
         ...(search && {
           OR: [
             {
