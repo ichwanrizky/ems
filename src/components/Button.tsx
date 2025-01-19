@@ -78,6 +78,55 @@ export default function Button(props: ButtonProps) {
         </div>
       );
 
+    case "actionTable2":
+      return isLoading ? (
+        <button
+          className="btn btn-sm btn-filter dropdown-toggle dropdown-toggle-nocaret"
+          type="button"
+          disabled
+        >
+          <span
+            className="spinner-border spinner-border-sm"
+            role="status"
+            aria-hidden="true"
+          ></span>
+        </button>
+      ) : (
+        <div className="dropdown">
+          <button
+            id={`dropdownMenuButton-${indexData}`}
+            className="btn btn-sm btn-filter dropdown-toggle dropdown-toggle-nocaret"
+            type="button"
+            data-bs-toggle="dropdown"
+            data-bs-display="static"
+            aria-expanded="false"
+          >
+            <i className="bi bi-three-dots" />
+          </button>
+          <ul
+            className="dropdown-menu"
+            aria-labelledby={`dropdownMenuButton-${indexData}`}
+            style={{
+              position: "absolute",
+              top: "100%",
+              left: "0",
+              zIndex: 1050,
+            }}
+          >
+            <li>
+              <button
+                type="button"
+                className="dropdown-item text-danger"
+                onClick={onDelete}
+              >
+                <i className="bi bi-trash me-2"></i>
+                DELETE
+              </button>
+            </li>
+          </ul>
+        </div>
+      );
+
     case "createTable":
       return isLoading ? (
         <button className="btn btn-primary px-4" type="button" disabled>

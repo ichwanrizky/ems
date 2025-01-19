@@ -233,3 +233,21 @@ export type AbsenProps = {
     late: number;
   }[];
 };
+
+export type PengajuanIzinProps = {
+  id: number;
+  uuid: string;
+  tanggal: Date;
+  tahun: number;
+  bulan: number;
+  keterangan: string;
+  jumlah_hari: string;
+  jumlah_jam: string;
+  jenis_izin: {
+    kode: string;
+    jenis: string;
+  };
+  pegawai: {
+    nama: string;
+  };
+};

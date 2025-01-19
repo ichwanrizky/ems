@@ -86,6 +86,7 @@ model jenis_izin {
   jenis          String
   akses_izin     akses_izin[]
   pengajuan_izin pengajuan_izin[]
+  izin           izin[]
 }
 
 model akses_izin {
@@ -266,6 +267,7 @@ model pengajuan_izin {
   jumlah_hari     String?
   jumlah_jam      String?
   approve_by      Int?
+  approve_date    DateTime?  @db.DateTime(0)
   user_approved   user?      @relation("user_approved", fields: [approve_by], references: [id])
   department_id   Int
   department      department @relation(fields: [department_id], references: [id])
@@ -274,7 +276,8 @@ model pengajuan_izin {
 
 model izin {
   id                Int            @id @default(autoincrement())
-  jenis_izin        String
+  jenis_izin_kode   String
+  jenis_izin        jenis_izin     @relation(fields: [jenis_izin_kode], references: [kode])
   tanggal           DateTime       @db.Date
   pegawai_id        Int
   pegawai           pegawai        @relation(fields: [pegawai_id], references: [id])
