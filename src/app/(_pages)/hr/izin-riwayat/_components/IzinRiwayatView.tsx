@@ -1,29 +1,29 @@
 "use client";
-
-import Button from "@/components/Button";
 import {
   AccessDepartmentProps,
   AccessProps,
   isLoadingProps,
-  PengajuanIzinProps,
+  RiwayatIzinProps,
 } from "@/types";
 import React, { useEffect, useState } from "react";
-import {
-  approvalPengajuanIzin,
-  deletePengajuanIzin,
-  getPengajuanIzin,
-} from "../_libs/action";
+import { deleteRiwayatIzin, getRiwayatIzin } from "../_libs/action";
 import Alert from "@/components/Alert";
-import Pagination from "@/components/Pagination";
+import Button from "@/components/Button";
 import { DisplayFullDate } from "@/libs/DisplayDate";
+import Pagination from "@/components/Pagination";
+import { FilterBulan } from "@/libs/FilterBulan";
+import { FilterTahun } from "@/libs/FilterTahun";
 
 type Props = {
   accessDepartment: AccessDepartmentProps;
   accessMenu: AccessProps;
 };
 
-export default function IzinPengajuanView(props: Props) {
+export default function IzinRiwayatView(props: Props) {
   const { accessDepartment, accessMenu } = props;
+
+  const [currentPage, setCurrentPage] = useState(1 as number);
+  const [totalData, setTotalData] = useState(0 as number);
 
   const [loadingPage, setLoadingPage] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
@@ -38,50 +38,42 @@ export default function IzinPengajuanView(props: Props) {
 
   const [filter, setFilter] = useState({
     department: accessDepartment[0].department.id?.toString() || "",
+    bulan: (new Date().getMonth() + 1) as number | string,
+    tahun: new Date().getFullYear() as number | string,
   });
 
-  const [pengajuanIzinData, setPengajuanIzinData] = useState(
-    [] as PengajuanIzinProps[]
+  const [riwayatIzinData, setRiwayatIzinData] = useState(
+    [] as RiwayatIzinProps[]
   );
-
-  useEffect(() => {
-    if (alertPage.status) {
-      const timer = setTimeout(() => {
-        setAlertPage({
-          status: false,
-          color: "",
-          message: "",
-          subMessage: "",
-        });
-      }, 2000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [alertPage]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
+      setCurrentPage(1);
     }, 500);
 
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
   useEffect(() => {
-    fetchData(debouncedSearchTerm, filter);
-  }, [debouncedSearchTerm, filter]);
+    fetchData(debouncedSearchTerm, filter, currentPage);
+  }, [debouncedSearchTerm, filter, currentPage]);
 
   const fetchData = async (
     search = "",
     filter = {
       department: "",
-    }
+      bulan: "" as number | string,
+      tahun: "" as number | string,
+    },
+    currentPage = 1
   ) => {
     setLoadingPage(true);
     try {
-      const result = await getPengajuanIzin(search, filter);
+      const result = await getRiwayatIzin(search, filter, currentPage);
       if (result.status) {
-        setPengajuanIzinData(result.data);
+        setRiwayatIzinData(result.data);
+        setTotalData(result.total_data);
       } else {
         setAlertPage({
           status: true,
@@ -110,7 +102,7 @@ export default function IzinPengajuanView(props: Props) {
     if (confirm("Delete this data?")) {
       setIsLoadingAction({ ...isLoadingAction, [id]: true });
       try {
-        const result = await deletePengajuanIzin(id);
+        const result = await deleteRiwayatIzin(id);
         if (result.status) {
           setAlertPage({
             status: true,
@@ -118,7 +110,7 @@ export default function IzinPengajuanView(props: Props) {
             message: "Success",
             subMessage: result.message,
           });
-          fetchData("", filter);
+          fetchData("", filter, 1);
         } else {
           setAlertPage({
             status: true,
@@ -142,41 +134,9 @@ export default function IzinPengajuanView(props: Props) {
     return;
   };
 
-  const handleApproval = async (id: number, status: number) => {
-    if (confirm("Update this data?")) {
-      setIsLoadingAction({ ...isLoadingAction, [id]: true });
-      try {
-        const result = await approvalPengajuanIzin(id, status);
-        if (result.status) {
-          setAlertPage({
-            status: true,
-            color: "success",
-            message: "Success",
-            subMessage: result.message,
-          });
-          fetchData("", filter);
-        } else {
-          setAlertPage({
-            status: true,
-            color: "danger",
-            message: "Failed",
-            subMessage: result.message,
-          });
-        }
-      } catch (error) {
-        setAlertPage({
-          status: true,
-          color: "danger",
-          message: "Error",
-          subMessage: "Something went wrong, please refresh and try again",
-        });
-      } finally {
-        setIsLoadingAction({ ...isLoadingAction, [id]: false });
-      }
-    }
-
-    return;
-  };
+  const maxPagination = 5;
+  const itemPerPage = 10;
+  const totalPage = Math.ceil(totalData / itemPerPage);
 
   return (
     <>
@@ -210,6 +170,26 @@ export default function IzinPengajuanView(props: Props) {
                   {item.department.nama_department}
                 </option>
               ))}
+            </select>
+
+            <select
+              className="form-select me-2"
+              value={filter.bulan}
+              onChange={(e) =>
+                setFilter({ ...filter, bulan: Number(e.target.value) })
+              }
+            >
+              {FilterBulan()}
+            </select>
+
+            <select
+              className="form-select me-2"
+              value={filter.tahun}
+              onChange={(e) =>
+                setFilter({ ...filter, tahun: Number(e.target.value) })
+              }
+            >
+              {FilterTahun()}
             </select>
           </div>
         </div>
@@ -255,8 +235,8 @@ export default function IzinPengajuanView(props: Props) {
                         Loading...
                       </td>
                     </tr>
-                  ) : pengajuanIzinData.length > 0 ? (
-                    pengajuanIzinData.map((item, index) => (
+                  ) : riwayatIzinData.length > 0 ? (
+                    riwayatIzinData.map((item, index) => (
                       <tr key={index}>
                         <td align="center">
                           <Button
@@ -294,34 +274,15 @@ export default function IzinPengajuanView(props: Props) {
                         <td align="center"></td>
                         <td>{item.keterangan?.toUpperCase()}</td>
                         <td align="center">
-                          {accessMenu.update &&
-                            (isLoadingAction[item.id] ? (
-                              <div className="d-grid gap-2">
-                                <span
-                                  className="spinner-border spinner-border-sm me-2"
-                                  role="status"
-                                  aria-hidden="true"
-                                ></span>
-                                LOADING ...
-                              </div>
-                            ) : (
-                              <div className="d-grid gap-2">
-                                <button
-                                  className="btn btn-success btn-sm"
-                                  type="button"
-                                  onClick={() => handleApproval(item.id, 1)}
-                                >
-                                  Accept
-                                </button>
-                                <button
-                                  className="btn btn-danger btn-sm"
-                                  type="button"
-                                  onClick={() => handleApproval(item.id, 2)}
-                                >
-                                  Reject
-                                </button>
-                              </div>
-                            ))}
+                          {item.status === 1 ? (
+                            <span className="badge bg-success">
+                              Approved By
+                            </span>
+                          ) : (
+                            <span className="badge bg-danger">Rejected By</span>
+                          )}
+                          <br />
+                          {item.user_approved.name?.toUpperCase()}
                         </td>
                       </tr>
                     ))
@@ -335,10 +296,10 @@ export default function IzinPengajuanView(props: Props) {
                 </tbody>
               </table>
               <Pagination
-                currentPage={1}
-                totalPage={1}
-                maxPagination={1}
-                setCurrentPage={() => {}}
+                currentPage={currentPage}
+                totalPage={totalPage}
+                maxPagination={maxPagination}
+                setCurrentPage={setCurrentPage}
               />
             </div>
           </div>

@@ -251,3 +251,26 @@ export type PengajuanIzinProps = {
     nama: string;
   };
 };
+
+export type RiwayatIzinProps = {
+  id: number;
+  uuid: string;
+  tanggal: Date;
+  tahun: number;
+  bulan: number;
+  keterangan: string;
+  jumlah_hari: string;
+  jumlah_jam: string;
+  jenis_izin: {
+    kode: string;
+    jenis: string;
+  };
+  pegawai: {
+    nama: string;
+  };
+  user_approved: {
+    name: string;
+  };
+  approve_date: Date;
+  status: number;
+};
