@@ -84,6 +84,7 @@ model sub_department {
 model jenis_izin {
   kode           String           @id @unique
   jenis          String
+  is_jam         Boolean          @default(false)
   akses_izin     akses_izin[]
   pengajuan_izin pengajuan_izin[]
   izin           izin[]
@@ -302,6 +303,8 @@ model request_session_izin {
   created_at DateTime? @db.DateTime(0)
   expired_at DateTime? @db.DateTime(0)
   expired    Boolean   @default(false)
+
+  @@index([uuid], map: "request_session_izin_uuid")
 }
 
 model tanggal_merah {

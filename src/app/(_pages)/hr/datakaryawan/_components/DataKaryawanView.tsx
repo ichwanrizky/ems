@@ -208,6 +208,7 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
             </span>
           </div>
         </div>
+
         <div className="col-auto flex-grow-1 overflow-auto">
           <div className="btn-group position-static">
             <select

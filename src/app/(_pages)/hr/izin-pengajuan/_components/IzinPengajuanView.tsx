@@ -178,6 +178,20 @@ export default function IzinPengajuanView(props: Props) {
     return;
   };
 
+  const handleAdd = async () => {
+    try {
+    } catch (error) {
+      setAlertPage({
+        status: true,
+        color: "danger",
+        message: "Error",
+        subMessage: "Something went wrong, please refresh and try again",
+      });
+    } finally {
+      setIsLoadingAction({ ...isLoadingAction, [0]: false });
+    }
+  };
+
   return (
     <>
       <div className="row g-3">
@@ -195,6 +209,7 @@ export default function IzinPengajuanView(props: Props) {
             </span>
           </div>
         </div>
+
         <div className="col-auto flex-grow-1 overflow-auto">
           <div className="btn-group position-static">
             <select

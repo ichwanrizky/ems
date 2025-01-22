@@ -13,6 +13,7 @@ import { DisplayFullDate } from "@/libs/DisplayDate";
 import Pagination from "@/components/Pagination";
 import { FilterBulan } from "@/libs/FilterBulan";
 import { FilterTahun } from "@/libs/FilterTahun";
+import IzinRiwayatCreate from "./IzinRiwayatCreate";
 
 type Props = {
   accessDepartment: AccessDepartmentProps;
@@ -41,6 +42,8 @@ export default function IzinRiwayatView(props: Props) {
     bulan: (new Date().getMonth() + 1) as number | string,
     tahun: new Date().getFullYear() as number | string,
   });
+
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   const [riwayatIzinData, setRiwayatIzinData] = useState(
     [] as RiwayatIzinProps[]
@@ -155,6 +158,7 @@ export default function IzinRiwayatView(props: Props) {
             </span>
           </div>
         </div>
+
         <div className="col-auto flex-grow-1 overflow-auto">
           <div className="btn-group position-static">
             <select
@@ -191,6 +195,17 @@ export default function IzinRiwayatView(props: Props) {
             >
               {FilterTahun()}
             </select>
+          </div>
+        </div>
+
+        <div className="col-auto">
+          <div className="d-flex align-items-center gap-2 justify-content-lg-end">
+            {accessMenu.insert && (
+              <Button
+                type="createTable"
+                onClick={() => setIsCreateOpen(true)}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -305,6 +320,17 @@ export default function IzinRiwayatView(props: Props) {
           </div>
         </div>
       </div>
+
+      {isCreateOpen && (
+        <IzinRiwayatCreate
+          isOpen={isCreateOpen}
+          onClose={() => {
+            setIsCreateOpen(false);
+            fetchData("", filter, 1);
+          }}
+          departmentData={accessDepartment}
+        />
+      )}
     </>
   );
 }
