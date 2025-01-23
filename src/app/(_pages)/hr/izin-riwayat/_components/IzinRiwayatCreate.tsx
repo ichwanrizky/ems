@@ -11,7 +11,6 @@ import Select from "react-select";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "@/styles/styles.module.css";
-import { set } from "react-datepicker/dist/date_utils";
 
 type Props = {
   isOpen: boolean;
@@ -193,7 +192,7 @@ export default function IzinRiwayatCreate(props: Props) {
   if (isLoadingPage) {
     return (
       <Modal
-        modalTitle="EDIT DATA"
+        modalTitle="ADD DATA"
         onClose={onClose}
         alert={alertModal}
         isLoadingModal={false}

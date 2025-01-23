@@ -274,3 +274,25 @@ export type RiwayatIzinProps = {
   approve_date: Date;
   status: number;
 };
+
+export interface PengajuanOvertimeProps {
+  id: number;
+  pengajuan_overtime_pegawai: {
+    pegawai: {
+      id: number;
+      nama: string;
+    };
+  }[];
+  sub_department: {
+    id: number;
+    nama_sub_department: string;
+    manager: number | null;
+    supervisor: number | null;
+  };
+  tanggal: Date;
+  jam_from: Date;
+  jam_to: Date;
+  job_desc: string;
+  remark: string;
+  approval: boolean;
+}
