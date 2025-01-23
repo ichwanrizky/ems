@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import React from "react";
 import OTPengajuanView from "./_components/OTPengajuanView";
 
-export default async function IzinRiwayatPage() {
+export default async function OTPengajuanPage() {
   const session: SeesionProps | null = await getServerSession(authOptions);
 
   if (!session) return null;

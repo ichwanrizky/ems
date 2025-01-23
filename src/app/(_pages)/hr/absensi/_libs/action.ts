@@ -6,11 +6,11 @@ import prisma from "@/libs/Prisma";
 import { AbsenProps } from "@/types";
 
 export const getAbsensi = async (
-  search?: string,
-  filter?: {
+  search: string,
+  filter: {
     department: string | number;
-    sub_department: string;
-    status_absen: string;
+    sub_department: string | number;
+    status_absen: string | number;
     date: Date;
   }
 ): Promise<{

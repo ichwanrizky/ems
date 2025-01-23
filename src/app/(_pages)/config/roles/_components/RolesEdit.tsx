@@ -10,7 +10,7 @@ type Props = {
   rolesEdit: RolesProps;
 };
 
-export default function RolesCreate(props: Props) {
+export default function RolesEdit(props: Props) {
   const { isOpen, onClose, rolesEdit } = props;
   const [alertModal, setAlertModal] = useState({
     status: false,

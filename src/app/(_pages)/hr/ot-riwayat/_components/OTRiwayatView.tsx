@@ -1,23 +1,19 @@
 "use client";
-
-import Alert from "@/components/Alert";
-import Button from "@/components/Button";
-import Pagination from "@/components/Pagination";
 import {
   AccessDepartmentProps,
   AccessProps,
   AccessSubDepartmentProps,
   isLoadingProps,
-  PengajuanOvertimeProps,
+  RiwayatOvertimeProps,
 } from "@/types";
 import React, { useEffect, useState } from "react";
-import OTPengajuanCreate from "./OTPengajuanCreate";
-import {
-  approvalPengajuanOt,
-  deletePengajuanOt,
-  getPengajuanOt,
-} from "../_libs/action";
+import { deleteRiwayatOt, getRiwayatOt } from "../_libs/action";
+import Alert from "@/components/Alert";
+import Button from "@/components/Button";
 import { DisplayFullDate, DisplayHour } from "@/libs/DisplayDate";
+import Pagination from "@/components/Pagination";
+import { FilterTahun } from "@/libs/FilterTahun";
+import { FilterBulan } from "@/libs/FilterBulan";
 
 type Props = {
   accessDepartment: AccessDepartmentProps;
@@ -25,8 +21,11 @@ type Props = {
   accessSubDepartment: AccessSubDepartmentProps;
 };
 
-export default function OTPengajuanView(props: Props) {
+export default function OTRiwayatView(props: Props) {
   const { accessDepartment, accessMenu, accessSubDepartment } = props;
+
+  const [currentPage, setCurrentPage] = useState(1 as number);
+  const [totalData, setTotalData] = useState(0 as number);
 
   const [loadingPage, setLoadingPage] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
@@ -41,12 +40,19 @@ export default function OTPengajuanView(props: Props) {
 
   const [filter, setFilter] = useState({
     department: accessDepartment[0].department.id?.toString() || "",
+    sub_department: "" as string | number,
+    tahun: new Date().getFullYear() as string | number,
+    bulan: (new Date().getMonth() + 1) as string | number,
   });
+  const [selectedSubDepartment, setSelectedSubDepartment] = useState(
+    accessSubDepartment.filter(
+      (item) =>
+        item.sub_department.department_id === accessDepartment[0].department.id
+    ) as AccessSubDepartmentProps
+  );
 
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-
-  const [pengajuanOTData, setPengajuanOTData] = useState(
-    [] as PengajuanOvertimeProps[]
+  const [riwayatOTData, setRiwayatOTData] = useState(
+    [] as RiwayatOvertimeProps[]
   );
 
   useEffect(() => {
@@ -80,13 +86,18 @@ export default function OTPengajuanView(props: Props) {
     search: string,
     filter: {
       department: string | number;
-    }
+      sub_department?: string | number;
+      tahun: string | number;
+      bulan: string | number;
+    },
+    currentPage?: number
   ) => {
     setLoadingPage(true);
     try {
-      const result = await getPengajuanOt(search, filter);
+      const result = await getRiwayatOt(search, filter, currentPage);
       if (result.status) {
-        setPengajuanOTData(result.data);
+        setRiwayatOTData(result.data);
+        setTotalData(result.total_data);
       } else {
         setAlertPage({
           status: true,
@@ -115,7 +126,7 @@ export default function OTPengajuanView(props: Props) {
     if (confirm("Delete this data?")) {
       setIsLoadingAction({ ...isLoadingAction, [id]: true });
       try {
-        const result = await deletePengajuanOt(id);
+        const result = await deleteRiwayatOt(id);
         if (result.status) {
           setAlertPage({
             status: true,
@@ -123,7 +134,7 @@ export default function OTPengajuanView(props: Props) {
             message: "Success",
             subMessage: result.message,
           });
-          fetchData("", filter);
+          fetchData("", filter, 1);
         } else {
           setAlertPage({
             status: true,
@@ -147,41 +158,9 @@ export default function OTPengajuanView(props: Props) {
     return;
   };
 
-  const handleApproval = async (id: number, status: number) => {
-    if (confirm("Update this data?")) {
-      setIsLoadingAction({ ...isLoadingAction, [id]: true });
-      try {
-        const result = await approvalPengajuanOt(id, status);
-        if (result.status) {
-          setAlertPage({
-            status: true,
-            color: "success",
-            message: "Success",
-            subMessage: result.message,
-          });
-          fetchData("", filter);
-        } else {
-          setAlertPage({
-            status: true,
-            color: "danger",
-            message: "Failed",
-            subMessage: result.message,
-          });
-        }
-      } catch (error) {
-        setAlertPage({
-          status: true,
-          color: "danger",
-          message: "Error",
-          subMessage: "Something went wrong, please refresh and try again",
-        });
-      } finally {
-        setIsLoadingAction({ ...isLoadingAction, [id]: false });
-      }
-    }
-
-    return;
-  };
+  const maxPagination = 5;
+  const itemPerPage = 10;
+  const totalPage = Math.ceil(totalData / itemPerPage);
 
   return (
     <>
@@ -207,6 +186,18 @@ export default function OTPengajuanView(props: Props) {
               className="form-select me-2"
               onChange={(e) => {
                 setFilter({ ...filter, department: e.target.value });
+                setSelectedSubDepartment([]);
+                if (e.target.value) {
+                  const subDepartments = accessSubDepartment.filter(
+                    (item) =>
+                      item.sub_department.department_id ===
+                      Number(e.target.value)
+                  );
+
+                  setSelectedSubDepartment(
+                    subDepartments as AccessSubDepartmentProps
+                  );
+                }
               }}
               value={filter.department}
             >
@@ -217,17 +208,41 @@ export default function OTPengajuanView(props: Props) {
                 </option>
               ))}
             </select>
-          </div>
-        </div>
 
-        <div className="col-auto">
-          <div className="d-flex align-items-center gap-2 justify-content-lg-end">
-            {accessMenu.insert && (
-              <Button
-                type="createTable"
-                onClick={() => setIsCreateOpen(true)}
-              />
-            )}
+            <select
+              className="form-select me-2"
+              onChange={(e) => {
+                setFilter({ ...filter, sub_department: e.target.value });
+              }}
+              value={filter.sub_department}
+            >
+              <option value="">-- SUB DEPT. --</option>
+              {selectedSubDepartment?.map((item, index: number) => (
+                <option value={item.sub_department.id} key={index}>
+                  {item.sub_department.nama_sub_department}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="form-select me-2"
+              onChange={(e) => {
+                setFilter({ ...filter, tahun: e.target.value });
+              }}
+              value={filter.tahun}
+            >
+              <FilterTahun />
+            </select>
+
+            <select
+              className="form-select me-2"
+              onChange={(e) => {
+                setFilter({ ...filter, bulan: e.target.value });
+              }}
+              value={filter.bulan}
+            >
+              <FilterBulan />
+            </select>
           </div>
         </div>
       </div>
@@ -271,8 +286,8 @@ export default function OTPengajuanView(props: Props) {
                         Loading...
                       </td>
                     </tr>
-                  ) : pengajuanOTData.length > 0 ? (
-                    pengajuanOTData.map((item, index) => (
+                  ) : riwayatOTData.length > 0 ? (
+                    riwayatOTData.map((item, index) => (
                       <tr key={index}>
                         <td align="center">
                           <Button
@@ -295,7 +310,7 @@ export default function OTPengajuanView(props: Props) {
                             <i className="bi bi-three-dots" />
                           </Button>
                         </td>
-                        <td align="center">{index + 1}</td>
+                        <td align="center">{item.number}</td>
                         <td align="center">
                           {item.sub_department.nama_sub_department?.toUpperCase()}
                         </td>
@@ -324,35 +339,15 @@ export default function OTPengajuanView(props: Props) {
                         <td align="left">{item.job_desc?.toUpperCase()}</td>
                         <td align="left">{item.remark?.toUpperCase()}</td>
                         <td align="center">
-                          {accessMenu.update &&
-                            item.approval &&
-                            (isLoadingAction[item.id] ? (
-                              <div className="d-grid gap-2">
-                                <span
-                                  className="spinner-border spinner-border-sm me-2"
-                                  role="status"
-                                  aria-hidden="true"
-                                ></span>
-                                LOADING ...
-                              </div>
-                            ) : (
-                              <div className="d-grid gap-2">
-                                <button
-                                  className="btn btn-success btn-sm"
-                                  type="button"
-                                  onClick={() => handleApproval(item.id, 1)}
-                                >
-                                  Accept
-                                </button>
-                                <button
-                                  className="btn btn-danger btn-sm"
-                                  type="button"
-                                  onClick={() => handleApproval(item.id, 2)}
-                                >
-                                  Reject
-                                </button>
-                              </div>
-                            ))}
+                          {item.status === 1 ? (
+                            <span className="badge bg-success">
+                              Approved By
+                            </span>
+                          ) : (
+                            <span className="badge bg-danger">Rejected By</span>
+                          )}
+                          <br />
+                          {item.user.name?.toUpperCase()}
                         </td>
                       </tr>
                     ))
@@ -366,27 +361,17 @@ export default function OTPengajuanView(props: Props) {
                 </tbody>
               </table>
               <Pagination
-                currentPage={1}
-                totalPage={1}
-                maxPagination={1}
-                setCurrentPage={() => {}}
+                currentPage={currentPage}
+                totalPage={totalPage}
+                maxPagination={maxPagination}
+                setCurrentPage={() => {
+                  setCurrentPage;
+                }}
               />
             </div>
           </div>
         </div>
       </div>
-
-      {isCreateOpen && (
-        <OTPengajuanCreate
-          isOpen={isCreateOpen}
-          onClose={() => {
-            setIsCreateOpen(false);
-            fetchData("", filter);
-          }}
-          departmentData={accessDepartment}
-          subDepartmentData={accessSubDepartment}
-        />
-      )}
     </>
   );
 }

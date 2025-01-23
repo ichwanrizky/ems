@@ -49,7 +49,7 @@ export default function AccessView() {
     fetchData(debouncedSearchTerm);
   }, [debouncedSearchTerm]);
 
-  const fetchData = async (search = "") => {
+  const fetchData = async (search: string) => {
     setLoadingPage(true);
     try {
       const result = await getAccess(search);
@@ -91,7 +91,7 @@ export default function AccessView() {
             message: "Success",
             subMessage: result.message,
           });
-          fetchData();
+          fetchData("");
         } else {
           setAlertPage({
             status: true,

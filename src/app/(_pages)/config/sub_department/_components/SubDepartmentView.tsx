@@ -70,9 +70,9 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
   }, [debouncedSearchTerm, filter]);
 
   const fetchData = async (
-    search = "",
-    filter = {
-      department: "" as string | number,
+    search: string,
+    filter: {
+      department: string | number;
     }
   ) => {
     setLoadingPage(true);
@@ -143,7 +143,7 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
             message: "Success",
             subMessage: result.message,
           });
-          fetchData();
+          fetchData("", filter);
         } else {
           setAlertPage({
             status: true,
@@ -303,7 +303,7 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
           isOpen={isCreateOpen}
           onClose={() => {
             setIsCreateOpen(false);
-            fetchData();
+            fetchData("", filter);
           }}
           departmentData={departmentData}
         />
@@ -314,7 +314,7 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
           isOpen={isEditOpen}
           onClose={() => {
             setIsEditOpen(false);
-            fetchData();
+            fetchData("", filter);
           }}
           departmentData={departmentData}
           subDepartmentEdit={subDepartmentEdit}

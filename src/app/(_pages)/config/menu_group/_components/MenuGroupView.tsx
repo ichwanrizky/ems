@@ -52,7 +52,7 @@ export default function MenuGroupView() {
     fetchData(debouncedSearchTerm);
   }, [debouncedSearchTerm]);
 
-  const fetchData = async (search = "") => {
+  const fetchData = async (search: string) => {
     setLoadingPage(true);
     try {
       const result = await getMenuGroup(search);
@@ -121,7 +121,7 @@ export default function MenuGroupView() {
             message: "Success",
             subMessage: result.message,
           });
-          fetchData();
+          fetchData("");
         } else {
           setAlertPage({
             status: true,
@@ -262,7 +262,7 @@ export default function MenuGroupView() {
           isOpen={isCreateOpen}
           onClose={() => {
             setIsCreateOpen(false);
-            fetchData();
+            fetchData("");
           }}
         />
       )}
@@ -272,7 +272,7 @@ export default function MenuGroupView() {
           isOpen={isEditOpen}
           onClose={() => {
             setIsEditOpen(false);
-            fetchData();
+            fetchData("");
           }}
           menuGroupEdit={menuGroupEdit}
         />

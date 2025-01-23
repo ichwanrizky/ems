@@ -10,7 +10,7 @@ import { getServerSession } from "next-auth";
 export const getRiwayatIzin = async (
   search?: string,
   filter?: {
-    department: string;
+    department: string | number;
     bulan: number | string;
     tahun: number | string;
   },

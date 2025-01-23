@@ -57,7 +57,7 @@ export default function DepartmentView() {
     fetchData(debouncedSearchTerm);
   }, [debouncedSearchTerm]);
 
-  const fetchData = async (search = "") => {
+  const fetchData = async (search: string) => {
     setLoadingPage(true);
     try {
       const result = await getDepartment(search);
@@ -126,7 +126,7 @@ export default function DepartmentView() {
             message: "Success",
             subMessage: result.message,
           });
-          fetchData();
+          fetchData("");
         } else {
           setAlertPage({
             status: true,
@@ -261,7 +261,7 @@ export default function DepartmentView() {
           isOpen={isCreateOpen}
           onClose={() => {
             setIsCreateOpen(false);
-            fetchData();
+            fetchData("");
           }}
         />
       )}
@@ -271,7 +271,7 @@ export default function DepartmentView() {
           isOpen={isEditOpen}
           onClose={() => {
             setIsEditOpen(false);
-            fetchData();
+            fetchData("");
           }}
           departmentEdit={departmentEdit}
         />

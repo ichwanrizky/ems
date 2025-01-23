@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import React from "react";
 import AbsensiView from "./_components/AbsensiView";
 // import DataKaryawanView from "./_components/DataKaryawanView";
-export default async function ShiftMasterPage() {
+export default async function AbsensiPage() {
   const session: SeesionProps | null = await getServerSession(authOptions);
 
   if (!session) return null;

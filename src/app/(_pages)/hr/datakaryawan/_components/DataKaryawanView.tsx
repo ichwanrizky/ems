@@ -77,21 +77,21 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
   }, [searchTerm]);
 
   useEffect(() => {
-    fetchData(debouncedSearchTerm, currentPage, filter);
-  }, [debouncedSearchTerm, currentPage, filter]);
+    fetchData(debouncedSearchTerm, filter, currentPage);
+  }, [debouncedSearchTerm, filter, currentPage]);
 
   const fetchData = async (
-    search = "",
-    currentPage = 1,
-    filter = {
-      department: "",
-      sub_department: "",
-      active: true,
-    }
+    search: string,
+    filter: {
+      department: string | number;
+      sub_department?: string | number;
+      active: boolean;
+    },
+    currentPage: number
   ) => {
     setLoadingPage(true);
     try {
-      const result = await getPegawai(search, currentPage, filter);
+      const result = await getPegawai(search, filter, currentPage);
       if (result.status) {
         setPegawaiData(result.data as PegawaiProps[]);
         setTotalData(result.total_data);
@@ -131,7 +131,7 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
             message: "Success",
             subMessage: result.message,
           });
-          fetchData();
+          fetchData("", filter, 1);
         } else {
           setAlertPage({
             status: true,
@@ -166,7 +166,7 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
           message: "Success",
           subMessage: result.message,
         });
-        fetchData();
+        fetchData("", filter, 1);
       } else {
         setAlertPage({
           status: true,

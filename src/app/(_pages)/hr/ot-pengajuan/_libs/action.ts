@@ -109,7 +109,7 @@ export const createOt = async (data: {
 export const getPengajuanOt = async (
   search?: string,
   filter?: {
-    department: string;
+    department: string | number;
   }
 ): Promise<{
   status: boolean;

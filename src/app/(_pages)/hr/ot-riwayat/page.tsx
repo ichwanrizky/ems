@@ -2,14 +2,14 @@ import { authOptions } from "@/libs/AuthOptions";
 import { AccessProps, SeesionProps } from "@/types";
 import { getServerSession } from "next-auth";
 import React from "react";
-import DataKaryawanView from "./_components/DataKaryawanView";
+import OTRiwayatView from "./_components/OTRiwayatView";
 
-export default async function DataKaryawanPage() {
+export default async function OTRiwayatPage() {
   const session: SeesionProps | null = await getServerSession(authOptions);
 
   if (!session) return null;
 
-  const targetPath = "hr/datakaryawan";
+  const targetPath = "hr/ot-pengajuan";
 
   const allMenus =
     session.user.menu?.map((group) => group.menu || []).flat() || [];
@@ -26,14 +26,14 @@ export default async function DataKaryawanPage() {
   return (
     <div className="main-content" style={{ height: "90vh", overflowY: "auto" }}>
       <div className="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-        <div className="breadcrumb-title pe-3">Data Karyawan</div>
+        <div className="breadcrumb-title pe-3">Data Riwayat OT</div>
       </div>
 
       {foundMenu ? (
-        <DataKaryawanView
+        <OTRiwayatView
           accessDepartment={session.user.access_department || []}
-          accessSubDepartment={session.user.access_sub_department || []}
           accessMenu={foundMenu.access[0] || {}}
+          accessSubDepartment={session.user.access_sub_department || []}
         />
       ) : (
         <div className="d-flex justify-content-center align-items-center text-danger">

@@ -200,7 +200,7 @@ export default function TanggalMerahEdit(props: Props) {
 
   return (
     <Modal
-      modalTitle="ADD DATA"
+      modalTitle="EDIT DATA"
       onClose={onClose}
       alert={alertModal}
       isLoadingModal={false}

@@ -74,7 +74,7 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
     fetchData(debouncedSearchTerm, filter.department);
   }, [debouncedSearchTerm, filter]);
 
-  const fetchData = async (search = "", department = "") => {
+  const fetchData = async (search: string, department: string | number) => {
     setLoadingPage(true);
     try {
       const result = await getShiftMaster(search, department);
@@ -143,7 +143,7 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
             message: "Success",
             subMessage: result.message,
           });
-          fetchData();
+          fetchData("", filter.department);
         } else {
           setAlertPage({
             status: true,
@@ -306,7 +306,7 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
           isOpen={isCreateOpen}
           onClose={() => {
             setIsCreateOpen(false);
-            fetchData();
+            fetchData("", filter.department);
           }}
           departmentData={accessDepartment}
         />
@@ -317,7 +317,7 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
           isOpen={isEditOpen}
           onClose={() => {
             setIsEditOpen(false);
-            fetchData();
+            fetchData("", filter.department);
           }}
           departmentData={accessDepartment}
           shiftMasterEdit={shiftMasterEdit}

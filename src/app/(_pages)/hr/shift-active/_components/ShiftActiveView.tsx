@@ -57,7 +57,7 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
     fetchData(filter.department);
   }, [filter]);
 
-  const fetchData = async (department = "") => {
+  const fetchData = async (department: string | number) => {
     setLoadingPage(true);
     try {
       const result = await getShiftMaster("", department);

@@ -78,12 +78,12 @@ export default function AbsensiView(props: AbsensiViewProps) {
   }, [debouncedSearchTerm, filter]);
 
   const fetchData = async (
-    search = "",
-    filter = {
-      department: "" as string | number,
-      sub_department: "",
-      status_absen: "",
-      date: new Date(),
+    search: string,
+    filter: {
+      department: string | number;
+      sub_department: string | number;
+      status_absen: string | number;
+      date: Date;
     }
   ) => {
     setLoadingPage(true);

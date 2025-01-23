@@ -63,13 +63,13 @@ export default function IzinRiwayatView(props: Props) {
   }, [debouncedSearchTerm, filter, currentPage]);
 
   const fetchData = async (
-    search = "",
-    filter = {
-      department: "",
-      bulan: "" as number | string,
-      tahun: "" as number | string,
+    search: string,
+    filter: {
+      department: string | number;
+      bulan: number | string;
+      tahun: number | string;
     },
-    currentPage = 1
+    currentPage: number
   ) => {
     setLoadingPage(true);
     try {
@@ -274,7 +274,7 @@ export default function IzinRiwayatView(props: Props) {
                             <i className="bi bi-three-dots" />
                           </Button>
                         </td>
-                        <td align="center">{index + 1}</td>
+                        <td align="center">{item.number}</td>
                         <td>{item.pegawai.nama?.toUpperCase()}</td>
                         <td align="center">
                           {item.jenis_izin.jenis?.toUpperCase()}

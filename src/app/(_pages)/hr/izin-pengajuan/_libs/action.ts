@@ -10,7 +10,7 @@ import { getServerSession } from "next-auth";
 export const getPengajuanIzin = async (
   search?: string,
   filter?: {
-    department: string;
+    department: string | number;
   }
 ): Promise<{
   status: boolean;

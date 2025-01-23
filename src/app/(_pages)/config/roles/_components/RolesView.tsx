@@ -52,7 +52,7 @@ export default function RolesView() {
     fetchData(debouncedSearchTerm);
   }, [debouncedSearchTerm]);
 
-  const fetchData = async (search = "") => {
+  const fetchData = async (search: string) => {
     setLoadingPage(true);
     try {
       const result = await getRoles(search);
@@ -121,7 +121,7 @@ export default function RolesView() {
             message: "Success",
             subMessage: result.message,
           });
-          fetchData();
+          fetchData("");
         } else {
           setAlertPage({
             status: true,
@@ -248,7 +248,7 @@ export default function RolesView() {
           isOpen={isCreateOpen}
           onClose={() => {
             setIsCreateOpen(false);
-            fetchData();
+            fetchData("");
           }}
         />
       )}
@@ -258,7 +258,7 @@ export default function RolesView() {
           isOpen={isEditOpen}
           onClose={() => {
             setIsEditOpen(false);
-            fetchData();
+            fetchData("");
           }}
           rolesEdit={rolesEdit}
         />

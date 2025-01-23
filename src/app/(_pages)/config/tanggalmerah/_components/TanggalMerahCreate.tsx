@@ -157,7 +157,7 @@ export default function TanggalMerahCreate(props: Props) {
   if (isLoadingPage) {
     return (
       <Modal
-        modalTitle="EDIT DATA"
+        modalTitle="ADD DATA"
         onClose={onClose}
         alert={alertModal}
         isLoadingModal={false}

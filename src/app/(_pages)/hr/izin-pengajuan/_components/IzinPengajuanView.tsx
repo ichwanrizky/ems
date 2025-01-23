@@ -72,9 +72,9 @@ export default function IzinPengajuanView(props: Props) {
   }, [debouncedSearchTerm, filter]);
 
   const fetchData = async (
-    search = "",
-    filter = {
-      department: "",
+    search: string,
+    filter: {
+      department: string | number;
     }
   ) => {
     setLoadingPage(true);

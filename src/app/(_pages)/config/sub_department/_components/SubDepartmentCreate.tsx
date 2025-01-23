@@ -122,7 +122,7 @@ export default function SubDepartmentCreate(props: Props) {
   if (isLoadingPage) {
     return (
       <Modal
-        modalTitle="EDIT DATA"
+        modalTitle="ADD DATA"
         onClose={onClose}
         alert={alertModal}
         isLoadingModal={false}

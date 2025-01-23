@@ -86,10 +86,7 @@ export default function MenuView() {
       setLoadingPage(false);
     }
   };
-  const fetchData = async (
-    search = "",
-    filter: { menu_group?: string } = {}
-  ) => {
+  const fetchData = async (search: string, filter: { menu_group?: string }) => {
     setLoadingPage(true);
     try {
       const result = await getMenu(search, filter);

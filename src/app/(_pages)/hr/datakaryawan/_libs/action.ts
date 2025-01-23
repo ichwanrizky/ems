@@ -9,12 +9,12 @@ const bcrypt = require("bcrypt");
 
 export const getPegawai = async (
   search?: string,
-  currentPage?: number,
-  filter: {
-    department?: string;
-    sub_department?: string;
+  filter?: {
+    department: string | number;
+    sub_department?: string | number;
     active: boolean;
-  } = { active: true }
+  },
+  currentPage?: number
 ): Promise<{
   status: boolean;
   message: string;
@@ -25,12 +25,12 @@ export const getPegawai = async (
     const condition = {
       where: {
         is_deleted: false,
-        is_active: filter.active,
-        ...(filter.department && {
-          department_id: Number(filter.department),
+        is_active: filter?.active,
+        ...(filter?.department && {
+          department_id: Number(filter?.department),
         }),
-        ...(filter.sub_department && {
-          sub_department_id: Number(filter.sub_department),
+        ...(filter?.sub_department && {
+          sub_department_id: Number(filter?.sub_department),
         }),
         ...(search && {
           OR: [
