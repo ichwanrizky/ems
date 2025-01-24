@@ -80,8 +80,8 @@ export const createOt = async (data: {
         sub_department_id: Number(data.sub_department_id),
         job_desc: data.job_desc?.toUpperCase(),
         remark: data.remarks?.toUpperCase(),
-        bulan: new Date(data.tgl_ot as Date).getMonth() + 1,
-        tahun: new Date(data.tgl_ot as Date).getFullYear(),
+        bulan: ConvertDateZeroHours(data.tgl_ot as Date).getMonth() + 1,
+        tahun: ConvertDateZeroHours(data.tgl_ot as Date).getFullYear(),
         pengajuan_overtime_pegawai: {
           create: data.list_pegawai.map((item) => ({
             pegawai_id: item.value,

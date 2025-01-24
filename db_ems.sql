@@ -11,7 +11,7 @@
  Target Server Version : 100424 (10.4.24-MariaDB)
  File Encoding         : 65001
 
- Date: 22/01/2025 22:40:44
+ Date: 24/01/2025 16:50:39
 */
 
 SET NAMES utf8mb4;
@@ -116,7 +116,7 @@ INSERT INTO `absen` VALUES (39, '2025-01-02', '07:36:51', '17:04:18', 0, 0, 1, 2
 INSERT INTO `absen` VALUES (40, '2025-01-02', '07:37:42', '20:00:11', 0, 0, 1, 2025, '1.0410537', '104.0033309', NULL, NULL, 0, 466, 3);
 INSERT INTO `absen` VALUES (41, '2025-01-02', '07:38:05', '20:01:36', 0, 0, 1, 2025, '1.0409364', '104.0033702', NULL, NULL, 0, 301, 3);
 INSERT INTO `absen` VALUES (42, '2025-01-02', '07:38:19', '20:02:28', 0, 0, 1, 2025, '1.0411644', '104.0033794', NULL, NULL, 0, 358, 3);
-INSERT INTO `absen` VALUES (43, '2025-01-02', '07:39:15', NULL, 0, 0, 1, 2025, '1.0413412595554197', '104.00316691405511', NULL, NULL, 0, 84, 3);
+INSERT INTO `absen` VALUES (43, '2025-01-02', '07:39:15', NULL, 10, 0, 1, 2025, '1.0413412595554197', '104.00316691405511', NULL, NULL, 0, 84, 3);
 INSERT INTO `absen` VALUES (44, '2025-01-02', '07:39:47', '20:02:48', 0, 0, 1, 2025, '1.0409381', '104.0033546', NULL, NULL, 0, 503, 3);
 INSERT INTO `absen` VALUES (45, '2025-01-02', '07:39:48', '20:01:19', 0, 0, 1, 2025, '1.0408935', '104.0033762', NULL, NULL, 0, 259, 3);
 INSERT INTO `absen` VALUES (46, '2025-01-02', '07:40:40', '20:03:16', 0, 0, 1, 2025, '1.0411561', '104.0034094', NULL, NULL, 0, 401, 3);
@@ -526,7 +526,7 @@ INSERT INTO `absen` VALUES (449, '2025-01-09', '07:43:08', NULL, 0, 0, 1, 2025, 
 INSERT INTO `absen` VALUES (450, '2025-01-09', '07:43:35', NULL, 0, 0, 1, 2025, '1.0411502', '104.0034142', NULL, NULL, 0, 358, 3);
 INSERT INTO `absen` VALUES (451, '2025-01-09', '07:44:15', NULL, 0, 0, 1, 2025, '1.0411', '104.0029441', NULL, NULL, 0, 405, 3);
 INSERT INTO `absen` VALUES (452, '2025-01-09', '07:45:17', NULL, 0, 0, 1, 2025, '1.0413929', '104.0034108', NULL, NULL, 0, 73, 3);
-INSERT INTO `absen` VALUES (453, '2025-01-09', '07:45:23', NULL, 0, 0, 1, 2025, '1.041379105621097', '104.00317991618428', NULL, NULL, 0, 84, 3);
+INSERT INTO `absen` VALUES (453, '2025-01-24', '07:45:23', NULL, 30, 0, 1, 2025, '1.041379105621097', '104.00317991618428', NULL, NULL, 0, 84, 3);
 INSERT INTO `absen` VALUES (454, '2025-01-09', '07:45:27', NULL, 0, 0, 1, 2025, '1.0409821', '104.0033085', NULL, NULL, 0, 135, 3);
 INSERT INTO `absen` VALUES (455, '2025-01-09', '07:45:38', NULL, 0, 0, 1, 2025, '1.0411644', '104.0033731', NULL, NULL, 0, 356, 3);
 INSERT INTO `absen` VALUES (456, '2025-01-09', '07:46:13', NULL, 0, 0, 1, 2025, '1.0411983', '104.0034133', NULL, NULL, 0, 521, 3);
@@ -580,6 +580,9 @@ INSERT INTO `access` VALUES (1, 11, 1, 1, 1, 1);
 INSERT INTO `access` VALUES (1, 14, 1, 1, 1, 1);
 INSERT INTO `access` VALUES (1, 15, 1, 1, 1, 1);
 INSERT INTO `access` VALUES (1, 16, 1, 1, 1, 1);
+INSERT INTO `access` VALUES (1, 17, 1, 1, 1, 1);
+INSERT INTO `access` VALUES (1, 18, 1, 1, 1, 1);
+INSERT INTO `access` VALUES (1, 19, 1, 1, 1, 1);
 
 -- ----------------------------
 -- Table structure for access_department
@@ -635,7 +638,7 @@ CREATE TABLE `akses_izin`  (
   INDEX `akses_izin_jenis_izin_kode_fkey`(`jenis_izin_kode` ASC) USING BTREE,
   CONSTRAINT `akses_izin_jenis_izin_kode_fkey` FOREIGN KEY (`jenis_izin_kode`) REFERENCES `jenis_izin` (`kode`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `akses_izin_sub_department_id_fkey` FOREIGN KEY (`sub_department_id`) REFERENCES `sub_department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 21 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 34 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of akses_izin
@@ -643,19 +646,19 @@ CREATE TABLE `akses_izin`  (
 INSERT INTO `akses_izin` VALUES (5, 9, 'C');
 INSERT INTO `akses_izin` VALUES (6, 9, 'CS');
 INSERT INTO `akses_izin` VALUES (7, 9, 'G1');
-INSERT INTO `akses_izin` VALUES (8, 2, 'C');
-INSERT INTO `akses_izin` VALUES (9, 2, 'CS');
-INSERT INTO `akses_izin` VALUES (10, 2, 'G2');
-INSERT INTO `akses_izin` VALUES (11, 2, 'G1');
-INSERT INTO `akses_izin` VALUES (12, 2, 'G3');
-INSERT INTO `akses_izin` VALUES (13, 2, 'I');
-INSERT INTO `akses_izin` VALUES (14, 2, 'IS');
-INSERT INTO `akses_izin` VALUES (15, 2, 'P/M');
-INSERT INTO `akses_izin` VALUES (16, 2, 'LA1');
-INSERT INTO `akses_izin` VALUES (17, 2, 'LA2');
-INSERT INTO `akses_izin` VALUES (18, 2, 'S');
-INSERT INTO `akses_izin` VALUES (19, 2, 'TA1');
-INSERT INTO `akses_izin` VALUES (20, 2, 'TA2');
+INSERT INTO `akses_izin` VALUES (21, 2, 'C');
+INSERT INTO `akses_izin` VALUES (22, 2, 'CS');
+INSERT INTO `akses_izin` VALUES (23, 2, 'G2');
+INSERT INTO `akses_izin` VALUES (24, 2, 'G1');
+INSERT INTO `akses_izin` VALUES (25, 2, 'G3');
+INSERT INTO `akses_izin` VALUES (26, 2, 'I');
+INSERT INTO `akses_izin` VALUES (27, 2, 'IS');
+INSERT INTO `akses_izin` VALUES (28, 2, 'P/M');
+INSERT INTO `akses_izin` VALUES (29, 2, 'LA1');
+INSERT INTO `akses_izin` VALUES (30, 2, 'LA2');
+INSERT INTO `akses_izin` VALUES (31, 2, 'S');
+INSERT INTO `akses_izin` VALUES (32, 2, 'TA1');
+INSERT INTO `akses_izin` VALUES (33, 2, 'TA2');
 
 -- ----------------------------
 -- Table structure for department
@@ -695,24 +698,21 @@ CREATE TABLE `izin`  (
   `department_id` int NOT NULL,
   `jenis_izin_kode` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`) USING BTREE,
-  UNIQUE INDEX `izin_pegawai_id_tanggal_key`(`pegawai_id` ASC, `tanggal` ASC) USING BTREE,
   INDEX `izin_pengajuan_izin_id_fkey`(`pengajuan_izin_id` ASC) USING BTREE,
   INDEX `izin_department_id_fkey`(`department_id` ASC) USING BTREE,
   INDEX `izin_jenis_izin_kode_fkey`(`jenis_izin_kode` ASC) USING BTREE,
+  UNIQUE INDEX `izin_pegawai_id_tanggal_jenis_izin_kode_key`(`pegawai_id` ASC, `tanggal` ASC, `jenis_izin_kode` ASC) USING BTREE,
   CONSTRAINT `izin_department_id_fkey` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `izin_jenis_izin_kode_fkey` FOREIGN KEY (`jenis_izin_kode`) REFERENCES `jenis_izin` (`kode`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `izin_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `izin_pengajuan_izin_id_fkey` FOREIGN KEY (`pengajuan_izin_id`) REFERENCES `pengajuan_izin` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 34 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 42 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of izin
 -- ----------------------------
-INSERT INTO `izin` VALUES (29, '2025-01-21', 84, 1, 2025, 'contoh', '5', NULL, 3, 1, 'C');
-INSERT INTO `izin` VALUES (30, '2025-01-22', 84, 1, 2025, 'contoh', '5', NULL, 3, 1, 'C');
-INSERT INTO `izin` VALUES (31, '2025-01-23', 84, 1, 2025, 'contoh', '5', NULL, 3, 1, 'C');
-INSERT INTO `izin` VALUES (32, '2025-01-24', 84, 1, 2025, 'contoh', '5', NULL, 3, 1, 'C');
-INSERT INTO `izin` VALUES (33, '2025-01-28', 84, 1, 2025, 'contoh', '5', NULL, 3, 1, 'C');
+INSERT INTO `izin` VALUES (40, '2025-01-24', 84, 1, 2025, 'malas bgts', '1', NULL, 10, 1, 'CS');
+INSERT INTO `izin` VALUES (41, '2025-01-24', 84, 1, 2025, 'macet bgts', NULL, '1', 11, 1, 'G2');
 
 -- ----------------------------
 -- Table structure for jenis_izin
@@ -758,7 +758,7 @@ CREATE TABLE `menu`  (
   INDEX `menu_urut_menu_group_id_idx`(`urut` ASC, `menu_group_id` ASC) USING BTREE,
   INDEX `menu_menu_group_id_fkey`(`menu_group_id` ASC) USING BTREE,
   CONSTRAINT `menu_menu_group_id_fkey` FOREIGN KEY (`menu_group_id`) REFERENCES `menu_group` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 17 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 20 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu
@@ -777,6 +777,9 @@ INSERT INTO `menu` VALUES (11, 'ABSENSI PER PEGAWAI', 'hr/absensiperpegawai', 'a
 INSERT INTO `menu` VALUES (14, 'IZIN - PENGAJUAN', 'hr/izin-pengajuan', 'izin-pengajuan', 6, 2);
 INSERT INTO `menu` VALUES (15, 'IZIN - RIWAYAT', 'hr/izin-riwayat', 'izin-riwayat', 7, 2);
 INSERT INTO `menu` VALUES (16, 'TANGGAL MERAH', 'config/tanggalmerah', 'tanggalmerah', 7, 1);
+INSERT INTO `menu` VALUES (17, 'OT-  PENGAJUAN', 'hr/ot-pengajuan', 'ot-pengajuan', 8, 2);
+INSERT INTO `menu` VALUES (18, 'OT - RIWAYAT', 'hr/ot-riwayat', 'ot-riwayat', 9, 2);
+INSERT INTO `menu` VALUES (19, 'OT- PER PEGAWAI', 'hr/ot-perpegawai', 'ot-perpegawai', 10, 2);
 
 -- ----------------------------
 -- Table structure for menu_group
@@ -798,6 +801,36 @@ CREATE TABLE `menu_group`  (
 -- ----------------------------
 INSERT INTO `menu_group` VALUES (1, 'CONFIG', 99, 1, 'config');
 INSERT INTO `menu_group` VALUES (2, 'HR', 1, 1, 'hr');
+
+-- ----------------------------
+-- Table structure for overtime
+-- ----------------------------
+DROP TABLE IF EXISTS `overtime`;
+CREATE TABLE `overtime`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `tanggal` date NOT NULL,
+  `pegawai_id` int NOT NULL,
+  `department_id` int NOT NULL,
+  `jam` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `total` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `is_holiday` tinyint(1) NOT NULL DEFAULT 0,
+  `status` int NOT NULL DEFAULT 0,
+  `bulan` int NOT NULL,
+  `tahun` int NOT NULL,
+  `pengajuan_overtime_id` int NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `overtime_pegawai_id_fkey`(`pegawai_id` ASC) USING BTREE,
+  INDEX `overtime_department_id_fkey`(`department_id` ASC) USING BTREE,
+  INDEX `overtime_pengajuan_overtime_id_fkey`(`pengajuan_overtime_id` ASC) USING BTREE,
+  CONSTRAINT `overtime_department_id_fkey` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `overtime_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `overtime_pengajuan_overtime_id_fkey` FOREIGN KEY (`pengajuan_overtime_id`) REFERENCES `pengajuan_overtime` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of overtime
+-- ----------------------------
+INSERT INTO `overtime` VALUES (3, '2025-01-24', 84, 1, '2', '3.5', 0, 1, 1, 2025, 7);
 
 -- ----------------------------
 -- Table structure for pegawai
@@ -857,7 +890,7 @@ INSERT INTO `pegawai` VALUES (76, 'NORA SUSAN', 'NORA SUSANTI', '130413441193000
 INSERT INTO `pegawai` VALUES (77, 'PJ - 0627', 'NELPITA SARI', '1402035810970001', 'BONGKAL MALANG', '1996-10-18', 'P', 'Islam', 'INDONESIA', 'TAMAN HANG TUAH BLOK D2 NO. 7', NULL, NULL, NULL, 'BATAM KOTA', 'BATAM', '082382520292', 'K0', 'sari_nelpita@yahoo.com', 'STAFF', '83.020.208.1-213.000', 'Mandiri', '109-00-1676016-7', '18001203209', '0001500007937', 1, 0, 1, NULL, 3, 'nonfixed', 1);
 INSERT INTO `pegawai` VALUES (78, 'PJ - 0739', 'RIKO HENDRA ', '2171101709810003', 'BUKIT TINGGI', '1981-09-17', 'L', 'Islam', 'INDONESIA', 'CENDANA THP VII BLOK F 8 NO. 8', '008', NULL, NULL, 'BATAM KOTA', 'BATAM', '81261443900', 'K3', 'rikohendra152@gmail.com', 'SPV', '08.188.822.4-215.000 ', 'Mandiri', '109-00-0492600-2', '20059963288', '0001495264678', 1, 0, 1, NULL, 3, 'nonfixed', 1);
 INSERT INTO `pegawai` VALUES (79, 'PJ - 0797', 'RIA NOFITA SARI', '2171114802970001', 'BELAKANG PADANG', '1997-02-08', 'P', 'ISLAM', 'INDONESIA', 'PERUM GRIYA PERMAI BLOK B NO 2', '01', NULL, NULL, 'SAGULUNG', 'BATAM', '085668034796', 'TK', 'riafita4@gmail.com', 'STAFF', '96.915.261.0-225.000', 'Mandiri', '109-00-1796448-7', '2006688561', '0001324096593', 0, 0, 1, NULL, NULL, 'nonfixed', 1);
-INSERT INTO `pegawai` VALUES (80, 'PJ - 0813', 'VIOLA RAHMADHIAN', '1305025702940001', 'PARIAMAN', '1994-02-17', 'P', 'ISLAM', 'INDONESIA', 'PERUM CIPTA ASRI BLOK 5 NO. 35', NULL, NULL, NULL, NULL, NULL, '081276425531', 'TK', 'violarahmadhian@gmail.com', 'STAFF', '82.067.570.0-201.000', 'Mandiri', '109-00-1683745-2', '18009135726', '0002300174932', 1, 0, 1, NULL, 3, 'nonfixed', 1);
+INSERT INTO `pegawai` VALUES (80, 'PJ - 0813', 'VIOLA RAHMADHIAN', '1305025702940001', 'PARIAMAN', '1994-02-17', 'P', 'ISLAM', 'INDONESIA', 'PERUM CIPTA ASRI BLOK 5 NO. 35', NULL, NULL, NULL, NULL, NULL, '081276425531', 'TK', 'violarahmadhian@gmail.com', 'STAFF', '82.067.570.0-201.000', 'Mandiri', '109-00-1683745-2', '18009135726', '0002300174932', 1, 0, 1, 2, 3, 'nonfixed', 1);
 INSERT INTO `pegawai` VALUES (81, 'PJ - 0826', 'ROMY ARDIAN', '2171101007800002', 'TANJUNG PINANG', '1980-07-10', 'L', 'ISLAM', 'INDONESIA', 'PERUMAHAN OMA BLOK A-2 NO. 09', NULL, NULL, NULL, NULL, NULL, '081364101707', 'K3', 'romy.ardian@panji-jaya.co.id', 'OPERATIONAL MANAGER', '07.972.125.4-215.000', 'Mandiri', '109-00-1146825-3', '07D20230000', '0001500037896', 1, 0, 1, NULL, 3, 'fix', 0);
 INSERT INTO `pegawai` VALUES (82, 'PJ - 0838', 'ZULBAHRIZAL', '2171031502729021', 'LASI TUO', '1972-02-15', 'L', 'Islam', 'INDONESIA', 'TIBAN LAMA NO. 67 RT/RW. 004/006', '004', NULL, NULL, 'SEKUPANG', 'BATAM', '081364248155', 'K3', 'ZULBAHRIZALL@GMAIL.COM', 'DRIVER', NULL, 'Mandiri', '109-00-1909508-2', '21050659974', '0001293004462', 1, 0, 1, NULL, 3, 'nonfixed', 1);
 INSERT INTO `pegawai` VALUES (83, 'PJ - 0872', 'AHMAD FIKRI', '2171102110000003', 'BATAM', '2000-10-21', 'L', 'ISLAM', 'INDONESIA', 'PERUMAHAN TAMAN RAYA TAHAP 3 BLOK HD NO. 31', NULL, NULL, NULL, NULL, 'BATAM', '082284571710', 'TK', 'af.690815@gmail.com', 'IT STAFF', NULL, 'Mandiri', '109-00-1774034-1', '21050659990', '0002075984379', 0, 0, 1, NULL, NULL, 'nonfixed', 1);
@@ -1037,12 +1070,65 @@ CREATE TABLE `pengajuan_izin`  (
   CONSTRAINT `pengajuan_izin_department_id_fkey` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `pengajuan_izin_jenis_izin_kode_fkey` FOREIGN KEY (`jenis_izin_kode`) REFERENCES `jenis_izin` (`kode`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `pengajuan_izin_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of pengajuan_izin
 -- ----------------------------
-INSERT INTO `pengajuan_izin` VALUES (3, '6e4baa74-4dbc-46f9-993a-22a0c62a2e12', 'C', '2025-01-21', 84, 1, 1, 2025, 'contoh', '5', NULL, 8, 1, '2025-01-22 22:39:36');
+INSERT INTO `pengajuan_izin` VALUES (10, '039e7c27-25ec-4092-a9f8-e30aeea097ad', 'CS', '2025-01-24', 84, 1, 1, 2025, 'malas bgts', '1', NULL, 8, 1, '2025-01-24 09:44:47');
+INSERT INTO `pengajuan_izin` VALUES (11, '6ec138a8-e307-4abd-9100-1d2eaea3a932', 'G2', '2025-01-24', 84, 1, 1, 2025, 'macet bgts', NULL, '1', 8, 1, '2025-01-24 09:45:51');
+
+-- ----------------------------
+-- Table structure for pengajuan_overtime
+-- ----------------------------
+DROP TABLE IF EXISTS `pengajuan_overtime`;
+CREATE TABLE `pengajuan_overtime`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `tanggal` date NOT NULL,
+  `jam_from` time NOT NULL,
+  `jam_to` time NOT NULL,
+  `department_id` int NOT NULL,
+  `sub_department_id` int NOT NULL,
+  `job_desc` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `remark` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `status` int NOT NULL DEFAULT 0,
+  `bulan` int NOT NULL,
+  `tahun` int NOT NULL,
+  `approve_by` int NULL DEFAULT NULL,
+  `approve_date` datetime NULL DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `pengajuan_overtime_department_id_fkey`(`department_id` ASC) USING BTREE,
+  INDEX `pengajuan_overtime_sub_department_id_fkey`(`sub_department_id` ASC) USING BTREE,
+  INDEX `pengajuan_overtime_approve_by_fkey`(`approve_by` ASC) USING BTREE,
+  CONSTRAINT `pengajuan_overtime_approve_by_fkey` FOREIGN KEY (`approve_by`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT `pengajuan_overtime_department_id_fkey` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `pengajuan_overtime_sub_department_id_fkey` FOREIGN KEY (`sub_department_id`) REFERENCES `sub_department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of pengajuan_overtime
+-- ----------------------------
+INSERT INTO `pengajuan_overtime` VALUES (7, '2025-01-24', '17:00:00', '19:00:00', 1, 2, 'JOB DESC', 'JOB DESC', 1, 1, 2025, 8, '2025-01-24 15:29:27');
+
+-- ----------------------------
+-- Table structure for pengajuan_overtime_pegawai
+-- ----------------------------
+DROP TABLE IF EXISTS `pengajuan_overtime_pegawai`;
+CREATE TABLE `pengajuan_overtime_pegawai`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `pengajuan_overtime_id` int NOT NULL,
+  `pegawai_id` int NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `pengajuan_overtime_pegawai_pengajuan_overtime_id_pegawai_id_key`(`pengajuan_overtime_id` ASC, `pegawai_id` ASC) USING BTREE,
+  INDEX `pengajuan_overtime_pegawai_pegawai_id_fkey`(`pegawai_id` ASC) USING BTREE,
+  CONSTRAINT `pengajuan_overtime_pegawai_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `pengajuan_overtime_pegawai_pengajuan_overtime_id_fkey` FOREIGN KEY (`pengajuan_overtime_id`) REFERENCES `pengajuan_overtime` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of pengajuan_overtime_pegawai
+-- ----------------------------
+INSERT INTO `pengajuan_overtime_pegawai` VALUES (13, 7, 84);
 
 -- ----------------------------
 -- Table structure for request_session_izin
@@ -1055,15 +1141,12 @@ CREATE TABLE `request_session_izin`  (
   `created_at` datetime NULL DEFAULT NULL,
   `expired_at` datetime NULL DEFAULT NULL,
   `expired` tinyint(1) NOT NULL DEFAULT 0,
-  `admin` int NULL DEFAULT NULL,
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `request_session_izin_uuid_key`(`uuid` ASC) USING BTREE,
   INDEX `request_session_izin_pegawai_id_fkey`(`pegawai_id` ASC) USING BTREE,
   INDEX `request_session_izin_uuid`(`uuid` ASC) USING BTREE,
-  INDEX `request_session_izin_admin_fkey`(`admin` ASC) USING BTREE,
-  CONSTRAINT `request_session_izin_admin_fkey` FOREIGN KEY (`admin`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `request_session_izin_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of request_session_izin
@@ -1099,7 +1182,7 @@ CREATE TABLE `session_mobile`  (
   UNIQUE INDEX `session_mobile_token_key`(`token` ASC) USING BTREE,
   UNIQUE INDEX `session_mobile_user_id_token_key`(`user_id` ASC, `token` ASC) USING BTREE,
   CONSTRAINT `session_mobile_user_id_fkey` FOREIGN KEY (`user_id`) REFERENCES `user` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of session_mobile
@@ -1158,7 +1241,7 @@ CREATE TABLE `sub_department`  (
 -- Records of sub_department
 -- ----------------------------
 INSERT INTO `sub_department` VALUES (1, 'MANAGEMENT', NULL, 0, 1, NULL, NULL, NULL);
-INSERT INTO `sub_department` VALUES (2, 'HR', NULL, 0, 1, NULL, NULL, NULL);
+INSERT INTO `sub_department` VALUES (2, 'HR', NULL, 0, 1, NULL, NULL, 8);
 INSERT INTO `sub_department` VALUES (3, 'BATTERY', NULL, 0, 1, NULL, NULL, NULL);
 INSERT INTO `sub_department` VALUES (4, 'AUTOMOTIVE', NULL, 0, 1, NULL, NULL, NULL);
 INSERT INTO `sub_department` VALUES (5, 'NKA', NULL, 0, 1, NULL, NULL, NULL);
@@ -1178,7 +1261,7 @@ CREATE TABLE `tanggal_merah`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `tanggal_merah_department_id_bulan_tahun_key`(`department_id` ASC, `bulan` ASC, `tahun` ASC) USING BTREE,
   CONSTRAINT `tanggal_merah_department_id_fkey` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tanggal_merah
@@ -1197,7 +1280,7 @@ CREATE TABLE `tanggal_merah_list`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `tanggal_merah_list_tanggal_merah_id_fkey`(`tanggal_merah_id` ASC) USING BTREE,
   CONSTRAINT `tanggal_merah_list_tanggal_merah_id_fkey` FOREIGN KEY (`tanggal_merah_id`) REFERENCES `tanggal_merah` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tanggal_merah_list

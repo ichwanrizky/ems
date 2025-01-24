@@ -1,8 +1,10 @@
 "use server";
 
+import { AttendanceData } from "@/libs/AttendanceData";
+import { DisplayHour } from "@/libs/DisplayDate";
 import { HandleError } from "@/libs/Error";
 import prisma from "@/libs/Prisma";
-import { AbsenProps } from "@/types";
+import { AbsenProps, AttendanceMonthlyProps } from "@/types";
 
 type PegawaiAbsen = {
   id: number;
@@ -57,37 +59,14 @@ export const getAbsensiPerpegawai = async (filter: {
 }): Promise<{
   status: boolean;
   message: string;
-  data: AbsenProps[] | [];
+  data: AttendanceMonthlyProps[] | [];
 }> => {
   try {
-    const result = (await prisma.pegawai.findMany({
-      select: {
-        id: true,
-        nama: true,
-        absen: {
-          select: {
-            id: true,
-            tanggal: true,
-            absen_masuk: true,
-            absen_pulang: true,
-            late: true,
-          },
-          where: {
-            bulan: filter.bulan,
-            tahun: filter.tahun,
-            pegawai_id: Number(filter.pegawai),
-          },
-        },
-      },
-      where: {
-        is_active: true,
-        is_deleted: false,
-        id: Number(filter.pegawai),
-      },
-      orderBy: {
-        nama: "asc",
-      },
-    })) as AbsenProps[];
+    const result = await AttendanceData(
+      Number(filter.tahun),
+      Number(filter.bulan),
+      Number(filter.pegawai)
+    );
 
     if (!result) {
       return {
@@ -100,7 +79,7 @@ export const getAbsensiPerpegawai = async (filter: {
     return {
       status: true,
       message: "Data fetched successfully",
-      data: result,
+      data: result as AttendanceMonthlyProps[],
     };
   } catch (error) {
     return HandleError(error) as any;

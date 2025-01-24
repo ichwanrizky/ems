@@ -1,9 +1,14 @@
 "use client";
-import { AbsenProps, AccessDepartmentProps } from "@/types";
+import { AccessDepartmentProps, AttendanceMonthlyProps } from "@/types";
 import React, { useEffect, useState } from "react";
 import { getAbsensiPerpegawai, getPegawaiAbsen } from "../_libs/action";
 import Alert from "@/components/Alert";
-import { DisplayFullDate, DisplayHour } from "@/libs/DisplayDate";
+import {
+  DisplayDate,
+  DisplayFullDate,
+  DisplayHour,
+  getDayInIndonesian,
+} from "@/libs/DisplayDate";
 import Pagination from "@/components/Pagination";
 
 type AbsensiPegawaiViewProps = {
@@ -33,15 +38,22 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
       nama: string;
     }[]
   );
-  const [absensiData, setAbsensiData] = useState([] as AbsenProps[]);
+  const [absensiData, setAbsensiData] = useState(
+    [] as AttendanceMonthlyProps[]
+  );
+  console.log("🚀 ~ AbsensiPegawaiView ~ absensiData:", absensiData);
+
+  useEffect(() => {
+    setFilter((prevFilter) => ({
+      ...prevFilter,
+      pegawai: "",
+    }));
+    setAbsensiData([]);
+  }, [filter.department, filter.bulan, filter.tahun]);
 
   useEffect(() => {
     fetchDataPegawai(filter.department);
   }, [filter.department]);
-
-  useEffect(() => {
-    fetchDataAbsen(filter);
-  }, [filter]);
 
   const fetchDataPegawai = async (department = "" as string | number) => {
     setLoadingPage(true);
@@ -74,16 +86,23 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
     }
   };
 
-  const fetchDataAbsen = async (filter: {
-    bulan: number;
-    tahun: number;
-    pegawai: string | number;
-  }) => {
-    if (filter.pegawai === "") return;
+  const fetchDataAbsen = async (
+    bulan: number,
+    tahun: number,
+    pegawai: string | number
+  ) => {
+    if (pegawai === "") return;
+
     try {
-      const result = await getAbsensiPerpegawai(filter);
+      const data = {
+        bulan: bulan,
+        tahun: tahun,
+        pegawai: pegawai,
+      };
+
+      const result = await getAbsensiPerpegawai(data);
       if (result.status) {
-        setAbsensiData(result.data as AbsenProps[]);
+        setAbsensiData(result.data);
       } else {
         setAlertPage({
           status: true,
@@ -101,6 +120,8 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
       });
     }
   };
+
+  let latePegawai = 0;
 
   return (
     <>
@@ -172,7 +193,9 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
               className="form-select me-2"
               value={filter.pegawai}
               onChange={(e) => {
+                setAbsensiData([]);
                 setFilter({ ...filter, pegawai: e.target.value });
+                fetchDataAbsen(filter.bulan, filter.tahun, e.target.value);
               }}
             >
               <option value="">--SELECT--</option>
@@ -205,17 +228,20 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
                   <tr>
                     <th style={{ width: "1%" }}>NO</th>
                     <th>NAMA</th>
-                    <th style={{ width: "20%" }}>TANGGAL</th>
+                    <th style={{ width: "10%" }}>TANGGAL</th>
+                    <th style={{ width: "10%" }}>HARI</th>
                     <th style={{ width: "10%" }}>ABSEN MASUK</th>
                     <th style={{ width: "10%" }}>ABSEN PULANG</th>
-                    <th style={{ width: "8%" }}>TERLAMBAT</th>
-                    <th style={{ width: "10%" }}>IZIN</th>
+                    <th style={{ width: "10%" }}>TERLAMBAT</th>
+                    <th style={{ width: "15%" }}>IZIN</th>
+                    <th style={{ width: "5%" }}>OT</th>
+                    <th style={{ width: "5%" }}>OT TOTAL</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingPage ? (
                     <tr>
-                      <td colSpan={7} align="center">
+                      <td colSpan={10} align="center">
                         <div
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
@@ -230,47 +256,61 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
                       <tr key={index}>
                         <td align="center">{index + 1}</td>
                         <td>{item.nama?.toUpperCase()}</td>
-                        <td align="center" className="text-nowrap">
-                          {item.absen.length > 0 ? (
-                            new Date(item.absen[0].tanggal)
-                              .toLocaleString("id-ID", DisplayFullDate)
-                              .replaceAll(".", ":")
-                          ) : (
-                            <span className="text-danger">
-                              Menunggu Absensi
-                            </span>
-                          )}
+                        <td align="center">
+                          {new Date(item.tanggal)
+                            .toLocaleString("id-ID", DisplayDate)
+                            .replaceAll(".", ":")}{" "}
                         </td>
-                        <td align="center" className="text-nowrap">
-                          {item.absen.length > 0
-                            ? item.absen[0].absen_masuk !== null
-                              ? new Date(item.absen[0].absen_masuk)
-                                  .toLocaleString("id-ID", DisplayHour)
-                                  .replaceAll(".", ":")
-                              : "-"
+                        <td align="center">
+                          {getDayInIndonesian(item.hari?.toString())}
+                        </td>
+                        <td align="center">{item.absen_masuk}</td>
+                        <td align="center">{item.absen_pulang}</td>
+                        <td align="center">
+                          {item.tanggal_libur === null &&
+                          item.tanggal_absen !== null &&
+                          !item.izin?.some((e) =>
+                            ["G2", "CS", "IS"].includes(
+                              e.jenis_izin_kode?.toUpperCase()
+                            )
+                          )
+                            ? item.late
+                              ? (() => {
+                                  latePegawai += item.late;
+                                  return `${item.late} menit`;
+                                })()
+                              : ""
                             : ""}
                         </td>
-                        <td align="center" className="text-nowrap">
-                          {item.absen.length > 0
-                            ? item.absen[0].absen_pulang !== null
-                              ? new Date(item.absen[0].absen_pulang)
-                                  .toLocaleString("id-ID", DisplayHour)
-                                  .replaceAll(".", ":")
-                              : "-"
-                            : ""}
+                        <td align="left">
+                          {item.izin?.map((e, index) => (
+                            <React.Fragment key={index}>
+                              {`* ${e.jenis_izin?.toUpperCase()}`}
+                              <br />
+                            </React.Fragment>
+                          ))}
                         </td>
-                        <td align="center">{item.absen[0]?.late}</td>
-                        <td></td>
+                        <td align="center">
+                          {item.jam_ot ? `${item.jam_ot} jam` : ""}
+                        </td>
+                        <td align="center">{item.total_ot}</td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={8} align="center">
+                      <td colSpan={10} align="center">
                         No data available
                       </td>
                     </tr>
                   )}
                 </tbody>
+
+                <tfoot>
+                  <tr>
+                    <td colSpan={6}></td>
+                    <td align="center">{latePegawai}</td>
+                  </tr>
+                </tfoot>
               </table>
               <Pagination
                 currentPage={1}

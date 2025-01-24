@@ -1,6 +1,7 @@
 "use server";
 
 import { authOptions } from "@/libs/AuthOptions";
+import { ConvertDateZeroHours } from "@/libs/ConvertDate";
 import { DateNowFormat } from "@/libs/DateFormat";
 import { HandleError } from "@/libs/Error";
 import prisma from "@/libs/Prisma";
@@ -46,7 +47,7 @@ export const getRiwayatIzin = async (
 
     const itemPerPage = currentPage ? 10 : totalData;
 
-    const result = (await prisma.pengajuan_izin.findMany({
+    const result = await prisma.pengajuan_izin.findMany({
       select: {
         id: true,
         uuid: true,
@@ -81,7 +82,7 @@ export const getRiwayatIzin = async (
       },
       skip: currentPage ? (currentPage - 1) * itemPerPage : 0,
       take: itemPerPage,
-    })) as RiwayatIzinProps[];
+    });
 
     if (!result) {
       return {
@@ -102,7 +103,7 @@ export const getRiwayatIzin = async (
     return {
       status: true,
       message: "Data fetched successfully",
-      data: newData,
+      data: newData as RiwayatIzinProps[],
       total_data: totalData,
     };
   } catch (error) {
@@ -297,11 +298,11 @@ export const createIizin = async (data: {
       const create = await prisma.pengajuan_izin.create({
         data: {
           jenis_izin_kode: data.jenis_izin,
-          tanggal: data.tgl_izin,
+          tanggal: ConvertDateZeroHours(data.tgl_izin as Date),
           pegawai_id: Number(data.pegawai_id),
           status: 1,
-          bulan: new Date(data.tgl_izin as Date).getMonth() + 1,
-          tahun: new Date(data.tgl_izin as Date).getFullYear(),
+          bulan: ConvertDateZeroHours(data.tgl_izin as Date).getMonth() + 1,
+          tahun: ConvertDateZeroHours(data.tgl_izin as Date).getFullYear(),
           keterangan: data.keterangan,
           jumlah_hari: data.is_hari ? data.jumlah_hari?.toString() : null,
           jumlah_jam: data.is_jam ? data.jumlah_jam?.toString() : null,
@@ -340,7 +341,9 @@ export const createIizin = async (data: {
         );
 
         const jumlah_hari =
-          create.jumlah_hari === "" ? 1 : Number(create.jumlah_hari);
+          create.jumlah_hari === "" || create.jumlah_hari === null
+            ? 1
+            : Number(create.jumlah_hari);
 
         const izinData = [];
 

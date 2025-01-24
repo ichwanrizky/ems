@@ -298,7 +298,7 @@ model izin {
   department_id     Int
   department        department     @relation(fields: [department_id], references: [id])
 
-  @@unique([pegawai_id, tanggal])
+  @@unique([pegawai_id, tanggal, jenis_izin_kode])
 }
 
 model request_session_izin {

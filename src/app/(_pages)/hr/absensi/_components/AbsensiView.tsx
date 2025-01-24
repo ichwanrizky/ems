@@ -228,7 +228,7 @@ export default function AbsensiView(props: AbsensiViewProps) {
                     <th style={{ width: "10%" }}>ABSEN MASUK</th>
                     <th style={{ width: "10%" }}>ABSEN PULANG</th>
                     <th style={{ width: "8%" }}>TERLAMBAT</th>
-                    <th style={{ width: "10%" }}>IZIN</th>
+                    <th style={{ width: "20%" }}>IZIN</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -279,7 +279,18 @@ export default function AbsensiView(props: AbsensiViewProps) {
                             : ""}
                         </td>
                         <td align="center">{item.absen[0]?.late}</td>
-                        <td></td>
+                        <td align="left">
+                          {item.izin?.map((e, index) => (
+                            <React.Fragment key={index}>
+                              {`* ${e.jenis_izin.jenis?.toUpperCase()} ${
+                                e.jenis_izin.is_jam
+                                  ? `- ${e.jumlah_jam} Jam`
+                                  : ``
+                              } `}
+                              <br />
+                            </React.Fragment>
+                          ))}
+                        </td>
                       </tr>
                     ))
                   ) : (

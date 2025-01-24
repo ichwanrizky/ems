@@ -39,3 +39,9 @@ export const DisplayMonthName = (month: number) => {
 
   return monthNames[month - 1];
 };
+
+export const getDayInIndonesian = (dateString: any) => {
+  const date = new Date(dateString);
+  const options: any = { weekday: "long" };
+  return new Intl.DateTimeFormat("id-ID", options).format(date);
+};

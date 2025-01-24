@@ -32,7 +32,23 @@ export const getAbsensi = async (
             late: true,
           },
           where: {
-            tanggal: ConvertDateZeroHours(filter!.date),
+            tanggal: ConvertDateZeroHours(filter?.date),
+          },
+        },
+        izin: {
+          select: {
+            jenis_izin: {
+              select: {
+                kode: true,
+                jenis: true,
+                is_jam: true,
+              },
+            },
+            jumlah_jam: true,
+            jumlah_hari: true,
+          },
+          where: {
+            tanggal: ConvertDateZeroHours(filter?.date),
           },
         },
       },

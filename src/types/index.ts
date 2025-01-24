@@ -232,6 +232,15 @@ export type AbsenProps = {
     absen_pulang: Date;
     late: number;
   }[];
+  izin: {
+    jenis_izin: {
+      kode: string;
+      jenis: string;
+      is_jam: boolean;
+    };
+    jumlah_jam: string;
+    jumlah_hari: string;
+  }[];
 };
 
 export type PengajuanIzinProps = {
@@ -324,3 +333,25 @@ export interface RiwayatOvertimeProps {
   };
   approve_date: Date;
 }
+
+export type AttendanceMonthlyProps = {
+  id: number;
+  nama: string;
+  tanggal: Date;
+  hari: number;
+  tanggal_libur: Date;
+  absen_id: number;
+  tanggal_absen: Date;
+  absen_masuk: string;
+  absen_pulang: string;
+  late: number;
+  izin: {
+    jenis_izin_kode: string;
+    jenis_izin: string;
+    jumlah_jam: string;
+    jumlah_hari: string;
+  }[];
+  tanggal_ot: Date;
+  jam_ot: String;
+  total_ot: String;
+};
