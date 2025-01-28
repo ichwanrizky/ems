@@ -3,7 +3,6 @@ import { AccessProps, SeesionProps } from "@/types";
 import { getServerSession } from "next-auth";
 import React from "react";
 import AbsensiPegawaiView from "./_components/AbsensiPegawaiView";
-// import DataKaryawanView from "./_components/DataKaryawanView";
 
 export default async function AbsensiPegawaiPage() {
   const session: SeesionProps | null = await getServerSession(authOptions);
@@ -33,6 +32,7 @@ export default async function AbsensiPegawaiPage() {
       {foundMenu ? (
         <AbsensiPegawaiView
           accessDepartment={session.user.access_department || []}
+          accessMenu={foundMenu.access[0] || {}}
         />
       ) : (
         <div className="d-flex justify-content-center align-items-center text-danger">

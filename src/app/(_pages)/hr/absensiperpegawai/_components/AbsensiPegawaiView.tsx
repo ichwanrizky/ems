@@ -1,23 +1,32 @@
 "use client";
-import { AccessDepartmentProps, AttendanceMonthlyProps } from "@/types";
-import React, { useEffect, useState } from "react";
-import { getAbsensiPerpegawai, getPegawaiAbsen } from "../_libs/action";
-import Alert from "@/components/Alert";
 import {
-  DisplayDate,
-  DisplayFullDate,
-  DisplayHour,
-  getDayInIndonesian,
-} from "@/libs/DisplayDate";
+  AccessDepartmentProps,
+  AccessProps,
+  AttendanceMonthlyProps,
+  isLoadingProps,
+} from "@/types";
+import React, { useEffect, useState } from "react";
+import {
+  deleteAbsensiPerpegawai,
+  getAbsensiPerpegawai,
+  getPegawaiAbsen,
+} from "../_libs/action";
+import Alert from "@/components/Alert";
+import { DisplayDate, getDayInIndonesian } from "@/libs/DisplayDate";
 import Pagination from "@/components/Pagination";
+import Button from "@/components/Button";
+import AbsensiPegawaiCreate from "./AbsensiPegawaiCreate";
+import AbsensiPegawaiEdit from "./AbsensiPegawaiEdit";
 
 type AbsensiPegawaiViewProps = {
   accessDepartment: AccessDepartmentProps;
+  accessMenu: AccessProps;
 };
 export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
-  const { accessDepartment } = props;
+  const { accessDepartment, accessMenu } = props;
 
   const [loadingPage, setLoadingPage] = useState(true);
+  const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
   const [alertPage, setAlertPage] = useState({
     status: false,
     color: "",
@@ -32,6 +41,9 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
     pegawai: "" as string | number,
   });
 
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
+
   const [pegawaiData, setPegawaiData] = useState(
     [] as {
       id: number;
@@ -41,7 +53,8 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
   const [absensiData, setAbsensiData] = useState(
     [] as AttendanceMonthlyProps[]
   );
-  console.log("🚀 ~ AbsensiPegawaiView ~ absensiData:", absensiData);
+
+  const [selectedAbsen, setSelectedAbsen] = useState({} as any);
 
   useEffect(() => {
     setFilter((prevFilter) => ({
@@ -119,6 +132,76 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
         subMessage: "Something went wrong, please refresh and try again",
       });
     }
+  };
+
+  const handleCreateAbsen = (
+    date: Date,
+    pegawai: {
+      id: number;
+      nama: string;
+    }
+  ) => {
+    setSelectedAbsen({
+      date,
+      pegawai,
+    });
+    setIsCreateOpen(true);
+  };
+
+  const handleDelete = async (id: number) => {
+    if (confirm("Delete this data?")) {
+      setIsLoadingAction({ ...isLoadingAction, [id]: true });
+      try {
+        const result = await deleteAbsensiPerpegawai(id);
+        if (result.status) {
+          setAlertPage({
+            status: true,
+            color: "success",
+            message: "Success",
+            subMessage: result.message,
+          });
+          fetchDataAbsen(filter.bulan, filter.tahun, filter.pegawai);
+        } else {
+          setAlertPage({
+            status: true,
+            color: "danger",
+            message: "Failed",
+            subMessage: result.message,
+          });
+        }
+      } catch (error) {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
+        });
+      } finally {
+        setIsLoadingAction({ ...isLoadingAction, [id]: false });
+      }
+    }
+
+    return;
+  };
+
+  const handleEditAbsen = (
+    date: Date,
+    pegawai: {
+      id: number;
+      nama: string;
+    },
+    absen?: {
+      absen_id: number;
+      absen_masuk: string;
+      absen_pulang: string;
+    }
+  ) => {
+    setSelectedAbsen({
+      date,
+      pegawai,
+      absen,
+    });
+    setIsEditOpen(true);
   };
 
   let latePegawai = 0;
@@ -222,9 +305,23 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
           )}
 
           <div className="customer-table">
-            <div className="table-responsive white-space-nowrap">
-              <table className="table align-middle table-striped table-hover table-bordered">
-                <thead className="table-light">
+            <div
+              className="table-responsive white-space-nowrap"
+              style={{ maxHeight: "35rem" }}
+            >
+              <table
+                className="table align-middle table-striped table-hover table-bordered"
+                style={{ position: "relative" }}
+              >
+                <thead
+                  className="table-light"
+                  style={{
+                    position: "sticky",
+                    top: 0,
+                    backgroundColor: "white",
+                    zIndex: 1,
+                  }}
+                >
                   <tr>
                     <th style={{ width: "1%" }}>NO</th>
                     <th>NAMA</th>
@@ -259,27 +356,100 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
                         <td align="center">
                           {new Date(item.tanggal)
                             .toLocaleString("id-ID", DisplayDate)
-                            .replaceAll(".", ":")}{" "}
+                            .replaceAll(".", ":")}
+                          <br />
+                          {item.absen_id === null ? (
+                            <button
+                              type="button"
+                              className="btn btn-primary btn-sm mt-2"
+                              onClick={() =>
+                                handleCreateAbsen(item.tanggal, {
+                                  id: item.id,
+                                  nama: item.nama,
+                                })
+                              }
+                            >
+                              CREATE
+                            </button>
+                          ) : (
+                            <>
+                              <div className="mt-2"></div>
+                              <Button
+                                type="actionTable"
+                                indexData={index}
+                                onEdit={() => {
+                                  if (accessMenu.update) {
+                                    handleEditAbsen(
+                                      item.tanggal,
+                                      {
+                                        id: item.id,
+                                        nama: item.nama,
+                                      },
+                                      {
+                                        absen_id: item.absen_id,
+                                        absen_masuk: item.absen_masuk,
+                                        absen_pulang: item.absen_pulang,
+                                      }
+                                    );
+                                  } else {
+                                    setAlertPage({
+                                      status: true,
+                                      color: "danger",
+                                      message:
+                                        "You don't have access to delete",
+                                      subMessage: "",
+                                    });
+                                  }
+                                }}
+                                onDelete={() => {
+                                  if (accessMenu.delete) {
+                                    handleDelete(item.absen_id);
+                                  } else {
+                                    setAlertPage({
+                                      status: true,
+                                      color: "danger",
+                                      message:
+                                        "You don't have access to delete",
+                                      subMessage: "",
+                                    });
+                                  }
+                                }}
+                              >
+                                <i className="bi bi-three-dots" />
+                              </Button>
+                            </>
+                          )}
                         </td>
-                        <td align="center">
-                          {getDayInIndonesian(item.hari?.toString())}
+                        <td
+                          align="center"
+                          style={{
+                            color: item.tanggal_libur !== null ? "red" : "",
+                          }}
+                        >
+                          {getDayInIndonesian(item.tanggal)}
                         </td>
                         <td align="center">{item.absen_masuk}</td>
                         <td align="center">{item.absen_pulang}</td>
                         <td align="center">
-                          {item.tanggal_libur === null &&
-                          item.tanggal_absen !== null &&
-                          !item.izin?.some((e) =>
-                            ["G2", "CS", "IS"].includes(
-                              e.jenis_izin_kode?.toUpperCase()
-                            )
-                          )
-                            ? item.late
-                              ? (() => {
-                                  latePegawai += item.late;
-                                  return `${item.late} menit`;
-                                })()
+                          {item.tanggal_libur === null
+                            ? item.tanggal_absen !== null &&
+                              !item.izin?.some((e) =>
+                                ["G2", "CS", "IS"].includes(
+                                  e.jenis_izin_kode?.toUpperCase()
+                                )
+                              )
+                              ? item.late
+                                ? (() => {
+                                    latePegawai += item.late;
+                                    return `${item.late} menit`;
+                                  })()
+                                : ""
                               : ""
+                            : item.late
+                            ? (() => {
+                                latePegawai += item.late;
+                                return `${item.late} menit`;
+                              })()
                             : ""}
                         </td>
                         <td align="left">
@@ -322,6 +492,41 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
           </div>
         </div>
       </div>
+
+      {isCreateOpen && (
+        <AbsensiPegawaiCreate
+          isOpen={isCreateOpen}
+          onClose={() => {
+            setIsCreateOpen(false);
+            fetchDataAbsen(filter.bulan, filter.tahun, filter.pegawai);
+          }}
+          date={selectedAbsen.date}
+          pegawai={{
+            id: selectedAbsen.pegawai.id,
+            nama: selectedAbsen.pegawai.nama,
+          }}
+        />
+      )}
+
+      {isEditOpen && (
+        <AbsensiPegawaiEdit
+          isOpen={isEditOpen}
+          onClose={() => {
+            setIsEditOpen(false);
+            fetchDataAbsen(filter.bulan, filter.tahun, filter.pegawai);
+          }}
+          date={selectedAbsen.date}
+          pegawai={{
+            id: selectedAbsen.pegawai.id,
+            nama: selectedAbsen.pegawai.nama,
+          }}
+          absen={{
+            absen_id: selectedAbsen.absen?.absen_id,
+            absen_masuk: selectedAbsen.absen?.absen_masuk,
+            absen_pulang: selectedAbsen.absen?.absen_pulang,
+          }}
+        />
+      )}
     </>
   );
 }
