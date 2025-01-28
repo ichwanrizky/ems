@@ -1,31 +1,31 @@
 "use client";
+
 import {
   AccessDepartmentProps,
   AccessProps,
-  AttendanceMonthlyProps,
   isLoadingProps,
+  OvertimeMonthlyProps,
 } from "@/types";
 import React, { useEffect, useState } from "react";
 import {
   deleteAbsensiPerpegawai,
-  getAbsensiPerpegawai,
   getPegawaiAbsen,
-} from "../_libs/action";
-import Alert from "@/components/Alert";
-import { DisplayDate, getDayInIndonesian } from "@/libs/DisplayDate";
-import Pagination from "@/components/Pagination";
-import Button from "@/components/Button";
-import AbsensiPegawaiCreate from "./AbsensiPegawaiCreate";
-import AbsensiPegawaiEdit from "./AbsensiPegawaiEdit";
+} from "../../absensiperpegawai/_libs/action";
+import { deleteOvertimePegawai, getOvertimePegawai } from "../_libs/action";
 import Select from "react-select";
-import { FilterTahun } from "@/libs/FilterTahun";
 import { FilterBulan } from "@/libs/FilterBulan";
+import { FilterTahun } from "@/libs/FilterTahun";
+import Alert from "@/components/Alert";
+import Pagination from "@/components/Pagination";
+import { DisplayDate, getDayInIndonesian } from "@/libs/DisplayDate";
+import Button from "@/components/Button";
 
-type AbsensiPegawaiViewProps = {
+type OTPegawaiViewProps = {
   accessDepartment: AccessDepartmentProps;
   accessMenu: AccessProps;
 };
-export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
+
+export default function OTPegawaiView(props: OTPegawaiViewProps) {
   const { accessDepartment, accessMenu } = props;
 
   const [loadingPage, setLoadingPage] = useState(true);
@@ -44,27 +44,21 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
     pegawai: "" as string | number,
   });
 
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
-
   const [pegawaiData, setPegawaiData] = useState(
     [] as {
       id: number;
       nama: string;
     }[]
   );
-  const [absensiData, setAbsensiData] = useState(
-    [] as AttendanceMonthlyProps[]
-  );
 
-  const [selectedAbsen, setSelectedAbsen] = useState({} as any);
+  const [otDataa, setOtData] = useState([] as OvertimeMonthlyProps[]);
 
   useEffect(() => {
     setFilter((prevFilter) => ({
       ...prevFilter,
       pegawai: "",
     }));
-    setAbsensiData([]);
+    setOtData([]);
   }, [filter.department, filter.bulan, filter.tahun]);
 
   useEffect(() => {
@@ -102,7 +96,7 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
     }
   };
 
-  const fetchDataAbsen = async (
+  const fetchDataOt = async (
     bulan: number,
     tahun: number,
     pegawai: string | number
@@ -116,9 +110,9 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
         pegawai: pegawai,
       };
 
-      const result = await getAbsensiPerpegawai(data);
+      const result = await getOvertimePegawai(data);
       if (result.status) {
-        setAbsensiData(result.data);
+        setOtData(result.data);
       } else {
         setAlertPage({
           status: true,
@@ -137,25 +131,11 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
     }
   };
 
-  const handleCreateAbsen = (
-    date: Date,
-    pegawai: {
-      id: number;
-      nama: string;
-    }
-  ) => {
-    setSelectedAbsen({
-      date,
-      pegawai,
-    });
-    setIsCreateOpen(true);
-  };
-
   const handleDelete = async (id: number) => {
     if (confirm("Delete this data?")) {
       setIsLoadingAction({ ...isLoadingAction, [id]: true });
       try {
-        const result = await deleteAbsensiPerpegawai(id);
+        const result = await deleteOvertimePegawai(id);
         if (result.status) {
           setAlertPage({
             status: true,
@@ -163,7 +143,7 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
             message: "Success",
             subMessage: result.message,
           });
-          fetchDataAbsen(filter.bulan, filter.tahun, filter.pegawai);
+          fetchDataOt(filter.bulan, filter.tahun, filter.pegawai);
         } else {
           setAlertPage({
             status: true,
@@ -187,27 +167,6 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
     return;
   };
 
-  const handleEditAbsen = (
-    date: Date,
-    pegawai: {
-      id: number;
-      nama: string;
-    },
-    absen?: {
-      absen_id: number;
-      absen_masuk: string;
-      absen_pulang: string;
-    }
-  ) => {
-    setSelectedAbsen({
-      date,
-      pegawai,
-      absen,
-    });
-    setIsEditOpen(true);
-  };
-
-  let latePegawai = 0;
   let count_jam = 0;
   let count_total = 0;
 
@@ -281,10 +240,10 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
                 label: e.nama?.toUpperCase(),
               }))}
               onChange={(e: any) => {
-                setAbsensiData([]);
+                setOtData([]);
                 if (e) {
                   setFilter({ ...filter, pegawai: e.value });
-                  fetchDataAbsen(filter.bulan, filter.tahun, e.value);
+                  fetchDataOt(filter.bulan, filter.tahun, e.value);
                 } else {
                   setFilter({ ...filter, pegawai: "" });
                 }
@@ -337,22 +296,19 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
                   }}
                 >
                   <tr>
+                    <th style={{ width: "1%" }}></th>
                     <th style={{ width: "1%" }}>NO</th>
                     <th>NAMA</th>
-                    <th style={{ width: "10%" }}>TANGGAL</th>
-                    <th style={{ width: "10%" }}>HARI</th>
-                    <th style={{ width: "10%" }}>ABSEN MASUK</th>
-                    <th style={{ width: "10%" }}>ABSEN PULANG</th>
-                    <th style={{ width: "10%" }}>TERLAMBAT</th>
-                    <th style={{ width: "15%" }}>IZIN</th>
-                    <th style={{ width: "5%" }}>OT</th>
-                    <th style={{ width: "5%" }}>OT TOTAL</th>
+                    <th style={{ width: "15%" }}>TANGGAL</th>
+                    <th style={{ width: "15%" }}>HARI</th>
+                    <th style={{ width: "10%" }}>OT</th>
+                    <th style={{ width: "10%" }}>OT TOTAL</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingPage ? (
                     <tr>
-                      <td colSpan={10} align="center">
+                      <td colSpan={7} align="center">
                         <div
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
@@ -362,135 +318,61 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
                         Loading...
                       </td>
                     </tr>
-                  ) : absensiData.length > 0 ? (
-                    absensiData.map((item, index) => (
+                  ) : otDataa.length > 0 ? (
+                    otDataa.map((item, index) => (
                       <tr key={index}>
+                        <td align="center">
+                          <Button
+                            type="actionTable2"
+                            indexData={index}
+                            onDelete={() => {
+                              if (accessMenu.delete) {
+                                handleDelete(item.id);
+                              } else {
+                                setAlertPage({
+                                  status: true,
+                                  color: "danger",
+                                  message: "You don't have access to delete",
+                                  subMessage: "",
+                                });
+                              }
+                            }}
+                          >
+                            <i className="bi bi-three-dots" />
+                          </Button>
+                        </td>
                         <td align="center">{index + 1}</td>
-                        <td>{item.nama?.toUpperCase()}</td>
+                        <td>{item.pegawai.nama?.toUpperCase()}</td>
                         <td align="center">
                           {new Date(item.tanggal)
                             .toLocaleString("id-ID", DisplayDate)
                             .replaceAll(".", ":")}
-                          <br />
-                          {item.absen_id === null ? (
-                            <button
-                              type="button"
-                              className="btn btn-primary btn-sm mt-2"
-                              onClick={() =>
-                                handleCreateAbsen(item.tanggal, {
-                                  id: item.id,
-                                  nama: item.nama,
-                                })
-                              }
-                            >
-                              CREATE
-                            </button>
-                          ) : (
-                            <>
-                              <div className="mt-2"></div>
-                              <Button
-                                type="actionTable"
-                                indexData={index}
-                                onEdit={() => {
-                                  if (accessMenu.update) {
-                                    handleEditAbsen(
-                                      item.tanggal,
-                                      {
-                                        id: item.id,
-                                        nama: item.nama,
-                                      },
-                                      {
-                                        absen_id: item.absen_id,
-                                        absen_masuk: item.absen_masuk,
-                                        absen_pulang: item.absen_pulang,
-                                      }
-                                    );
-                                  } else {
-                                    setAlertPage({
-                                      status: true,
-                                      color: "danger",
-                                      message:
-                                        "You don't have access to delete",
-                                      subMessage: "",
-                                    });
-                                  }
-                                }}
-                                onDelete={() => {
-                                  if (accessMenu.delete) {
-                                    handleDelete(item.absen_id);
-                                  } else {
-                                    setAlertPage({
-                                      status: true,
-                                      color: "danger",
-                                      message:
-                                        "You don't have access to delete",
-                                      subMessage: "",
-                                    });
-                                  }
-                                }}
-                              >
-                                <i className="bi bi-three-dots" />
-                              </Button>
-                            </>
-                          )}
                         </td>
                         <td
                           align="center"
                           style={{
-                            color: item.tanggal_libur !== null ? "red" : "",
+                            color: item.is_holiday ? "red" : "",
                           }}
                         >
                           {getDayInIndonesian(item.tanggal)}
                         </td>
-                        <td align="center">{item.absen_masuk}</td>
-                        <td align="center">{item.absen_pulang}</td>
-                        <td align="center">
-                          {item.tanggal_libur === null
-                            ? item.tanggal_absen !== null &&
-                              !item.izin?.some((e) =>
-                                ["G2", "CS", "IS"].includes(
-                                  e.jenis_izin_kode?.toUpperCase()
-                                )
-                              )
-                              ? item.late
-                                ? (() => {
-                                    latePegawai += item.late;
-                                    return `${item.late} menit`;
-                                  })()
-                                : ""
-                              : ""
-                            : item.late
-                            ? (() => {
-                                latePegawai += item.late;
-                                return `${item.late} menit`;
-                              })()
-                            : ""}
-                        </td>
-                        <td align="left">
-                          {item.izin?.map((e, index) => (
-                            <React.Fragment key={index}>
-                              {`* ${e.jenis_izin?.toUpperCase()}`}
-                              <br />
-                            </React.Fragment>
-                          ))}
-                        </td>
                         <td align="center">
                           {(() => {
-                            count_jam += Number(item.jam_ot);
-                            return item.jam_ot ? `${item.jam_ot} jam` : "";
+                            count_jam += Number(item.jam);
+                            return item.jam ? `${item.jam} jam` : "";
                           })()}
                         </td>
                         <td align="center">
                           {(() => {
-                            count_total += Number(item.total_ot);
-                            return item.total_ot;
+                            count_total += Number(item.total);
+                            return item.total;
                           })()}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={10} align="center">
+                      <td colSpan={7} align="center">
                         No data available
                       </td>
                     </tr>
@@ -499,9 +381,7 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
 
                 <tfoot>
                   <tr>
-                    <td colSpan={6}></td>
-                    <td align="center">{latePegawai}</td>
-                    <td align="center"></td>
+                    <td colSpan={5}></td>
                     <td align="center">{count_jam}</td>
                     <td align="center">{count_total}</td>
                   </tr>
@@ -517,41 +397,6 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
           </div>
         </div>
       </div>
-
-      {isCreateOpen && (
-        <AbsensiPegawaiCreate
-          isOpen={isCreateOpen}
-          onClose={() => {
-            setIsCreateOpen(false);
-            fetchDataAbsen(filter.bulan, filter.tahun, filter.pegawai);
-          }}
-          date={selectedAbsen.date}
-          pegawai={{
-            id: selectedAbsen.pegawai.id,
-            nama: selectedAbsen.pegawai.nama,
-          }}
-        />
-      )}
-
-      {isEditOpen && (
-        <AbsensiPegawaiEdit
-          isOpen={isEditOpen}
-          onClose={() => {
-            setIsEditOpen(false);
-            fetchDataAbsen(filter.bulan, filter.tahun, filter.pegawai);
-          }}
-          date={selectedAbsen.date}
-          pegawai={{
-            id: selectedAbsen.pegawai.id,
-            nama: selectedAbsen.pegawai.nama,
-          }}
-          absen={{
-            absen_id: selectedAbsen.absen?.absen_id,
-            absen_masuk: selectedAbsen.absen?.absen_masuk,
-            absen_pulang: selectedAbsen.absen?.absen_pulang,
-          }}
-        />
-      )}
     </>
   );
 }

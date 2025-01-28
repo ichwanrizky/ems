@@ -355,3 +355,14 @@ export type AttendanceMonthlyProps = {
   jam_ot: String;
   total_ot: String;
 };
+
+export type OvertimeMonthlyProps = {
+  id: number;
+  tanggal: Date;
+  pegawai: {
+    nama: string;
+  };
+  jam: string;
+  total: string;
+  is_holiday: boolean;
+};
