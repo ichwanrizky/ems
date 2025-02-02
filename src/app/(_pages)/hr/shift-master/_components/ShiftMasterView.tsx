@@ -26,6 +26,7 @@ type ShiftMasterViewProps = {
 
 export default function ShiftMasterView(props: ShiftMasterViewProps) {
   const { accessDepartment, accessMenu } = props;
+
   const [loadingPage, setLoadingPage] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
   const [alertPage, setAlertPage] = useState({
