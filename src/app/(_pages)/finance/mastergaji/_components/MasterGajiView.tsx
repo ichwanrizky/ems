@@ -2,7 +2,7 @@
 import Button from "@/components/Button";
 import { AccessDepartmentProps, AccessProps, isLoadingProps } from "@/types";
 import React, { useEffect, useState } from "react";
-import { getMasterGaji } from "../_libs/action";
+import { getMasterGaji, updateMasterGaji } from "../_libs/action";
 import Alert from "@/components/Alert";
 import Pagination from "@/components/Pagination";
 import { NumericFormat } from "react-number-format";
@@ -51,6 +51,12 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
           komponen: string;
         };
       }[];
+    }[]
+  );
+
+  const [selectedPegawai, setSelectedPegawai] = useState(
+    [] as {
+      pegawai_id: number;
     }[]
   );
 
@@ -117,6 +123,108 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
     }
   };
 
+  const handleChangeData = (
+    pegawaiId: number,
+    komponenId: number,
+    nominal: number
+  ) => {
+    setMasterGajiData(
+      masterGajiData.map((e) => {
+        return {
+          ...e,
+          master_gaji_pegawai: e.master_gaji_pegawai?.map((item, index) => {
+            if (item.id === komponenId && e.id === pegawaiId) {
+              return {
+                ...item,
+                nominal: nominal,
+              };
+            } else {
+              return {
+                ...item,
+                nominal: e.master_gaji_pegawai[index].nominal
+                  ? e.master_gaji_pegawai[index].nominal
+                  : 0,
+              } as any;
+            }
+          }),
+        };
+      })
+    );
+  };
+
+  const handleChangeTypeGaji = (pegawaiId: number, typeGaji: string) => {
+    setMasterGajiData(
+      masterGajiData.map((e) =>
+        e.id === pegawaiId ? { ...e, type_gaji: typeGaji } : e
+      )
+    );
+  };
+
+  const handleSelectPegawai = (pegawaiId: number, isChecked: boolean) => {
+    if (isChecked) {
+      setSelectedPegawai([...selectedPegawai, { pegawai_id: pegawaiId }]);
+    } else {
+      setSelectedPegawai(
+        selectedPegawai.filter((item) => item.pegawai_id !== pegawaiId)
+      );
+    }
+  };
+
+  const handleSelectAllPegawai = (isChecked: boolean) => {
+    if (isChecked) {
+      setSelectedPegawai(
+        masterGajiData.map((item) => ({ pegawai_id: item.id }))
+      );
+    } else {
+      setSelectedPegawai([]);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (selectedPegawai.length === 0) {
+      setAlertPage({
+        status: true,
+        color: "danger",
+        message: "Failed",
+        subMessage: "Please select pegawai",
+      });
+      return;
+    }
+
+    if (confirm("Submit this data?")) {
+      setLoadingPage(true);
+      try {
+        const selectPegawai = selectedPegawai.map((item) => item.pegawai_id);
+
+        const listGajiUpdated = masterGajiData.filter((item) =>
+          selectPegawai.includes(item.id)
+        );
+
+        const result = await updateMasterGaji(listGajiUpdated);
+        if (result.status) {
+          setAlertPage({
+            status: true,
+            color: "success",
+            message: "Success",
+            subMessage: result.message,
+          });
+          fetchData("", filter);
+        } else {
+          setAlertPage({
+            status: true,
+            color: "danger",
+            message: "Failed",
+            subMessage: result.message,
+          });
+        }
+      } catch (error) {
+      } finally {
+        setLoadingPage(false);
+        setSelectedPegawai([]);
+      }
+    }
+  };
+
   return (
     <>
       <div className="row g-3">
@@ -157,10 +265,7 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
         <div className="col-auto">
           <div className="d-flex align-items-center gap-2 justify-content-lg-end">
             {accessMenu.insert && (
-              <Button
-                type="createTable"
-                // onClick={() => setIsCreateOpen(true)}
-              />
+              <Button type="saveTable" onClick={handleSubmit} />
             )}
           </div>
         </div>
@@ -177,13 +282,39 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
           )}
 
           <div className="customer-table">
-            <div className="table-responsive white-space-nowrap">
+            <div
+              className="table-responsive white-space-nowrap"
+              style={{ maxHeight: "500px" }}
+            >
               <table className="table align-middle table-striped table-hover table-bordered">
                 <thead className="table-light">
                   <tr>
-                    <th style={{ width: "1%" }}>NO</th>
-                    <th style={{ width: "1%" }}></th>
-                    <th>NAMA</th>
+                    <th
+                      className="sticky-col sticky-col-1"
+                      style={{ width: "50px" }}
+                    >
+                      NO
+                    </th>
+                    <th
+                      className="sticky-col sticky-col-2"
+                      style={{ width: "50px" }}
+                    >
+                      <input
+                        type="checkbox"
+                        onChange={(e) =>
+                          handleSelectAllPegawai(e.target.checked)
+                        }
+                        checked={
+                          selectedPegawai.length === masterGajiData.length
+                        }
+                      />
+                    </th>
+                    <th
+                      className="sticky-col sticky-col-3"
+                      style={{ width: "150px" }}
+                    >
+                      NAMA
+                    </th>
                     <th style={{ width: "10%" }}>PTKP</th>
                     <th style={{ width: "10%" }}>TIPE</th>
                     {komponenGaji?.map((e, index) => (
@@ -209,27 +340,57 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                   ) : masterGajiData.length > 0 ? (
                     masterGajiData.map((item, index) => (
                       <tr key={index}>
-                        <td align="center">{index + 1}</td>
-                        <td align="center"></td>
-                        <td>{item.nama?.toUpperCase()}</td>
+                        <td className="sticky-col sticky-col-1" align="center">
+                          {index + 1}
+                        </td>
+                        <td className="sticky-col sticky-col-2" align="center">
+                          <input
+                            type="checkbox"
+                            onChange={(e) =>
+                              handleSelectPegawai(item.id, e.target.checked)
+                            }
+                            checked={selectedPegawai.some(
+                              (e) => e.pegawai_id === item.id
+                            )}
+                          />
+                        </td>
+                        <td className="sticky-col sticky-col-3">
+                          {item.nama?.toUpperCase()}
+                        </td>
                         <td align="center">
                           {item.status_nikah?.toUpperCase()}
                         </td>
-                        <td align="center">{item.type_gaji}</td>
+                        <td align="center">
+                          <select
+                            value={item.type_gaji}
+                            onChange={(e) =>
+                              handleChangeTypeGaji(item.id, e.target.value)
+                            }
+                          >
+                            <option value="fix">FIX</option>
+                            <option value="nonfixed">NONFIXED</option>
+                          </select>
+                        </td>
                         {item.master_gaji_pegawai.map((item2, index2) => (
                           <td key={index2}>
                             <NumericFormat
                               defaultValue={item2.nominal}
                               thousandSeparator=","
                               displayType="input"
-                              onValueChange={(e) => {}}
+                              onValueChange={(values) => {
+                                handleChangeData(
+                                  item.id,
+                                  item2.id,
+                                  values.floatValue
+                                );
+                              }}
                               onFocus={(e) =>
                                 e.target.value === "0" && (e.target.value = "")
                               }
                               onBlur={(e) =>
                                 e.target.value === "" && (e.target.value = "0")
                               }
-                              onWheel={(e: any) => e.target.blur()}
+                              onWheel={(e) => e.target.blur()}
                             />
                           </td>
                         ))}
@@ -251,6 +412,60 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                 setCurrentPage={() => {}}
               />
             </div>
+
+            <style jsx>{`
+              .customer-table {
+                overflow: auto;
+              }
+
+              .customer-table th,
+              .customer-table td {
+                white-space: nowrap;
+                padding: 8px;
+              }
+
+              thead th {
+                position: sticky;
+                top: 0;
+                background: #f8f9fa;
+                z-index: 10;
+                text-align: center;
+                border-bottom: 2px solid #ccc;
+              }
+
+              /* Sticky columns */
+              .sticky-col {
+                position: sticky;
+                background: #fff;
+                z-index: 9;
+                box-shadow: inset -1px 0 0 #ccc;
+              }
+
+              .sticky-col-1 {
+                left: 0;
+                z-index: 11;
+              }
+              .sticky-col-2 {
+                left: 50px;
+                z-index: 11;
+              }
+              .sticky-col-3 {
+                left: 100px;
+                z-index: 10;
+              }
+
+              th,
+              td {
+                min-width: 120px;
+                text-align: center;
+              }
+
+              /* Prevent scrollbar overlap */
+              .table-responsive {
+                overflow-x: auto;
+                overflow-y: hidden;
+              }
+            `}</style>
           </div>
         </div>
       </div>

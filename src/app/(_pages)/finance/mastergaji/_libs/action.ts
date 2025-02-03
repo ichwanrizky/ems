@@ -35,7 +35,6 @@ export const getMasterGaji = async (
   komponen: KomponenProps[] | [];
 }> => {
   try {
-    console.log(search);
     const result = await prisma.pegawai.findMany({
       select: {
         id: true,
@@ -103,6 +102,53 @@ export const getMasterGaji = async (
       message: "Data fetched successfully",
       data: result as MasterGajiProps[],
       komponen: komponenGaji as KomponenProps[],
+    };
+  } catch (error) {
+    return HandleError(error) as any;
+  }
+};
+
+export const updateMasterGaji = async (
+  data: MasterGajiProps[]
+): Promise<{
+  status: boolean;
+  message: string;
+}> => {
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+      await Promise.all(
+        data.map((item) =>
+          prisma.pegawai.update({
+            data: {
+              type_gaji: item.type_gaji,
+              master_gaji_pegawai: {
+                deleteMany: {},
+                create: item.master_gaji_pegawai.map((e) => ({
+                  nominal: Number(e.nominal),
+                  komponen_id: e.komponen.id,
+                })),
+              },
+            },
+            where: {
+              id: item.id,
+            },
+          })
+        )
+      );
+
+      return true;
+    });
+
+    if (!result) {
+      return {
+        status: false,
+        message: "Edit data failed",
+      };
+    }
+
+    return {
+      status: true,
+      message: "Edit data successfully",
     };
   } catch (error) {
     return HandleError(error) as any;
