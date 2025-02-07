@@ -290,13 +290,13 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                 <thead className="table-light">
                   <tr>
                     <th
-                      className="sticky-col sticky-col-1"
+                      className="sticky-col sticky-header"
                       style={{ width: "50px" }}
                     >
                       NO
                     </th>
                     <th
-                      className="sticky-col sticky-col-2"
+                      className="sticky-col sticky-header"
                       style={{ width: "50px" }}
                     >
                       <input
@@ -310,15 +310,23 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                       />
                     </th>
                     <th
-                      className="sticky-col sticky-col-3"
+                      className="sticky-col sticky-header"
                       style={{ width: "150px" }}
                     >
                       NAMA
                     </th>
-                    <th style={{ width: "10%" }}>PTKP</th>
-                    <th style={{ width: "10%" }}>TIPE</th>
+                    <th className="sticky-header" style={{ width: "10%" }}>
+                      PTKP
+                    </th>
+                    <th className="sticky-header" style={{ width: "10%" }}>
+                      TIPE
+                    </th>
                     {komponenGaji?.map((e, index) => (
-                      <th key={index} style={{ fontSize: "8pt", width: "20%" }}>
+                      <th
+                        className="sticky-header"
+                        key={index}
+                        style={{ fontSize: "8pt", width: "20%" }}
+                      >
                         {e.komponen?.toUpperCase()}
                       </th>
                     ))}
@@ -340,10 +348,10 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                   ) : masterGajiData.length > 0 ? (
                     masterGajiData.map((item, index) => (
                       <tr key={index}>
-                        <td className="sticky-col sticky-col-1" align="center">
+                        <td className="sticky-col" align="center">
                           {index + 1}
                         </td>
-                        <td className="sticky-col sticky-col-2" align="center">
+                        <td className="sticky-col" align="center">
                           <input
                             type="checkbox"
                             onChange={(e) =>
@@ -354,7 +362,7 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                             )}
                           />
                         </td>
-                        <td className="sticky-col sticky-col-3">
+                        <td className="sticky-col">
                           {item.nama?.toUpperCase()}
                         </td>
                         <td align="center">
@@ -381,7 +389,7 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                                 handleChangeData(
                                   item.id,
                                   item2.id,
-                                  values.floatValue
+                                  Number(values.floatValue)
                                 );
                               }}
                               onFocus={(e) =>
@@ -390,7 +398,7 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                               onBlur={(e) =>
                                 e.target.value === "" && (e.target.value = "0")
                               }
-                              onWheel={(e) => e.target.blur()}
+                              onWheel={(e: any) => e.target.blur()}
                             />
                           </td>
                         ))}
@@ -414,56 +422,26 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
             </div>
 
             <style jsx>{`
-              .customer-table {
-                overflow: auto;
-              }
-
-              .customer-table th,
-              .customer-table td {
-                white-space: nowrap;
-                padding: 8px;
-              }
-
-              thead th {
-                position: sticky;
-                top: 0;
-                background: #f8f9fa;
-                z-index: 10;
-                text-align: center;
-                border-bottom: 2px solid #ccc;
-              }
-
-              /* Sticky columns */
-              .sticky-col {
-                position: sticky;
-                background: #fff;
-                z-index: 9;
-                box-shadow: inset -1px 0 0 #ccc;
-              }
-
-              .sticky-col-1 {
-                left: 0;
-                z-index: 11;
-              }
-              .sticky-col-2 {
-                left: 50px;
-                z-index: 11;
-              }
-              .sticky-col-3 {
-                left: 100px;
-                z-index: 10;
-              }
-
-              th,
-              td {
-                min-width: 120px;
-                text-align: center;
-              }
-
-              /* Prevent scrollbar overlap */
               .table-responsive {
                 overflow-x: auto;
-                overflow-y: hidden;
+              }
+              .sticky-col {
+                position: -webkit-sticky;
+                position: sticky;
+                left: 0;
+                background-color: #fff;
+                z-index: 10;
+                color: #000;
+              }
+              .sticky-header {
+                position: -webkit-sticky;
+                position: sticky;
+                top: 0;
+                background-color: #fff;
+                z-index: 10;
+              }
+              .sticky-col:nth-child(4) {
+                z-index: 9; /* Adjust z-index for the last sticky column */
               }
             `}</style>
           </div>
