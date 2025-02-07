@@ -11,7 +11,7 @@
  Target Server Version : 100424 (10.4.24-MariaDB)
  File Encoding         : 65001
 
- Date: 24/01/2025 16:50:39
+ Date: 07/02/2025 16:48:06
 */
 
 SET NAMES utf8mb4;
@@ -69,7 +69,7 @@ CREATE TABLE `absen`  (
   INDEX `absen_shift_id_fkey`(`shift_id` ASC) USING BTREE,
   CONSTRAINT `absen_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `absen_shift_id_fkey` FOREIGN KEY (`shift_id`) REFERENCES `shift` (`id`) ON DELETE SET NULL ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 473 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 477 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of absen
@@ -116,7 +116,7 @@ INSERT INTO `absen` VALUES (39, '2025-01-02', '07:36:51', '17:04:18', 0, 0, 1, 2
 INSERT INTO `absen` VALUES (40, '2025-01-02', '07:37:42', '20:00:11', 0, 0, 1, 2025, '1.0410537', '104.0033309', NULL, NULL, 0, 466, 3);
 INSERT INTO `absen` VALUES (41, '2025-01-02', '07:38:05', '20:01:36', 0, 0, 1, 2025, '1.0409364', '104.0033702', NULL, NULL, 0, 301, 3);
 INSERT INTO `absen` VALUES (42, '2025-01-02', '07:38:19', '20:02:28', 0, 0, 1, 2025, '1.0411644', '104.0033794', NULL, NULL, 0, 358, 3);
-INSERT INTO `absen` VALUES (43, '2025-01-02', '07:39:15', NULL, 10, 0, 1, 2025, '1.0413412595554197', '104.00316691405511', NULL, NULL, 0, 84, 3);
+INSERT INTO `absen` VALUES (43, '2025-01-02', '07:55:00', NULL, 5, 0, 1, 2025, '1.0413412595554197', '104.00316691405511', 'ABSEN MANUAL BY: 08117779914', 'ABSEN MANUAL BY: 08117779914', 0, 84, 3);
 INSERT INTO `absen` VALUES (44, '2025-01-02', '07:39:47', '20:02:48', 0, 0, 1, 2025, '1.0409381', '104.0033546', NULL, NULL, 0, 503, 3);
 INSERT INTO `absen` VALUES (45, '2025-01-02', '07:39:48', '20:01:19', 0, 0, 1, 2025, '1.0408935', '104.0033762', NULL, NULL, 0, 259, 3);
 INSERT INTO `absen` VALUES (46, '2025-01-02', '07:40:40', '20:03:16', 0, 0, 1, 2025, '1.0411561', '104.0034094', NULL, NULL, 0, 401, 3);
@@ -157,7 +157,6 @@ INSERT INTO `absen` VALUES (80, '2025-01-03', '07:17:04', '20:05:51', 0, 0, 1, 2
 INSERT INTO `absen` VALUES (81, '2025-01-03', '07:18:33', '20:01:31', 0, 0, 1, 2025, '1.0411738', '104.0033529', NULL, NULL, 0, 502, 3);
 INSERT INTO `absen` VALUES (82, '2025-01-03', '07:19:14', '20:00:57', 0, 0, 1, 2025, '1.0413982', '104.0031346', NULL, NULL, 0, 539, 3);
 INSERT INTO `absen` VALUES (83, '2025-01-03', '07:20:59', '20:00:56', 0, 0, 1, 2025, '1.0411824', '104.0033143', NULL, NULL, 0, 536, 3);
-INSERT INTO `absen` VALUES (84, '2025-01-03', '07:21:00', '20:03:35', 0, 0, 1, 2025, '1.0411389098085113', '104.00326910723273', NULL, NULL, 0, 465, 3);
 INSERT INTO `absen` VALUES (85, '2025-01-03', '07:25:16', '20:01:37', 0, 0, 1, 2025, '1.0411994', '104.0033906', NULL, NULL, 0, 510, 3);
 INSERT INTO `absen` VALUES (86, '2025-01-03', '07:26:03', '20:03:06', 0, 0, 1, 2025, '1.0408743566811989', '104.00336668601122', NULL, NULL, 0, 276, 3);
 INSERT INTO `absen` VALUES (87, '2025-01-03', '07:26:16', '20:02:05', 0, 0, 1, 2025, '1.0410933', '104.003336', NULL, NULL, 0, 404, 3);
@@ -172,7 +171,6 @@ INSERT INTO `absen` VALUES (95, '2025-01-03', '07:29:46', NULL, 0, 0, 1, 2025, '
 INSERT INTO `absen` VALUES (96, '2025-01-03', '07:30:25', '20:00:47', 0, 0, 1, 2025, '1.0411402', '104.0033587', NULL, NULL, 0, 526, 3);
 INSERT INTO `absen` VALUES (97, '2025-01-03', '07:30:29', '20:01:25', 0, 0, 1, 2025, '1.0413250491945534', '104.00321669668776', NULL, NULL, 0, 508, 3);
 INSERT INTO `absen` VALUES (98, '2025-01-03', '07:30:32', '20:01:29', 0, 0, 1, 2025, '1.04112', '104.003362', NULL, NULL, 0, 516, 3);
-INSERT INTO `absen` VALUES (99, '2025-01-03', '07:31:03', NULL, 0, 0, 1, 2025, '1.0413505457030405', '104.00321326030684', NULL, NULL, 0, 84, 3);
 INSERT INTO `absen` VALUES (100, '2025-01-03', '07:31:28', '20:01:18', 0, 0, 1, 2025, '1.0410692', '104.0030726', NULL, NULL, 0, 458, 3);
 INSERT INTO `absen` VALUES (101, '2025-01-03', '07:31:57', '20:01:36', 0, 0, 1, 2025, '1.0411128', '104.003377', NULL, NULL, 0, 297, 3);
 INSERT INTO `absen` VALUES (102, '2025-01-03', '07:32:07', '20:01:38', 0, 0, 1, 2025, '1.0409328', '104.0033141', NULL, NULL, 0, 457, 3);
@@ -545,6 +543,8 @@ INSERT INTO `absen` VALUES (468, '2025-01-09', '07:50:14', NULL, 0, 0, 1, 2025, 
 INSERT INTO `absen` VALUES (469, '2025-01-09', '07:50:26', NULL, 0, 0, 1, 2025, '1.0414273652977137', '104.00309312611746', NULL, NULL, 0, 507, 3);
 INSERT INTO `absen` VALUES (470, '2025-01-09', '07:52:04', NULL, 2, 0, 1, 2025, '1.041427672321343', '104.00309473980649', 'Edit Absen', NULL, 1, 77, 3);
 INSERT INTO `absen` VALUES (471, '2025-01-14', '20:21:37', NULL, 0, 0, 1, 2025, '1', '1', NULL, NULL, 0, 403, 3);
+INSERT INTO `absen` VALUES (475, '2025-01-04', '09:39:36', NULL, 109, 0, 1, 2025, NULL, NULL, 'ABSEN MANUAL BY: 08117779914', NULL, 0, 84, 3);
+INSERT INTO `absen` VALUES (476, '2025-01-09', '19:14:57', '16:15:06', 0, 0, 1, 2025, NULL, NULL, 'ABSEN MANUAL BY: 08117779914', NULL, 0, 84, 3);
 
 -- ----------------------------
 -- Table structure for access
@@ -583,6 +583,10 @@ INSERT INTO `access` VALUES (1, 16, 1, 1, 1, 1);
 INSERT INTO `access` VALUES (1, 17, 1, 1, 1, 1);
 INSERT INTO `access` VALUES (1, 18, 1, 1, 1, 1);
 INSERT INTO `access` VALUES (1, 19, 1, 1, 1, 1);
+INSERT INTO `access` VALUES (1, 20, 1, 1, 1, 1);
+INSERT INTO `access` VALUES (1, 21, 1, 1, 1, 1);
+INSERT INTO `access` VALUES (1, 22, 1, 1, 1, 1);
+INSERT INTO `access` VALUES (1, 23, 1, 1, 1, 1);
 
 -- ----------------------------
 -- Table structure for access_department
@@ -624,6 +628,30 @@ INSERT INTO `access_sub_department` VALUES (1, 3);
 INSERT INTO `access_sub_department` VALUES (1, 4);
 INSERT INTO `access_sub_department` VALUES (1, 5);
 INSERT INTO `access_sub_department` VALUES (1, 6);
+
+-- ----------------------------
+-- Table structure for adjustment
+-- ----------------------------
+DROP TABLE IF EXISTS `adjustment`;
+CREATE TABLE `adjustment`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `bulan` int NOT NULL,
+  `tahun` int NOT NULL,
+  `pegawai_id` int NOT NULL,
+  `nominal` int NOT NULL DEFAULT 0,
+  `keterangan` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `jenis` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `department_id` int NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `adjustment_pegawai_id_fkey`(`pegawai_id` ASC) USING BTREE,
+  INDEX `adjustment_department_id_fkey`(`department_id` ASC) USING BTREE,
+  CONSTRAINT `adjustment_department_id_fkey` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `adjustment_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of adjustment
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for akses_izin
@@ -682,6 +710,57 @@ CREATE TABLE `department`  (
 INSERT INTO `department` VALUES (1, 'PANJI JAYA', NULL, NULL, NULL, NULL, 0);
 
 -- ----------------------------
+-- Table structure for gaji
+-- ----------------------------
+DROP TABLE IF EXISTS `gaji`;
+CREATE TABLE `gaji`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `bulan` int NOT NULL,
+  `tahun` int NOT NULL,
+  `pegawai_id` int NOT NULL,
+  `tipe` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `komponen` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `komponen_id` int NULL DEFAULT NULL,
+  `nominal` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
+  `urut` int NOT NULL,
+  `gaji_pegawai_id` int NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `gaji_pegawai_id_fkey`(`pegawai_id` ASC) USING BTREE,
+  INDEX `gaji_gaji_pegawai_id_fkey`(`gaji_pegawai_id` ASC) USING BTREE,
+  CONSTRAINT `gaji_gaji_pegawai_id_fkey` FOREIGN KEY (`gaji_pegawai_id`) REFERENCES `gaji_pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `gaji_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of gaji
+-- ----------------------------
+
+-- ----------------------------
+-- Table structure for gaji_pegawai
+-- ----------------------------
+DROP TABLE IF EXISTS `gaji_pegawai`;
+CREATE TABLE `gaji_pegawai`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `bulan` int NOT NULL,
+  `tahun` int NOT NULL,
+  `pegawai_id` int NOT NULL,
+  `nominal` int NOT NULL DEFAULT 0,
+  `publish` tinyint(1) NOT NULL DEFAULT 0,
+  `department_id` int NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `gaji_pegawai_uuid_key`(`uuid` ASC) USING BTREE,
+  INDEX `gaji_pegawai_pegawai_id_fkey`(`pegawai_id` ASC) USING BTREE,
+  INDEX `gaji_pegawai_department_id_fkey`(`department_id` ASC) USING BTREE,
+  CONSTRAINT `gaji_pegawai_department_id_fkey` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `gaji_pegawai_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of gaji_pegawai
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for izin
 -- ----------------------------
 DROP TABLE IF EXISTS `izin`;
@@ -698,10 +777,10 @@ CREATE TABLE `izin`  (
   `department_id` int NOT NULL,
   `jenis_izin_kode` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `izin_pegawai_id_tanggal_jenis_izin_kode_key`(`pegawai_id` ASC, `tanggal` ASC, `jenis_izin_kode` ASC) USING BTREE,
   INDEX `izin_pengajuan_izin_id_fkey`(`pengajuan_izin_id` ASC) USING BTREE,
   INDEX `izin_department_id_fkey`(`department_id` ASC) USING BTREE,
   INDEX `izin_jenis_izin_kode_fkey`(`jenis_izin_kode` ASC) USING BTREE,
-  UNIQUE INDEX `izin_pegawai_id_tanggal_jenis_izin_kode_key`(`pegawai_id` ASC, `tanggal` ASC, `jenis_izin_kode` ASC) USING BTREE,
   CONSTRAINT `izin_department_id_fkey` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `izin_jenis_izin_kode_fkey` FOREIGN KEY (`jenis_izin_kode`) REFERENCES `jenis_izin` (`kode`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `izin_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
@@ -744,6 +823,951 @@ INSERT INTO `jenis_izin` VALUES ('TA1', 'TIDAK ABSEN MASUK', 0);
 INSERT INTO `jenis_izin` VALUES ('TA2', 'TIDAK ABSEN PULANG', 0);
 
 -- ----------------------------
+-- Table structure for komponen_gaji
+-- ----------------------------
+DROP TABLE IF EXISTS `komponen_gaji`;
+CREATE TABLE `komponen_gaji`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `komponen` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `tipe` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `metode` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL,
+  `is_master` tinyint(1) NOT NULL DEFAULT 0,
+  `urut` int NULL DEFAULT NULL,
+  `urut_tampil` int NULL DEFAULT NULL,
+  `is_gaji` tinyint(1) NOT NULL DEFAULT 0,
+  `department_id` int NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `komponen_gaji_department_id_fkey`(`department_id` ASC) USING BTREE,
+  CONSTRAINT `komponen_gaji_department_id_fkey` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 30 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of komponen_gaji
+-- ----------------------------
+INSERT INTO `komponen_gaji` VALUES (1, 'BASIC SALARY', 'penambahan', 'tetap', 1, 1, 1, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (2, 'POSITION ALLOWANCE', 'penambahan', 'tetap', 1, 2, 2, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (3, 'MEAL ALLOWANCE', 'penambahan', 'variabel', 1, 3, 3, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (4, 'TRANSPORTATION ALLOWANCE', 'penambahan', 'variabel', 1, 4, 4, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (5, 'SHIFT ALLOWANCE', 'penambahan', 'variabel', 1, 6, 6, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (6, 'LEAVE SERVICE', 'penambahan', 'tetap', 1, 9, 9, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (7, 'OVERTIME', 'penambahan', 'variabel', 0, 8, 8, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (8, 'ADJUSTMENT PLUS', 'penambahan', 'adjustment', 0, 10, 10, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (9, 'ABSENT', 'pengurangan', 'variabel', 0, 12, 12, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (10, 'UNPIAD LEAVE', 'pengurangan', 'variabel', 0, 14, 14, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (11, 'ANNUAL LEAVE', 'pengurangan', 'variabel', 0, 16, 16, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (12, 'PERMISSION', 'pengurangan', 'variabel', 0, 19, 19, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (13, 'PPH21', 'pengurangan', 'variabel', 0, 25, 25, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (14, 'JHT (2%)', 'pengurangan', 'variabel', 0, 24, 24, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (15, 'JP (1%)', 'pengurangan', 'variabel', 0, 23, 23, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (16, 'BPJS KESEHATAN (1%)', 'pengurangan', 'variabel', 0, 22, 22, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (17, 'ADJUSTMENT MINUS', 'pengurangan', 'adjustment', 0, 26, 26, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (18, 'JUMLAH HARI KERJA', 'informasi', NULL, 0, 27, 27, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (19, 'JUMLAH OVERTIME', 'informasi', NULL, 0, 7, 7, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (20, 'JUMLAH ABSENT', 'informasi', NULL, 0, 11, 11, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (21, 'JUMLAH UL', 'informasi', NULL, 0, 13, 13, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (22, 'JUMLAH AL', 'informasi', NULL, 0, 15, 15, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (23, 'JUMLAH PERMISSION', 'informasi', NULL, 0, 18, 18, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (24, 'JUMLAH LATE', 'informasi', NULL, 0, 20, 20, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (25, 'JUMLAH MC', 'informasi', NULL, 0, 17, 17, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (26, 'BPJS KESEHATAN', 'informasi', NULL, 1, 0, 99, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (27, 'BPJS KETENAGAKERJAAN', 'informasi', NULL, 1, 0, 99, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (28, 'ATTENDANCE ALLOWANCE', 'penambahan', 'variabel', 1, 5, 5, 0, 1);
+INSERT INTO `komponen_gaji` VALUES (29, 'LATE', 'pengurangan', 'variabel', 0, 21, 21, 0, 1);
+
+-- ----------------------------
+-- Table structure for master_gaji_pegawai
+-- ----------------------------
+DROP TABLE IF EXISTS `master_gaji_pegawai`;
+CREATE TABLE `master_gaji_pegawai`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `komponen_id` int NOT NULL,
+  `pegawai_id` int NOT NULL,
+  `nominal` int NOT NULL,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `master_gaji_pegawai_komponen_id_pegawai_id_key`(`komponen_id` ASC, `pegawai_id` ASC) USING BTREE,
+  INDEX `master_gaji_pegawai_pegawai_id_fkey`(`pegawai_id` ASC) USING BTREE,
+  CONSTRAINT `master_gaji_pegawai_komponen_id_fkey` FOREIGN KEY (`komponen_id`) REFERENCES `komponen_gaji` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `master_gaji_pegawai_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 3322 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of master_gaji_pegawai
+-- ----------------------------
+INSERT INTO `master_gaji_pegawai` VALUES (55, 1, 400, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (56, 2, 400, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (57, 3, 400, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (58, 4, 400, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (59, 28, 400, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (60, 5, 400, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (61, 6, 400, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (62, 26, 400, 4685050);
+INSERT INTO `master_gaji_pegawai` VALUES (63, 27, 400, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (109, 1, 504, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (110, 2, 504, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (111, 3, 504, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (112, 4, 504, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (113, 28, 504, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (114, 5, 504, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (115, 6, 504, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (116, 26, 504, 4685050);
+INSERT INTO `master_gaji_pegawai` VALUES (117, 27, 504, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (226, 1, 497, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (227, 2, 497, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (228, 3, 497, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (229, 4, 497, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (230, 28, 497, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (231, 5, 497, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (232, 6, 497, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (233, 26, 497, 4685050);
+INSERT INTO `master_gaji_pegawai` VALUES (234, 27, 497, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (244, 1, 266, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (245, 2, 266, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (246, 3, 266, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (247, 4, 266, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (248, 28, 266, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (249, 5, 266, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (250, 6, 266, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (251, 26, 266, 4685050);
+INSERT INTO `master_gaji_pegawai` VALUES (252, 27, 266, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (433, 1, 501, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (434, 2, 501, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (435, 3, 501, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (436, 4, 501, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (437, 28, 501, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (438, 5, 501, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (439, 6, 501, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (440, 26, 501, 4685050);
+INSERT INTO `master_gaji_pegawai` VALUES (441, 27, 501, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (505, 1, 500, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (506, 2, 500, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (507, 3, 500, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (508, 4, 500, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (509, 28, 500, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (510, 5, 500, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (511, 6, 500, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (512, 26, 500, 4685050);
+INSERT INTO `master_gaji_pegawai` VALUES (513, 27, 500, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (595, 1, 513, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (596, 2, 513, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (597, 3, 513, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (598, 4, 513, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (599, 28, 513, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (600, 5, 513, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (601, 6, 513, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (602, 26, 513, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (603, 27, 513, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (856, 1, 267, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (857, 2, 267, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (858, 3, 267, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (859, 4, 267, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (860, 28, 267, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (861, 5, 267, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (862, 6, 267, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (863, 26, 267, 4685050);
+INSERT INTO `master_gaji_pegawai` VALUES (864, 27, 267, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (865, 1, 269, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (866, 2, 269, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (867, 3, 269, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (868, 4, 269, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (869, 28, 269, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (870, 5, 269, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (871, 6, 269, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (872, 26, 269, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (873, 27, 269, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (901, 1, 453, 4500000);
+INSERT INTO `master_gaji_pegawai` VALUES (902, 2, 453, 300000);
+INSERT INTO `master_gaji_pegawai` VALUES (903, 3, 453, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (904, 4, 453, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (905, 28, 453, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (906, 5, 453, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (907, 6, 453, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (908, 26, 453, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (909, 27, 453, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (946, 1, 462, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (947, 2, 462, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (948, 3, 462, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (949, 4, 462, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (950, 28, 462, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (951, 5, 462, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (952, 6, 462, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (953, 26, 462, 4685050);
+INSERT INTO `master_gaji_pegawai` VALUES (954, 27, 462, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1000, 1, 461, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (1001, 2, 461, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1002, 3, 461, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (1003, 4, 461, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (1004, 28, 461, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (1005, 5, 461, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1006, 6, 461, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1007, 26, 461, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1008, 27, 461, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (1009, 1, 483, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (1010, 2, 483, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1011, 3, 483, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (1012, 4, 483, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (1013, 28, 483, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (1014, 5, 483, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1015, 6, 483, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1016, 26, 483, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1017, 27, 483, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (1018, 1, 533, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (1019, 2, 533, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1020, 3, 533, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (1021, 4, 533, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (1022, 28, 533, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (1023, 5, 533, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1024, 6, 533, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1025, 26, 533, 4685050);
+INSERT INTO `master_gaji_pegawai` VALUES (1026, 27, 533, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1063, 1, 528, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (1064, 2, 528, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1065, 3, 528, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (1066, 4, 528, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (1067, 28, 528, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (1068, 5, 528, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1069, 6, 528, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (1070, 26, 528, 4685050);
+INSERT INTO `master_gaji_pegawai` VALUES (1071, 27, 528, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2440, 1, 531, 5000000);
+INSERT INTO `master_gaji_pegawai` VALUES (2441, 2, 531, 100000);
+INSERT INTO `master_gaji_pegawai` VALUES (2442, 3, 531, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2443, 4, 531, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2444, 28, 531, 100000);
+INSERT INTO `master_gaji_pegawai` VALUES (2445, 5, 531, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2446, 6, 531, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2447, 26, 531, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2448, 27, 531, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2458, 1, 541, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2459, 2, 541, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2460, 3, 541, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2461, 4, 541, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2462, 28, 541, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2463, 5, 541, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2464, 6, 541, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2465, 26, 541, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2466, 27, 541, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2575, 1, 535, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2576, 2, 535, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2577, 3, 535, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2578, 4, 535, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2579, 28, 535, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2580, 5, 535, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2581, 6, 535, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2582, 27, 535, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2583, 26, 535, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2602, 1, 525, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2603, 2, 525, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2604, 3, 525, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2605, 4, 525, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2606, 28, 525, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2607, 5, 525, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2608, 6, 525, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2609, 26, 525, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2610, 27, 525, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2611, 1, 534, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2612, 2, 534, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2613, 3, 534, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2614, 4, 534, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2615, 28, 534, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2616, 5, 534, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2617, 6, 534, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2618, 26, 534, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2619, 27, 534, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2620, 1, 488, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2621, 2, 488, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2622, 3, 488, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2623, 4, 488, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2624, 28, 488, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2625, 5, 488, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2626, 6, 488, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2627, 26, 488, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2628, 27, 488, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2629, 1, 85, 4500440);
+INSERT INTO `master_gaji_pegawai` VALUES (2630, 2, 85, 50000);
+INSERT INTO `master_gaji_pegawai` VALUES (2631, 3, 85, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2632, 4, 85, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2633, 28, 85, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2634, 5, 85, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2635, 6, 85, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2636, 26, 85, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2637, 27, 85, 4550440);
+INSERT INTO `master_gaji_pegawai` VALUES (2638, 1, 402, 4500440);
+INSERT INTO `master_gaji_pegawai` VALUES (2639, 2, 402, 100000);
+INSERT INTO `master_gaji_pegawai` VALUES (2640, 3, 402, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2641, 4, 402, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2642, 28, 402, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2643, 5, 402, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2644, 6, 402, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2645, 26, 402, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2646, 27, 402, 4600440);
+INSERT INTO `master_gaji_pegawai` VALUES (2647, 1, 405, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2648, 2, 405, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2649, 3, 405, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2650, 4, 405, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2651, 28, 405, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2652, 5, 405, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2653, 6, 405, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2654, 26, 405, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2655, 27, 405, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2656, 1, 259, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (2657, 2, 259, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2658, 3, 259, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2659, 4, 259, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2660, 28, 259, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2661, 5, 259, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2662, 6, 259, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2663, 26, 259, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2664, 27, 259, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (2665, 1, 301, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (2666, 2, 301, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2667, 3, 301, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2668, 4, 301, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2669, 28, 301, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2670, 5, 301, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2671, 6, 301, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2672, 27, 301, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (2673, 26, 301, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2674, 1, 515, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2675, 2, 515, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2676, 3, 515, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2677, 4, 515, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2678, 28, 515, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2679, 5, 515, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2680, 6, 515, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2681, 26, 515, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2682, 27, 515, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2683, 1, 505, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2684, 2, 505, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2685, 3, 505, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2686, 4, 505, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2687, 28, 505, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2688, 5, 505, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2689, 6, 505, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2690, 26, 505, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2691, 27, 505, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2692, 1, 297, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (2693, 2, 297, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2694, 3, 297, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2695, 4, 297, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2696, 28, 297, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2697, 5, 297, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2698, 6, 297, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2699, 26, 297, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2700, 27, 297, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (2701, 1, 123, 3996440);
+INSERT INTO `master_gaji_pegawai` VALUES (2702, 2, 123, 100000);
+INSERT INTO `master_gaji_pegawai` VALUES (2703, 3, 123, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2704, 4, 123, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2705, 28, 123, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2706, 5, 123, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2707, 6, 123, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2708, 26, 123, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2709, 27, 123, 4600440);
+INSERT INTO `master_gaji_pegawai` VALUES (2719, 1, 516, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2720, 2, 516, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2721, 3, 516, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2722, 4, 516, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2723, 28, 516, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2724, 5, 516, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2725, 6, 516, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2726, 26, 516, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2727, 27, 516, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2728, 1, 260, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (2729, 2, 260, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2730, 3, 260, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2731, 4, 260, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2732, 28, 260, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2733, 5, 260, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2734, 6, 260, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2735, 26, 260, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2736, 27, 260, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (2737, 1, 538, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2738, 2, 538, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2739, 3, 538, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2740, 4, 538, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2741, 28, 538, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2742, 5, 538, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2743, 6, 538, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2744, 26, 538, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2745, 27, 538, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2746, 1, 84, 4550000);
+INSERT INTO `master_gaji_pegawai` VALUES (2747, 2, 84, 200000);
+INSERT INTO `master_gaji_pegawai` VALUES (2748, 3, 84, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2749, 4, 84, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2750, 28, 84, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2751, 5, 84, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2752, 6, 84, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2753, 26, 84, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2754, 27, 84, 4750000);
+INSERT INTO `master_gaji_pegawai` VALUES (2755, 1, 303, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (2756, 2, 303, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2757, 3, 303, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2758, 4, 303, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2759, 28, 303, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2760, 5, 303, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2761, 6, 303, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2762, 26, 303, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2763, 27, 303, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (2764, 1, 519, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2765, 2, 519, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2766, 3, 519, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2767, 4, 519, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2768, 28, 519, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2769, 5, 519, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2770, 6, 519, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2771, 26, 519, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2772, 27, 519, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2773, 1, 507, 4500440);
+INSERT INTO `master_gaji_pegawai` VALUES (2774, 2, 507, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2775, 3, 507, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2776, 4, 507, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2777, 28, 507, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2778, 5, 507, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2779, 6, 507, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2780, 26, 507, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2781, 27, 507, 4500440);
+INSERT INTO `master_gaji_pegawai` VALUES (2782, 1, 467, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2783, 2, 467, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2784, 3, 467, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2785, 4, 467, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2786, 28, 467, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2787, 5, 467, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2788, 6, 467, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2789, 26, 467, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2790, 27, 467, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2791, 1, 536, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2792, 2, 536, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2793, 3, 536, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2794, 4, 536, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2795, 28, 536, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2796, 5, 536, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2797, 6, 536, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2798, 26, 536, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2799, 27, 536, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2800, 1, 139, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (2801, 2, 139, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2802, 3, 139, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2803, 4, 139, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2804, 28, 139, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2805, 5, 139, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2806, 6, 139, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2807, 27, 139, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (2808, 26, 139, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2809, 1, 471, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2810, 2, 471, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2811, 3, 471, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2812, 4, 471, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2813, 28, 471, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2814, 5, 471, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2815, 6, 471, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2816, 26, 471, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2817, 27, 471, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2818, 1, 470, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2819, 2, 470, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2820, 3, 470, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2821, 4, 470, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2822, 28, 470, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2823, 5, 470, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2824, 6, 470, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2825, 26, 470, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2826, 27, 470, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2827, 1, 74, 4500440);
+INSERT INTO `master_gaji_pegawai` VALUES (2828, 2, 74, 50000);
+INSERT INTO `master_gaji_pegawai` VALUES (2829, 3, 74, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2830, 4, 74, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2831, 28, 74, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2832, 5, 74, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2833, 6, 74, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2834, 26, 74, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2835, 27, 74, 4550440);
+INSERT INTO `master_gaji_pegawai` VALUES (2836, 1, 262, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (2837, 2, 262, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2838, 3, 262, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2839, 4, 262, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2840, 28, 262, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2841, 5, 262, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2842, 6, 262, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2843, 26, 262, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2844, 27, 262, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (2845, 1, 273, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (2846, 2, 273, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2847, 3, 273, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2848, 4, 273, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2849, 28, 273, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2850, 5, 273, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2851, 6, 273, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2852, 26, 273, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2853, 27, 273, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (2854, 1, 276, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (2855, 2, 276, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2856, 3, 276, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2857, 4, 276, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2858, 28, 276, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2859, 5, 276, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2860, 6, 276, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2861, 27, 276, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (2862, 26, 276, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2863, 1, 73, 4730000);
+INSERT INTO `master_gaji_pegawai` VALUES (2864, 2, 73, 300000);
+INSERT INTO `master_gaji_pegawai` VALUES (2865, 3, 73, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2866, 4, 73, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2867, 28, 73, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2868, 5, 73, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2869, 6, 73, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2870, 26, 73, 5030000);
+INSERT INTO `master_gaji_pegawai` VALUES (2871, 27, 73, 5030000);
+INSERT INTO `master_gaji_pegawai` VALUES (2872, 1, 356, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (2873, 2, 356, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2874, 3, 356, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2875, 4, 356, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2876, 28, 356, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2877, 5, 356, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2878, 6, 356, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2879, 26, 356, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2880, 27, 356, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (2881, 1, 517, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2882, 2, 517, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2883, 3, 517, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2884, 4, 517, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2885, 28, 517, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2886, 5, 517, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2887, 6, 517, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2888, 27, 517, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2889, 26, 517, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2890, 1, 466, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2891, 2, 466, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2892, 3, 466, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2893, 4, 466, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2894, 28, 466, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2895, 5, 466, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2896, 6, 466, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2897, 26, 466, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2898, 27, 466, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2899, 1, 135, 3996440);
+INSERT INTO `master_gaji_pegawai` VALUES (2900, 2, 135, 100000);
+INSERT INTO `master_gaji_pegawai` VALUES (2901, 3, 135, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2902, 4, 135, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2903, 28, 135, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2904, 5, 135, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2905, 6, 135, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2906, 26, 135, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2907, 27, 135, 4600440);
+INSERT INTO `master_gaji_pegawai` VALUES (2908, 1, 401, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2909, 2, 401, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2910, 3, 401, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2911, 4, 401, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2912, 28, 401, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2913, 5, 401, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2914, 6, 401, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2915, 26, 401, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2916, 27, 401, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2917, 1, 403, 1000000);
+INSERT INTO `master_gaji_pegawai` VALUES (2918, 2, 403, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2919, 3, 403, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2920, 4, 403, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2921, 28, 403, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2922, 5, 403, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2923, 6, 403, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2924, 26, 403, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2925, 27, 403, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2926, 1, 77, 4500440);
+INSERT INTO `master_gaji_pegawai` VALUES (2927, 2, 77, 200000);
+INSERT INTO `master_gaji_pegawai` VALUES (2928, 3, 77, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2929, 4, 77, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2930, 28, 77, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2931, 5, 77, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2932, 6, 77, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2933, 26, 77, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2934, 27, 77, 4500440);
+INSERT INTO `master_gaji_pegawai` VALUES (2935, 1, 493, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2936, 2, 493, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2937, 3, 493, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2938, 4, 493, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2939, 28, 493, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2940, 5, 493, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2941, 6, 493, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2942, 26, 493, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2943, 27, 493, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2944, 1, 502, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2945, 2, 502, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2946, 3, 502, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2947, 4, 502, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2948, 28, 502, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2949, 5, 502, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2950, 6, 502, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2951, 26, 502, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2952, 27, 502, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2953, 1, 523, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2954, 2, 523, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2955, 3, 523, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2956, 4, 523, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2957, 28, 523, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2958, 5, 523, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2959, 6, 523, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2960, 26, 523, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2961, 27, 523, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2962, 1, 498, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2963, 2, 498, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2964, 3, 498, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2965, 4, 498, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2966, 28, 498, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2967, 5, 498, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2968, 6, 498, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2969, 26, 498, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2970, 27, 498, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2971, 1, 358, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (2972, 2, 358, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2973, 3, 358, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2974, 4, 358, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2975, 28, 358, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2976, 5, 358, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2977, 6, 358, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2978, 26, 358, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2979, 27, 358, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (2980, 1, 460, 4730000);
+INSERT INTO `master_gaji_pegawai` VALUES (2981, 2, 460, 300000);
+INSERT INTO `master_gaji_pegawai` VALUES (2982, 3, 460, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2983, 4, 460, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2984, 28, 460, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2985, 5, 460, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2986, 6, 460, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2987, 26, 460, 5030000);
+INSERT INTO `master_gaji_pegawai` VALUES (2988, 27, 460, 5030000);
+INSERT INTO `master_gaji_pegawai` VALUES (2989, 1, 458, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2990, 2, 458, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2991, 3, 458, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (2992, 4, 458, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (2993, 28, 458, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (2994, 5, 458, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2995, 6, 458, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (2996, 26, 458, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (2997, 27, 458, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (2998, 1, 524, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (2999, 2, 524, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3000, 3, 524, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3001, 4, 524, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3002, 28, 524, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3003, 5, 524, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3004, 6, 524, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3005, 26, 524, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3006, 27, 524, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3007, 1, 514, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3008, 2, 514, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3009, 3, 514, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3010, 4, 514, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3011, 28, 514, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3012, 5, 514, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3013, 6, 514, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3014, 27, 514, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3015, 26, 514, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3016, 1, 496, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3017, 2, 496, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3018, 3, 496, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3019, 4, 496, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3020, 28, 496, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3021, 5, 496, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3022, 6, 496, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3023, 26, 496, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3024, 27, 496, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3025, 1, 491, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3026, 2, 491, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3027, 3, 491, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3028, 4, 491, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3029, 28, 491, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3030, 5, 491, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3031, 6, 491, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3032, 26, 491, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3033, 27, 491, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3034, 1, 364, 4800000);
+INSERT INTO `master_gaji_pegawai` VALUES (3035, 2, 364, 200000);
+INSERT INTO `master_gaji_pegawai` VALUES (3036, 3, 364, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3037, 4, 364, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3038, 28, 364, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3039, 5, 364, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3040, 6, 364, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3041, 26, 364, 5000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3042, 27, 364, 5000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3043, 1, 78, 5000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3044, 2, 78, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3045, 3, 78, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3046, 4, 78, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3047, 28, 78, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3048, 5, 78, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3049, 6, 78, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3050, 26, 78, 5000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3051, 27, 78, 5000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3052, 1, 308, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (3053, 2, 308, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3054, 3, 308, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3055, 4, 308, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3056, 28, 308, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3057, 5, 308, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3058, 6, 308, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3059, 26, 308, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3060, 27, 308, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (3061, 1, 71, 15000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3062, 2, 71, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3063, 3, 71, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3064, 4, 71, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3065, 28, 71, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3066, 5, 71, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3067, 6, 71, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3068, 26, 71, 8000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3069, 27, 71, 15000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3070, 1, 529, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3071, 2, 529, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3072, 3, 529, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3073, 4, 529, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3074, 28, 529, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3075, 5, 529, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3076, 6, 529, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3077, 26, 529, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3078, 27, 529, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3079, 1, 510, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3080, 2, 510, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3081, 3, 510, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3082, 4, 510, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3083, 28, 510, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3084, 5, 510, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3085, 6, 510, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3086, 26, 510, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3087, 27, 510, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3088, 1, 526, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3089, 2, 526, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3090, 3, 526, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3091, 4, 526, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3092, 28, 526, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3093, 5, 526, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3094, 6, 526, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3095, 26, 526, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3096, 27, 526, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3097, 1, 457, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3098, 2, 457, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3099, 3, 457, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3100, 4, 457, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3101, 28, 457, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3102, 5, 457, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3103, 6, 457, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3104, 26, 457, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3105, 27, 457, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3106, 1, 81, 6600000);
+INSERT INTO `master_gaji_pegawai` VALUES (3107, 2, 81, 400000);
+INSERT INTO `master_gaji_pegawai` VALUES (3108, 3, 81, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3109, 4, 81, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3110, 28, 81, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3111, 5, 81, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3112, 6, 81, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3113, 26, 81, 7000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3114, 27, 81, 7000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3115, 1, 542, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3116, 2, 542, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3117, 3, 542, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3118, 4, 542, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3119, 28, 542, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3120, 5, 542, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3121, 6, 542, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3122, 26, 542, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3123, 27, 542, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3124, 1, 540, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3125, 2, 540, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3126, 3, 540, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3127, 4, 540, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3128, 28, 540, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3129, 5, 540, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3130, 6, 540, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3131, 26, 540, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3132, 27, 540, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3133, 1, 532, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3134, 2, 532, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3135, 3, 532, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3136, 4, 532, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3137, 28, 532, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3138, 5, 532, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3139, 6, 532, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3140, 26, 532, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3141, 27, 532, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3142, 1, 261, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (3143, 2, 261, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3144, 3, 261, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3145, 4, 261, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3146, 28, 261, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3147, 5, 261, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3148, 6, 261, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3149, 26, 261, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3150, 27, 261, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (3151, 1, 399, 3996440);
+INSERT INTO `master_gaji_pegawai` VALUES (3152, 2, 399, 100000);
+INSERT INTO `master_gaji_pegawai` VALUES (3153, 3, 399, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3154, 4, 399, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3155, 28, 399, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3156, 5, 399, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3157, 6, 399, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3158, 27, 399, 4600440);
+INSERT INTO `master_gaji_pegawai` VALUES (3159, 26, 399, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3160, 1, 459, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3161, 2, 459, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3162, 3, 459, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3163, 4, 459, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3164, 28, 459, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3165, 5, 459, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3166, 6, 459, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3167, 26, 459, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3168, 27, 459, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3169, 1, 307, 3796000);
+INSERT INTO `master_gaji_pegawai` VALUES (3170, 2, 307, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3171, 3, 307, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3172, 4, 307, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3173, 28, 307, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3174, 5, 307, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3175, 6, 307, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3176, 26, 307, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3177, 27, 307, 4300000);
+INSERT INTO `master_gaji_pegawai` VALUES (3178, 1, 503, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3179, 2, 503, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3180, 3, 503, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3181, 4, 503, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3182, 28, 503, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3183, 5, 503, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3184, 6, 503, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3185, 26, 503, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3186, 27, 503, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3187, 1, 406, 4500440);
+INSERT INTO `master_gaji_pegawai` VALUES (3188, 2, 406, 200000);
+INSERT INTO `master_gaji_pegawai` VALUES (3189, 3, 406, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3190, 4, 406, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3191, 28, 406, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3192, 5, 406, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3193, 6, 406, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3194, 26, 406, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3195, 27, 406, 4700440);
+INSERT INTO `master_gaji_pegawai` VALUES (3196, 1, 404, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3197, 2, 404, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3198, 3, 404, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3199, 4, 404, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3200, 28, 404, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3201, 5, 404, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3202, 6, 404, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3203, 26, 404, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3204, 27, 404, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3205, 1, 80, 4550000);
+INSERT INTO `master_gaji_pegawai` VALUES (3206, 2, 80, 200000);
+INSERT INTO `master_gaji_pegawai` VALUES (3207, 3, 80, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3208, 4, 80, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3209, 28, 80, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3210, 5, 80, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3211, 6, 80, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3212, 27, 80, 4750000);
+INSERT INTO `master_gaji_pegawai` VALUES (3213, 26, 80, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3214, 1, 465, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3215, 2, 465, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3216, 3, 465, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3217, 4, 465, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3218, 28, 465, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3219, 5, 465, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3220, 6, 465, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3221, 26, 465, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3222, 27, 465, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3223, 1, 522, 4500440);
+INSERT INTO `master_gaji_pegawai` VALUES (3224, 2, 522, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3225, 3, 522, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3226, 4, 522, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3227, 28, 522, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3228, 5, 522, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3229, 6, 522, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3230, 26, 522, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3231, 27, 522, 4500440);
+INSERT INTO `master_gaji_pegawai` VALUES (3232, 1, 75, 5000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3233, 2, 75, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3234, 3, 75, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3235, 4, 75, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3236, 28, 75, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3237, 5, 75, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3238, 6, 75, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3239, 26, 75, 5000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3240, 27, 75, 5000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3241, 1, 492, 4500440);
+INSERT INTO `master_gaji_pegawai` VALUES (3242, 2, 492, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3243, 3, 492, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3244, 4, 492, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3245, 28, 492, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3246, 5, 492, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3247, 6, 492, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3248, 26, 492, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3249, 27, 492, 4500440);
+INSERT INTO `master_gaji_pegawai` VALUES (3250, 1, 537, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3251, 2, 537, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3252, 3, 537, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3253, 4, 537, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3254, 28, 537, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3255, 5, 537, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3256, 6, 537, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3257, 26, 537, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3258, 27, 537, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3259, 1, 486, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3260, 2, 486, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3261, 3, 486, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3262, 4, 486, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3263, 28, 486, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3264, 5, 486, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3265, 6, 486, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3266, 26, 486, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3267, 27, 486, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3268, 1, 539, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3269, 2, 539, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3270, 3, 539, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3271, 4, 539, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3272, 28, 539, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3273, 5, 539, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3274, 6, 539, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3275, 26, 539, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3276, 27, 539, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3277, 1, 508, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3278, 2, 508, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3279, 3, 508, 14000);
+INSERT INTO `master_gaji_pegawai` VALUES (3280, 4, 508, 10000);
+INSERT INTO `master_gaji_pegawai` VALUES (3281, 28, 508, 78000);
+INSERT INTO `master_gaji_pegawai` VALUES (3282, 5, 508, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3283, 6, 508, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3284, 26, 508, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3285, 27, 508, 4130279);
+INSERT INTO `master_gaji_pegawai` VALUES (3286, 1, 82, 4500440);
+INSERT INTO `master_gaji_pegawai` VALUES (3287, 2, 82, 50000);
+INSERT INTO `master_gaji_pegawai` VALUES (3288, 3, 82, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3289, 4, 82, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3290, 28, 82, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3291, 5, 82, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3292, 6, 82, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3293, 26, 82, 4989600);
+INSERT INTO `master_gaji_pegawai` VALUES (3294, 27, 82, 4550440);
+INSERT INTO `master_gaji_pegawai` VALUES (3295, 1, 70, 15000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3296, 2, 70, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3297, 3, 70, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3298, 4, 70, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3299, 28, 70, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3300, 5, 70, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3301, 6, 70, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3302, 26, 70, 12000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3303, 27, 70, 15000000);
+INSERT INTO `master_gaji_pegawai` VALUES (3304, 1, 456, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3305, 2, 456, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3306, 3, 456, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3307, 4, 456, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3308, 28, 456, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3309, 5, 456, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3310, 6, 456, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3311, 27, 456, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3312, 26, 456, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3313, 1, 521, 3523427);
+INSERT INTO `master_gaji_pegawai` VALUES (3314, 2, 521, 0);
+INSERT INTO `master_gaji_pegawai` VALUES (3315, 3, 521, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3316, 4, 521, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3317, 28, 521, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3318, 5, 521, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3319, 6, 521, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3320, 26, 521, 1);
+INSERT INTO `master_gaji_pegawai` VALUES (3321, 27, 521, 1);
+
+-- ----------------------------
 -- Table structure for menu
 -- ----------------------------
 DROP TABLE IF EXISTS `menu`;
@@ -758,7 +1782,7 @@ CREATE TABLE `menu`  (
   INDEX `menu_urut_menu_group_id_idx`(`urut` ASC, `menu_group_id` ASC) USING BTREE,
   INDEX `menu_menu_group_id_fkey`(`menu_group_id` ASC) USING BTREE,
   CONSTRAINT `menu_menu_group_id_fkey` FOREIGN KEY (`menu_group_id`) REFERENCES `menu_group` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 20 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 24 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu
@@ -780,6 +1804,10 @@ INSERT INTO `menu` VALUES (16, 'TANGGAL MERAH', 'config/tanggalmerah', 'tanggalm
 INSERT INTO `menu` VALUES (17, 'OT-  PENGAJUAN', 'hr/ot-pengajuan', 'ot-pengajuan', 8, 2);
 INSERT INTO `menu` VALUES (18, 'OT - RIWAYAT', 'hr/ot-riwayat', 'ot-riwayat', 9, 2);
 INSERT INTO `menu` VALUES (19, 'OT- PER PEGAWAI', 'hr/ot-perpegawai', 'ot-perpegawai', 10, 2);
+INSERT INTO `menu` VALUES (20, 'MASTER GAJI', 'finance/mastergaji', 'mastergaji', 1, 3);
+INSERT INTO `menu` VALUES (21, 'ADJUSTMEN GAJI', 'finance/adjustmengaji', 'adjustmengaji', 2, 3);
+INSERT INTO `menu` VALUES (22, 'GAJI', 'finance/gaji', 'gaji', 3, 3);
+INSERT INTO `menu` VALUES (23, 'PPH', 'finance/pph', 'pph', 4, 3);
 
 -- ----------------------------
 -- Table structure for menu_group
@@ -794,13 +1822,14 @@ CREATE TABLE `menu_group`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `menu_group_menu_group_key`(`menu_group` ASC) USING BTREE,
   INDEX `menu_group_menu_group_urut_parent_id_idx`(`menu_group` ASC, `urut` ASC, `parent_id` ASC) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 3 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of menu_group
 -- ----------------------------
 INSERT INTO `menu_group` VALUES (1, 'CONFIG', 99, 1, 'config');
 INSERT INTO `menu_group` VALUES (2, 'HR', 1, 1, 'hr');
+INSERT INTO `menu_group` VALUES (3, 'FINANCE', 3, 1, 'finance');
 
 -- ----------------------------
 -- Table structure for overtime
@@ -825,12 +1854,12 @@ CREATE TABLE `overtime`  (
   CONSTRAINT `overtime_department_id_fkey` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `overtime_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `overtime_pengajuan_overtime_id_fkey` FOREIGN KEY (`pengajuan_overtime_id`) REFERENCES `pengajuan_overtime` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of overtime
 -- ----------------------------
-INSERT INTO `overtime` VALUES (3, '2025-01-24', 84, 1, '2', '3.5', 0, 1, 1, 2025, 7);
+INSERT INTO `overtime` VALUES (5, '2025-01-30', 84, 1, '1', '1.5', 0, 1, 1, 2025, 8);
 
 -- ----------------------------
 -- Table structure for pegawai
@@ -1103,12 +2132,13 @@ CREATE TABLE `pengajuan_overtime`  (
   CONSTRAINT `pengajuan_overtime_approve_by_fkey` FOREIGN KEY (`approve_by`) REFERENCES `user` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   CONSTRAINT `pengajuan_overtime_department_id_fkey` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `pengajuan_overtime_sub_department_id_fkey` FOREIGN KEY (`sub_department_id`) REFERENCES `sub_department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 8 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of pengajuan_overtime
 -- ----------------------------
 INSERT INTO `pengajuan_overtime` VALUES (7, '2025-01-24', '17:00:00', '19:00:00', 1, 2, 'JOB DESC', 'JOB DESC', 1, 1, 2025, 8, '2025-01-24 15:29:27');
+INSERT INTO `pengajuan_overtime` VALUES (8, '2025-01-30', '19:00:00', '20:00:00', 1, 2, '', '', 1, 1, 2025, 8, '2025-01-28 20:13:31');
 
 -- ----------------------------
 -- Table structure for pengajuan_overtime_pegawai
@@ -1123,12 +2153,35 @@ CREATE TABLE `pengajuan_overtime_pegawai`  (
   INDEX `pengajuan_overtime_pegawai_pegawai_id_fkey`(`pegawai_id` ASC) USING BTREE,
   CONSTRAINT `pengajuan_overtime_pegawai_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `pengajuan_overtime_pegawai_pengajuan_overtime_id_fkey` FOREIGN KEY (`pengajuan_overtime_id`) REFERENCES `pengajuan_overtime` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of pengajuan_overtime_pegawai
 -- ----------------------------
-INSERT INTO `pengajuan_overtime_pegawai` VALUES (13, 7, 84);
+INSERT INTO `pengajuan_overtime_pegawai` VALUES (14, 8, 84);
+
+-- ----------------------------
+-- Table structure for pph21
+-- ----------------------------
+DROP TABLE IF EXISTS `pph21`;
+CREATE TABLE `pph21`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `bulan` int NOT NULL,
+  `tahun` int NOT NULL,
+  `department_id` int NOT NULL,
+  `pegawai_id` int NOT NULL,
+  `gaji` int NOT NULL DEFAULT 0,
+  `pph21` int NOT NULL DEFAULT 0,
+  PRIMARY KEY (`id`) USING BTREE,
+  INDEX `pph21_department_id_fkey`(`department_id` ASC) USING BTREE,
+  INDEX `pph21_pegawai_id_fkey`(`pegawai_id` ASC) USING BTREE,
+  CONSTRAINT `pph21_department_id_fkey` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `pph21_pegawai_id_fkey` FOREIGN KEY (`pegawai_id`) REFERENCES `pegawai` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of pph21
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for request_session_izin
@@ -1209,7 +2262,7 @@ CREATE TABLE `shift`  (
 -- ----------------------------
 -- Records of shift
 -- ----------------------------
-INSERT INTO `shift` VALUES (3, '21:00:00', '17:00:00', 'SHIFT - NORMAL', 0, 30, 1);
+INSERT INTO `shift` VALUES (3, '07:50:00', '17:00:00', 'SHIFT - NORMAL', 0, 30, 1);
 INSERT INTO `shift` VALUES (5, '06:50:00', '16:00:00', 'SHIFT - RAMADHAN', 0, 0, 1);
 
 -- ----------------------------
@@ -1261,12 +2314,14 @@ CREATE TABLE `tanggal_merah`  (
   PRIMARY KEY (`id`) USING BTREE,
   UNIQUE INDEX `tanggal_merah_department_id_bulan_tahun_key`(`department_id` ASC, `bulan` ASC, `tahun` ASC) USING BTREE,
   CONSTRAINT `tanggal_merah_department_id_fkey` FOREIGN KEY (`department_id`) REFERENCES `department` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tanggal_merah
 -- ----------------------------
 INSERT INTO `tanggal_merah` VALUES (1, 1, 2025, 1);
+INSERT INTO `tanggal_merah` VALUES (2, 2, 2025, 1);
+INSERT INTO `tanggal_merah` VALUES (3, 3, 2025, 1);
 
 -- ----------------------------
 -- Table structure for tanggal_merah_list
@@ -1280,7 +2335,7 @@ CREATE TABLE `tanggal_merah_list`  (
   PRIMARY KEY (`id`) USING BTREE,
   INDEX `tanggal_merah_list_tanggal_merah_id_fkey`(`tanggal_merah_id` ASC) USING BTREE,
   CONSTRAINT `tanggal_merah_list_tanggal_merah_id_fkey` FOREIGN KEY (`tanggal_merah_id`) REFERENCES `tanggal_merah` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE
-) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
+) ENGINE = InnoDB AUTO_INCREMENT = 31 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
 -- Records of tanggal_merah_list
@@ -1296,6 +2351,25 @@ INSERT INTO `tanggal_merah_list` VALUES (8, '2025-01-25', 1, '25');
 INSERT INTO `tanggal_merah_list` VALUES (9, '2025-01-26', 1, '26');
 INSERT INTO `tanggal_merah_list` VALUES (10, '2025-01-27', 1, '27');
 INSERT INTO `tanggal_merah_list` VALUES (11, '2025-01-29', 1, '29');
+INSERT INTO `tanggal_merah_list` VALUES (12, '2025-02-01', 2, '01');
+INSERT INTO `tanggal_merah_list` VALUES (13, '2025-02-02', 2, '02');
+INSERT INTO `tanggal_merah_list` VALUES (14, '2025-02-08', 2, '08');
+INSERT INTO `tanggal_merah_list` VALUES (15, '2025-02-09', 2, '09');
+INSERT INTO `tanggal_merah_list` VALUES (16, '2025-02-15', 2, '15');
+INSERT INTO `tanggal_merah_list` VALUES (17, '2025-02-16', 2, '16');
+INSERT INTO `tanggal_merah_list` VALUES (18, '2025-02-22', 2, '22');
+INSERT INTO `tanggal_merah_list` VALUES (19, '2025-02-23', 2, '23');
+INSERT INTO `tanggal_merah_list` VALUES (20, '2025-03-01', 3, '01');
+INSERT INTO `tanggal_merah_list` VALUES (21, '2025-03-02', 3, '02');
+INSERT INTO `tanggal_merah_list` VALUES (22, '2025-03-08', 3, '08');
+INSERT INTO `tanggal_merah_list` VALUES (23, '2025-03-09', 3, '09');
+INSERT INTO `tanggal_merah_list` VALUES (24, '2025-03-15', 3, '15');
+INSERT INTO `tanggal_merah_list` VALUES (25, '2025-03-16', 3, '16');
+INSERT INTO `tanggal_merah_list` VALUES (26, '2025-03-22', 3, '22');
+INSERT INTO `tanggal_merah_list` VALUES (27, '2025-03-23', 3, '23');
+INSERT INTO `tanggal_merah_list` VALUES (28, '2025-03-29', 3, '29');
+INSERT INTO `tanggal_merah_list` VALUES (29, '2025-03-30', 3, '30');
+INSERT INTO `tanggal_merah_list` VALUES (30, '2025-03-31', 3, '31');
 
 -- ----------------------------
 -- Table structure for user

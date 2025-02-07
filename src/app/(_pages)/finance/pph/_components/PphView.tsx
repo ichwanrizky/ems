@@ -1,35 +1,21 @@
 "use client";
 
 import Alert from "@/components/Alert";
-import Button from "@/components/Button";
-import {
-  AccessDepartmentProps,
-  AccessProps,
-  AdjustmentProps,
-  isLoadingProps,
-} from "@/types";
-import React, { useEffect, useState } from "react";
-import AdjustmentCreate from "./AdjustmentCreate";
-import {
-  deleteAdjustment,
-  getAdjustment,
-  getAdjustmentId,
-} from "../_libs/action";
 import Pagination from "@/components/Pagination";
 import { FilterBulan } from "@/libs/FilterBulan";
 import { FilterTahun } from "@/libs/FilterTahun";
-import AdjustmentEdit from "./AdjustmentEdit";
+import { AccessDepartmentProps } from "@/types";
+import React, { useEffect, useState } from "react";
+import { getPph } from "../_libs/action";
 
-type AdjustmentViewProps = {
+type PphViewProps = {
   accessDepartment: AccessDepartmentProps;
-  accessMenu: AccessProps;
 };
 
-export default function AdjustmentView(props: AdjustmentViewProps) {
-  const { accessDepartment, accessMenu } = props;
+export default function PphView(props: PphViewProps) {
+  const { accessDepartment } = props;
 
   const [loadingPage, setLoadingPage] = useState(true);
-  const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
   const [alertPage, setAlertPage] = useState({
     status: false,
     color: "",
@@ -47,8 +33,17 @@ export default function AdjustmentView(props: AdjustmentViewProps) {
     tahun: new Date().getFullYear() as number | string,
   });
 
-  const [adjustmentData, setAdjustmentData] = useState([] as AdjustmentProps[]);
-  const [adjustmentEdit, setAdjustmentEdit] = useState({} as AdjustmentProps);
+  const [pphData, setPphData] = useState(
+    [] as {
+      id: number;
+      gaji: number;
+      pph21: number;
+      pegawai: {
+        id: number;
+        nama: string;
+      };
+    }[]
+  );
 
   useEffect(() => {
     if (alertPage.status) {
@@ -87,9 +82,9 @@ export default function AdjustmentView(props: AdjustmentViewProps) {
   ) => {
     setLoadingPage(true);
     try {
-      const result = await getAdjustment(search, filter);
+      const result = await getPph(search, filter);
       if (result.status) {
-        setAdjustmentData(result.data);
+        setPphData(result.data);
       } else {
         setAlertPage({
           status: true,
@@ -112,69 +107,6 @@ export default function AdjustmentView(props: AdjustmentViewProps) {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-  };
-
-  const handleGetEdit = async (id: number) => {
-    setIsLoadingAction({ ...isLoadingAction, [id]: true });
-    try {
-      const result = await getAdjustmentId(id);
-      if (result.status) {
-        setAdjustmentEdit(result.data as AdjustmentProps);
-        setIsEditOpen(true);
-      } else {
-        setAlertPage({
-          status: true,
-          color: "danger",
-          message: "Failed",
-          subMessage: result.message,
-        });
-      }
-    } catch (error) {
-      setAlertPage({
-        status: true,
-        color: "danger",
-        message: "Error",
-        subMessage: "Something went wrong, please refresh and try again",
-      });
-    } finally {
-      setIsLoadingAction({ ...isLoadingAction, [id]: false });
-    }
-  };
-
-  const handleDelete = async (id: number) => {
-    if (confirm("Delete this data?")) {
-      setIsLoadingAction({ ...isLoadingAction, [id]: true });
-      try {
-        const result = await deleteAdjustment(id);
-        if (result.status) {
-          setAlertPage({
-            status: true,
-            color: "success",
-            message: "Success",
-            subMessage: result.message,
-          });
-          fetchData("", filter);
-        } else {
-          setAlertPage({
-            status: true,
-            color: "danger",
-            message: "Failed",
-            subMessage: result.message,
-          });
-        }
-      } catch (error) {
-        setAlertPage({
-          status: true,
-          color: "danger",
-          message: "Error",
-          subMessage: "Something went wrong, please refresh and try again",
-        });
-      } finally {
-        setIsLoadingAction({ ...isLoadingAction, [id]: false });
-      }
-    }
-
-    return;
   };
 
   return (
@@ -228,16 +160,7 @@ export default function AdjustmentView(props: AdjustmentViewProps) {
         </div>
         <div className="col-auto flex-grow-1 overflow-auto"></div>
 
-        <div className="col-auto">
-          <div className="d-flex align-items-center gap-2 justify-content-lg-end">
-            {accessMenu.insert && (
-              <Button
-                type="createTable"
-                onClick={() => setIsCreateOpen(true)}
-              />
-            )}
-          </div>
-        </div>
+        <div className="col-auto"></div>
       </div>
 
       <div className="card mt-4">
@@ -255,18 +178,16 @@ export default function AdjustmentView(props: AdjustmentViewProps) {
               <table className="table align-middle table-striped table-hover table-bordered">
                 <thead className="table-light">
                   <tr>
-                    <th style={{ width: "1%" }}></th>
                     <th style={{ width: "1%" }}>NO</th>
                     <th>NAMA</th>
-                    <th style={{ width: "15%" }}>JENIS</th>
-                    <th style={{ width: "30%" }}>KETERANGAN</th>
-                    <th style={{ width: "15%" }}>NOMINAL</th>
+                    <th style={{ width: "25%" }}>GAJI</th>
+                    <th style={{ width: "25%" }}>PPH</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingPage ? (
                     <tr>
-                      <td colSpan={6} align="center">
+                      <td colSpan={4} align="center">
                         <div
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
@@ -276,58 +197,30 @@ export default function AdjustmentView(props: AdjustmentViewProps) {
                         Loading...
                       </td>
                     </tr>
-                  ) : adjustmentData.length > 0 ? (
-                    adjustmentData.map((item, index) => (
+                  ) : pphData.length > 0 ? (
+                    pphData.map((item, index) => (
                       <tr key={index}>
-                        <td align="center">
-                          <Button
-                            type="actionTable"
-                            indexData={index}
-                            isLoading={isLoadingAction[item.id]}
-                            onEdit={() => {
-                              if (accessMenu.update) {
-                                handleGetEdit(item.id);
-                              } else {
-                                setAlertPage({
-                                  status: true,
-                                  color: "danger",
-                                  message: "You don't have access to edit",
-                                  subMessage: "",
-                                });
-                              }
-                            }}
-                            onDelete={() => {
-                              if (accessMenu.update) {
-                                handleDelete(item.id);
-                              } else {
-                                setAlertPage({
-                                  status: true,
-                                  color: "danger",
-                                  message: "You don't have access to delete",
-                                  subMessage: "",
-                                });
-                              }
-                            }}
-                          >
-                            <i className="bi bi-three-dots" />
-                          </Button>
-                        </td>
                         <td align="center">{index + 1}</td>
-                        <td align="left">{item.pegawai.nama?.toUpperCase()}</td>
-                        <td align="center">{item.jenis?.toUpperCase()}</td>
-                        <td align="left">{item.keterangan?.toUpperCase()}</td>
+                        <td>{item.pegawai.nama?.toUpperCase()}</td>
                         <td align="right">
                           {new Intl.NumberFormat("id-ID", {
                             style: "currency",
                             currency: "IDR",
                             minimumFractionDigits: 0,
-                          }).format(item.nominal)}
+                          }).format(item.gaji)}
+                        </td>
+                        <td align="right">
+                          {new Intl.NumberFormat("id-ID", {
+                            style: "currency",
+                            currency: "IDR",
+                            minimumFractionDigits: 0,
+                          }).format(item.pph21)}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={6} align="center">
+                      <td colSpan={4} align="center">
                         No data available
                       </td>
                     </tr>
@@ -345,29 +238,6 @@ export default function AdjustmentView(props: AdjustmentViewProps) {
           </div>
         </div>
       </div>
-
-      {isCreateOpen && (
-        <AdjustmentCreate
-          isOpen={isCreateOpen}
-          onClose={() => {
-            setIsCreateOpen(false);
-            fetchData("", filter);
-          }}
-          departmentData={accessDepartment}
-        />
-      )}
-
-      {isEditOpen && (
-        <AdjustmentEdit
-          isOpen={isEditOpen}
-          onClose={() => {
-            setIsEditOpen(false);
-            fetchData("", filter);
-          }}
-          departmentData={accessDepartment}
-          adjustmentEdit={adjustmentEdit}
-        />
-      )}
     </>
   );
 }
