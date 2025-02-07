@@ -366,3 +366,17 @@ export type OvertimeMonthlyProps = {
   total: string;
   is_holiday: boolean;
 };
+
+export type AdjustmentProps = {
+  id: number;
+  jenis: string;
+  nominal: number;
+  keterangan: string;
+  pegawai: {
+    id: number;
+    nama: string;
+  };
+  department_id: number;
+  bulan: number;
+  tahun: number;
+};

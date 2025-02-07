@@ -64,6 +64,7 @@ model department {
   pengajuan_overtime pengajuan_overtime[]
   overtime           overtime[]
   komponen_gaji      komponen_gaji[]
+  adjustment         adjustment[]
 }
 
 model sub_department {
@@ -224,6 +225,7 @@ model pegawai {
   pengajuan_overtime_pegawai pengajuan_overtime_pegawai[]
   overtime                   overtime[]
   master_gaji_pegawai        master_gaji_pegawai[]
+  adjustment                 adjustment[]
 }
 
 model pegawai_history {
@@ -405,4 +407,17 @@ model master_gaji_pegawai {
   nominal     Int
 
   @@unique([komponen_id, pegawai_id])
+}
+
+model adjustment {
+  id            Int        @id @default(autoincrement())
+  bulan         Int
+  tahun         Int
+  pegawai_id    Int
+  pegawai       pegawai    @relation(fields: [pegawai_id], references: [id])
+  nominal       Int        @default(0)
+  keterangan    String?
+  jenis         String?
+  department_id Int
+  department    department @relation(fields: [department_id], references: [id])
 }
