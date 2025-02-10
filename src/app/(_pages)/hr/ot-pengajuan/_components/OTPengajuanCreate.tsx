@@ -135,7 +135,7 @@ export default function OTPengajuanCreate(props: Props) {
     setFormData({
       ...formData,
       list_pegawai: pegawaiData.map((item) => ({
-        label: item.nama,
+        label: item.nama?.toUpperCase(),
         value: item.id,
       })),
     });
