@@ -2,13 +2,11 @@
 
 import Modal from "@/components/Modal";
 import { AccessDepartmentProps } from "@/types";
-import { use, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Select from "react-select";
 import { FilterBulan } from "@/libs/FilterBulan";
 import { FilterTahun } from "@/libs/FilterTahun";
-import { NumericFormat } from "react-number-format";
-import { getPegawaiGaji } from "../_libs/action";
-import { set } from "react-datepicker/dist/date_utils";
+import { createGaji, getPegawaiGaji } from "../_libs/action";
 
 type Props = {
   isOpen: boolean;
@@ -52,40 +50,40 @@ export default function GajiCreate(props: Props) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // if (confirm("Submit this data?")) {
-    //   setIsLoadingSubmit(true);
-    //   try {
-    //     const result = await createAdjustment(formData as any);
-    //     if (result.status) {
-    //       setAlertModal({
-    //         status: true,
-    //         color: "success",
-    //         message: "Success",
-    //         subMessage: result.message,
-    //       });
-    //       setTimeout(() => {
-    //         onClose();
-    //       }, 1000);
-    //     } else {
-    //       setAlertModal({
-    //         status: true,
-    //         color: "danger",
-    //         message: "Failed",
-    //         subMessage: result.message,
-    //       });
+    if (confirm("Submit this data?")) {
+      setIsLoadingSubmit(true);
+      try {
+        const result = await createGaji(formData as any);
+        if (result.status) {
+          setAlertModal({
+            status: true,
+            color: "success",
+            message: "Success",
+            subMessage: result.message,
+          });
+          setTimeout(() => {
+            onClose();
+          }, 1000);
+        } else {
+          setAlertModal({
+            status: true,
+            color: "danger",
+            message: "Failed",
+            subMessage: result.message,
+          });
 
-    //       setIsLoadingSubmit(false);
-    //     }
-    //   } catch (error) {
-    //     setAlertModal({
-    //       status: true,
-    //       color: "danger",
-    //       message: "Error",
-    //       subMessage: "Something went wrong, please refresh and try again",
-    //     });
-    //     setIsLoadingSubmit(false);
-    //   }
-    // }
+          setIsLoadingSubmit(false);
+        }
+      } catch (error) {
+        setAlertModal({
+          status: true,
+          color: "danger",
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
+        });
+        setIsLoadingSubmit(false);
+      }
+    }
 
     return;
   };

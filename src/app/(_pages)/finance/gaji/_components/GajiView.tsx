@@ -4,9 +4,15 @@ import Button from "@/components/Button";
 import Pagination from "@/components/Pagination";
 import { FilterBulan } from "@/libs/FilterBulan";
 import { FilterTahun } from "@/libs/FilterTahun";
-import { AccessDepartmentProps, AccessProps, isLoadingProps } from "@/types";
+import {
+  AccessDepartmentProps,
+  AccessProps,
+  GajiProps,
+  isLoadingProps,
+} from "@/types";
 import React, { useEffect, useState } from "react";
 import GajiCreate from "./GajiCreate";
+import { getGaji } from "../_libs/action";
 
 type GajiViewProps = {
   accessDepartment: AccessDepartmentProps;
@@ -34,7 +40,7 @@ export default function GajiView(props: GajiViewProps) {
     tahun: new Date().getFullYear() as number | string,
   });
 
-  const [gajiData, setGajiData] = useState([] as []);
+  const [gajiData, setGajiData] = useState([] as GajiProps[]);
 
   useEffect(() => {
     if (alertPage.status) {
@@ -71,29 +77,29 @@ export default function GajiView(props: GajiViewProps) {
       bulan: string | number;
     }
   ) => {
-    // setLoadingPage(true);
-    // try {
-    //   const result = await getAdjustment(search, filter);
-    //   if (result.status) {
-    //     setAdjustmentData(result.data);
-    //   } else {
-    //     setAlertPage({
-    //       status: true,
-    //       color: "danger",
-    //       message: "Failed",
-    //       subMessage: result.message,
-    //     });
-    //   }
-    // } catch (error) {
-    //   setAlertPage({
-    //     status: true,
-    //     color: "danger",
-    //     message: "Error",
-    //     subMessage: "Something went wrong, please refresh and try again",
-    //   });
-    // } finally {
-    //   setLoadingPage(false);
-    // }
+    setLoadingPage(true);
+    try {
+      const result = await getGaji(search, filter);
+      if (result.status) {
+        setGajiData(result.data);
+      } else {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Failed",
+          subMessage: result.message,
+        });
+      }
+    } catch (error) {
+      setAlertPage({
+        status: true,
+        color: "danger",
+        message: "Error",
+        subMessage: "Something went wrong, please refresh and try again",
+      });
+    } finally {
+      setLoadingPage(false);
+    }
   };
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -184,7 +190,7 @@ export default function GajiView(props: GajiViewProps) {
                     <th style={{ width: "15%" }}>SLIP GAJI</th>
                   </tr>
                 </thead>
-                {/* <tbody>
+                <tbody>
                   {loadingPage ? (
                     <tr>
                       <td colSpan={5} align="center">
@@ -197,29 +203,17 @@ export default function GajiView(props: GajiViewProps) {
                         Loading...
                       </td>
                     </tr>
-                  ) : adjustmentData.length > 0 ? (
-                    adjustmentData.map((item, index) => (
+                  ) : gajiData.length > 0 ? (
+                    gajiData.map((item, index) => (
                       <tr key={index}>
                         <td align="center">
                           <Button
-                            type="actionTable"
+                            type="actionTable2"
                             indexData={index}
                             isLoading={isLoadingAction[item.id]}
-                            onEdit={() => {
-                              if (accessMenu.update) {
-                                handleGetEdit(item.id);
-                              } else {
-                                setAlertPage({
-                                  status: true,
-                                  color: "danger",
-                                  message: "You don't have access to edit",
-                                  subMessage: "",
-                                });
-                              }
-                            }}
                             onDelete={() => {
                               if (accessMenu.update) {
-                                handleDelete(item.id);
+                                // handleDelete(item.id);
                               } else {
                                 setAlertPage({
                                   status: true,
@@ -235,14 +229,17 @@ export default function GajiView(props: GajiViewProps) {
                         </td>
                         <td align="center">{index + 1}</td>
                         <td align="left">{item.pegawai.nama?.toUpperCase()}</td>
-                        <td align="center">{item.jenis?.toUpperCase()}</td>
-                        <td align="left">{item.keterangan?.toUpperCase()}</td>
                         <td align="right">
                           {new Intl.NumberFormat("id-ID", {
                             style: "currency",
                             currency: "IDR",
                             minimumFractionDigits: 0,
                           }).format(item.nominal)}
+                        </td>
+                        <td align="center">
+                          {
+                            // slip gaji
+                          }
                         </td>
                       </tr>
                     ))
@@ -253,7 +250,7 @@ export default function GajiView(props: GajiViewProps) {
                       </td>
                     </tr>
                   )}
-                </tbody> */}
+                </tbody>
               </table>
 
               <Pagination

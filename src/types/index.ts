@@ -380,3 +380,16 @@ export type AdjustmentProps = {
   bulan: number;
   tahun: number;
 };
+
+export type GajiProps = {
+  id: number;
+  uuid: string;
+  tahun: number;
+  bulan: number;
+  nominal: number;
+  pegawai: {
+    id: number;
+    nama: string;
+  };
+  department_id: number;
+};
