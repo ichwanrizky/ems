@@ -12,7 +12,13 @@ import {
 } from "@/types";
 import React, { useEffect, useState } from "react";
 import GajiCreate from "./GajiCreate";
-import { getGaji } from "../_libs/action";
+import {
+  deleteGaji,
+  exportExcelGaji,
+  ExportGajiProps,
+  getGaji,
+} from "../_libs/action";
+import * as XLSX from "xlsx";
 
 type GajiViewProps = {
   accessDepartment: AccessDepartmentProps;
@@ -105,6 +111,155 @@ export default function GajiView(props: GajiViewProps) {
     setSearchTerm(e.target.value);
   };
 
+  const handleDelete = async (id: number) => {
+    if (confirm("Delete this data?")) {
+      setIsLoadingAction({ ...isLoadingAction, [id]: true });
+      try {
+        const result = await deleteGaji(id);
+        if (result.status) {
+          setAlertPage({
+            status: true,
+            color: "success",
+            message: "Success",
+            subMessage: result.message,
+          });
+          fetchData("", filter);
+        } else {
+          setAlertPage({
+            status: true,
+            color: "danger",
+            message: "Failed",
+            subMessage: result.message,
+          });
+        }
+      } catch (error) {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
+        });
+      } finally {
+        setIsLoadingAction({ ...isLoadingAction, [id]: false });
+      }
+    }
+
+    return;
+  };
+
+  const exportToExcel = async (
+    search: string,
+    filter: {
+      department: string | number;
+      tahun: string | number;
+      bulan: string | number;
+    }
+  ) => {
+    if (confirm("Export Excel this data?")) {
+      setIsLoadingAction({ ...isLoadingAction, [0]: true });
+      try {
+        const result = await exportExcelGaji(search, filter);
+        if (result.status) {
+          const res = result.data as ExportGajiProps;
+
+          const headers = res.listKomponen;
+          const data = res.listGaji;
+
+          const headerTitles = [
+            "NO",
+            "NAMA",
+            "POSITION",
+            "DEPARTMENT",
+            "SUB DEPARTMENT",
+            "STATUS NIKAH",
+            "REKENING",
+            ...headers.map((item) => item.komponen),
+            "TOTAL SALARY",
+          ];
+
+          const exportData = data.map((item, index: number) => {
+            const komponenValues = headers.reduce((acc: any, header: any) => {
+              const komponenItem = item.gaji.find(
+                (item2) => item2.komponen_id === header.id
+              );
+              if (komponenItem) {
+                acc[header.komponen] =
+                  komponenItem.tipe === "penambahan" ||
+                  komponenItem.tipe === "pengurangan"
+                    ? Number(komponenItem.nominal)
+                    : komponenItem.nominal?.toString();
+              } else {
+                acc[header.komponen] = "INVALID DATA";
+              }
+              return acc;
+            }, {});
+
+            return {
+              NO: index + 1,
+              NAMA: item.nama?.toUpperCase(),
+              POSITION: item.position?.toUpperCase(),
+              DEPARTMENT: item.department.nama_department?.toUpperCase(),
+              "SUB DEPARTMENT":
+                item.sub_department.nama_sub_department?.toUpperCase(),
+              "STATUS NIKAH": item.status_nikah?.toUpperCase(),
+              REKENING: item.no_rek?.toUpperCase(),
+              ...komponenValues,
+              "TOTAL SALARY": item.gaji.reduce((acc: number, item2) => {
+                const nominal = Number(item2.nominal);
+                if (item2.tipe === "penambahan") {
+                  return acc + nominal;
+                } else if (item2.tipe === "pengurangan") {
+                  return acc - nominal;
+                } else {
+                  return acc;
+                }
+              }, 0),
+            };
+          });
+
+          const workbook = XLSX.utils.book_new();
+          const worksheet = XLSX.utils.aoa_to_sheet([headerTitles]);
+          XLSX.utils.sheet_add_json(worksheet, exportData, {
+            skipHeader: true,
+            origin: "A2",
+          });
+          const colWidths = headerTitles.map((title, index) => {
+            const maxContentWidth = Math.max(
+              ...exportData.map((row: any) =>
+                row[title] ? row[title].toString().length : 0
+              )
+            );
+            return { wch: Math.max(title.length, maxContentWidth) };
+          });
+          worksheet["!cols"] = colWidths;
+          XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+          XLSX.writeFile(
+            workbook,
+            `DATA GAJI ${filter.bulan}-${filter.tahun}.xlsx`
+          );
+        } else {
+          setAlertPage({
+            status: true,
+            color: "danger",
+            message: "Failed",
+            subMessage: result.message,
+          });
+        }
+      } catch (error) {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
+        });
+      } finally {
+        setIsLoadingAction({ ...isLoadingAction, [0]: false });
+      }
+    }
+
+    return;
+  };
+
   return (
     <>
       <div className="row g-3">
@@ -164,6 +319,26 @@ export default function GajiView(props: GajiViewProps) {
                 onClick={() => setIsCreateOpen(true)}
               />
             )}
+
+            {gajiData.length > 0 &&
+              (isLoadingAction[0] ? (
+                <button type="button" className="btn btn-success" disabled>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                  LOADING ...
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={() => exportToExcel(debouncedSearchTerm, filter)}
+                >
+                  EXPORT EXCEL
+                </button>
+              ))}
           </div>
         </div>
       </div>
@@ -213,7 +388,7 @@ export default function GajiView(props: GajiViewProps) {
                             isLoading={isLoadingAction[item.id]}
                             onDelete={() => {
                               if (accessMenu.update) {
-                                // handleDelete(item.id);
+                                handleDelete(item.id);
                               } else {
                                 setAlertPage({
                                   status: true,

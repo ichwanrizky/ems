@@ -31,6 +31,35 @@ type ReportData = {
   overtime_total: number;
 };
 
+export type ExportGajiProps = {
+  listKomponen: {
+    id: number;
+    komponen: string;
+    tipe: string;
+  }[];
+  listGaji: {
+    id: number;
+    nama: string;
+    status_nikah: string;
+    no_rek: string;
+    position: string;
+    department: {
+      nama_department: string;
+    };
+    sub_department: {
+      nama_sub_department: string;
+    };
+    gaji: {
+      id: number;
+      bulan: number;
+      tahun: number;
+      nominal: string;
+      komponen_id: number;
+      tipe: string;
+    }[];
+  }[];
+};
+
 export const getPegawaiGaji = async (
   department_id: number,
   bulan: number,
@@ -763,6 +792,147 @@ export const getGaji = async (
       status: true,
       message: "Data fetched successfully",
       data: result as GajiProps[],
+    };
+  } catch (error) {
+    return HandleError(error) as any;
+  }
+};
+
+export const deleteGaji = async (
+  id: number
+): Promise<{
+  status: boolean;
+  message: string;
+}> => {
+  try {
+    const result = await prisma.$transaction(async (prisma) => {
+      await prisma.gaji.deleteMany({
+        where: {
+          gaji_pegawai_id: id,
+        },
+      });
+
+      const deleteGaji = await prisma.gaji_pegawai.delete({
+        where: {
+          id: id,
+        },
+      });
+
+      await prisma.pph21.deleteMany({
+        where: {
+          bulan: deleteGaji!.bulan,
+          tahun: deleteGaji!.tahun,
+          pegawai_id: deleteGaji!.pegawai_id,
+        },
+      });
+
+      return true;
+    });
+
+    if (!result) {
+      return {
+        status: false,
+        message: "Delete data failed",
+      };
+    }
+
+    return {
+      status: true,
+      message: "Delete data successfully",
+    };
+  } catch (error) {
+    return HandleError(error) as any;
+  }
+};
+
+export const exportExcelGaji = async (
+  search?: string,
+  filter?: {
+    department: string | number;
+    tahun: string | number;
+    bulan: string | number;
+  }
+): Promise<{
+  status: boolean;
+  message: string;
+  data: ExportGajiProps | {};
+}> => {
+  try {
+    const listKomponen = await prisma.komponen_gaji.findMany({
+      select: {
+        id: true,
+        komponen: true,
+        tipe: true,
+      },
+      where: {
+        department_id: Number(filter?.department),
+        urut: {
+          not: 0,
+        },
+      },
+      orderBy: {
+        urut_tampil: "asc",
+      },
+    });
+
+    const listGaji = await prisma.pegawai.findMany({
+      select: {
+        id: true,
+        nama: true,
+        status_nikah: true,
+        no_rek: true,
+        position: true,
+        department: { select: { nama_department: true } },
+        sub_department: { select: { nama_sub_department: true } },
+        gaji: {
+          select: {
+            id: true,
+            bulan: true,
+            tahun: true,
+            nominal: true,
+            komponen_id: true,
+            tipe: true,
+          },
+          where: {
+            bulan: Number(filter?.bulan),
+            tahun: Number(filter?.tahun),
+          },
+          orderBy: {
+            urut: "asc",
+          },
+        },
+      },
+      where: {
+        department_id: Number(filter?.department),
+        gaji: {
+          some: {
+            bulan: Number(filter?.bulan),
+            tahun: Number(filter?.tahun),
+          },
+        },
+      },
+      orderBy: {
+        nama: "asc",
+      },
+    });
+
+    if (!listGaji || !listKomponen) {
+      return {
+        status: false,
+        message: "Data not found",
+        data: {},
+      };
+    }
+
+    const data = {
+      listKomponen: listKomponen,
+      listGaji: listGaji,
+    };
+
+    return {
+      status: true,
+      message: "Data fetched successfully",
+      data: data as ExportGajiProps,
     };
   } catch (error) {
     return HandleError(error) as any;

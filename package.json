@@ -17,7 +17,8 @@
     "react-datepicker": "^7.5.0",
     "react-dom": "^18.3.1",
     "react-number-format": "^5.4.3",
-    "react-select": "^5.9.0"
+    "react-select": "^5.9.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@types/node": "^20",
