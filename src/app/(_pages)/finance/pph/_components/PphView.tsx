@@ -4,9 +4,10 @@ import Alert from "@/components/Alert";
 import Pagination from "@/components/Pagination";
 import { FilterBulan } from "@/libs/FilterBulan";
 import { FilterTahun } from "@/libs/FilterTahun";
-import { AccessDepartmentProps } from "@/types";
+import { AccessDepartmentProps, isLoadingProps } from "@/types";
 import React, { useEffect, useState } from "react";
 import { getPph } from "../_libs/action";
+import * as XLSX from "xlsx";
 
 type PphViewProps = {
   accessDepartment: AccessDepartmentProps;
@@ -16,6 +17,7 @@ export default function PphView(props: PphViewProps) {
   const { accessDepartment } = props;
 
   const [loadingPage, setLoadingPage] = useState(true);
+  const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
   const [alertPage, setAlertPage] = useState({
     status: false,
     color: "",
@@ -24,8 +26,6 @@ export default function PphView(props: PphViewProps) {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isEditOpen, setIsEditOpen] = useState(false);
   const [filter, setFilter] = useState({
     department:
       accessDepartment[0].department.id?.toString() || ("" as string | number),
@@ -41,6 +41,7 @@ export default function PphView(props: PphViewProps) {
       pegawai: {
         id: number;
         nama: string;
+        npwp: string;
       };
     }[]
   );
@@ -109,6 +110,56 @@ export default function PphView(props: PphViewProps) {
     setSearchTerm(e.target.value);
   };
 
+  const exportToExcel = async () => {
+    if (confirm("Export Excel this data?")) {
+      setIsLoadingAction({ ...isLoadingAction, [0]: true });
+      try {
+        const headerTitles = ["NO", "NAMA", "NPWP", "GAJI", "PPH21"];
+        const data = pphData.map((item, index: number) => {
+          return {
+            NO: index + 1,
+            NAMA: item.pegawai.nama?.toUpperCase(),
+            NPWP: item.pegawai.npwp,
+            GAJI: item.gaji,
+            PPH21: item.pph21,
+          };
+        });
+
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.aoa_to_sheet([headerTitles]);
+        XLSX.utils.sheet_add_json(worksheet, data, {
+          skipHeader: true,
+          origin: "A2",
+        });
+        const colWidths = headerTitles.map((title, index) => {
+          const maxContentWidth = Math.max(
+            ...data.map((row: any) =>
+              row[title] ? row[title].toString().length : 0
+            )
+          );
+          return { wch: Math.max(title.length, maxContentWidth) };
+        });
+        worksheet["!cols"] = colWidths;
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+        XLSX.writeFile(
+          workbook,
+          `DATA PPH ${filter.bulan}-${filter.tahun}.xlsx`
+        );
+      } catch (error) {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
+        });
+      } finally {
+        setIsLoadingAction({ ...isLoadingAction, [0]: false });
+      }
+    }
+
+    return;
+  };
+
   return (
     <>
       <div className="row g-3">
@@ -160,7 +211,29 @@ export default function PphView(props: PphViewProps) {
         </div>
         <div className="col-auto flex-grow-1 overflow-auto"></div>
 
-        <div className="col-auto"></div>
+        <div className="col-auto">
+          <div className="d-flex align-items-center gap-2 justify-content-lg-end">
+            {pphData.length > 0 &&
+              (isLoadingAction[0] ? (
+                <button type="button" className="btn btn-success" disabled>
+                  <span
+                    className="spinner-border spinner-border-sm me-2"
+                    role="status"
+                    aria-hidden="true"
+                  ></span>
+                  LOADING ...
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="btn btn-success"
+                  onClick={() => exportToExcel()}
+                >
+                  EXPORT EXCEL
+                </button>
+              ))}
+          </div>
+        </div>
       </div>
 
       <div className="card mt-4">

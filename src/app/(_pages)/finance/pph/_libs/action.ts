@@ -9,6 +9,7 @@ type PphProps = {
   pegawai: {
     id: number;
     nama: string;
+    npwp: string;
   };
 };
 
@@ -34,6 +35,7 @@ export const getPph = async (
           select: {
             id: true,
             nama: true,
+            npwp: true,
           },
         },
       },
