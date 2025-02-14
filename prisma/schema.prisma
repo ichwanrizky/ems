@@ -212,6 +212,7 @@ model pegawai {
   is_deleted                 Boolean                      @default(false)
   type_gaji                  String                       @default("nonfixed")
   is_overtime                Boolean                      @default(false)
+  tgl_join                   DateTime?                    @db.Date
   department_id              Int
   department                 department                   @relation(fields: [department_id], references: [id])
   sub_department_id          Int?

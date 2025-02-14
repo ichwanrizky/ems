@@ -317,7 +317,7 @@ export default function OTRiwayatView(props: Props) {
                         <td align="left">
                           {item.pengajuan_overtime_pegawai.map((e) => (
                             <React.Fragment key={e.pegawai.id}>
-                              * {e.pegawai.nama}
+                              * {e.pegawai.nama?.toUpperCase()}
                               <br />
                             </React.Fragment>
                           ))}

@@ -85,6 +85,9 @@ export const authOptions: NextAuthOptions = {
                       update: true,
                       delete: true,
                     },
+                    where: {
+                      role_id: user?.roles?.id,
+                    },
                   },
                 },
                 where: {

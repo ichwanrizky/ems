@@ -311,7 +311,7 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                 <tbody>
                   {loadingPage ? (
                     <tr>
-                      <td colSpan={8} align="center">
+                      <td colSpan={9} align="center">
                         <div
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
@@ -406,7 +406,7 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={8} align="center">
+                      <td colSpan={9} align="center">
                         No data available
                       </td>
                     </tr>

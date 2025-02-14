@@ -302,7 +302,7 @@ export default function OTPengajuanView(props: Props) {
                         <td align="left">
                           {item.pengajuan_overtime_pegawai.map((e) => (
                             <React.Fragment key={e.pegawai.id}>
-                              * {e.pegawai.nama}
+                              * {e.pegawai.nama?.toUpperCase()}
                               <br />
                             </React.Fragment>
                           ))}
@@ -324,8 +324,7 @@ export default function OTPengajuanView(props: Props) {
                         <td align="left">{item.job_desc?.toUpperCase()}</td>
                         <td align="left">{item.remark?.toUpperCase()}</td>
                         <td align="center">
-                          {accessMenu.update &&
-                            item.approval &&
+                          {(accessMenu.update || item.approval) &&
                             (isLoadingAction[item.id] ? (
                               <div className="d-grid gap-2">
                                 <span

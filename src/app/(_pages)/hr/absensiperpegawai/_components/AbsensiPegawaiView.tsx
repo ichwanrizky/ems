@@ -27,6 +27,7 @@ type AbsensiPegawaiViewProps = {
 };
 export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
   const { accessDepartment, accessMenu } = props;
+  console.log("🚀 ~ AbsensiPegawaiView ~ accessMenu:", accessMenu);
 
   const [loadingPage, setLoadingPage] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
