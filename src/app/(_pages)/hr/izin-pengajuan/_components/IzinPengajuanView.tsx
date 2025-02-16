@@ -295,7 +295,7 @@ export default function IzinPengajuanView(props: Props) {
                         <td align="center"></td>
                         <td>{item.keterangan?.toUpperCase()}</td>
                         <td align="center">
-                          {accessMenu.update &&
+                          {(accessMenu.update || item.approval) &&
                             (isLoadingAction[item.id] ? (
                               <div className="d-grid gap-2">
                                 <span

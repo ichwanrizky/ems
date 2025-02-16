@@ -23,12 +23,21 @@ export const getRiwayatIzin = async (
   total_data: number;
 }> => {
   try {
+    const session: any = await getServerSession(authOptions);
+
     const condition = {
       where: {
         status: {
           not: 0,
         },
         department_id: Number(filter?.department),
+        pegawai: {
+          sub_department_id: {
+            in: session.user.access_sub_department.map(
+              (item: any) => item.sub_department.id
+            ),
+          },
+        },
         bulan: Number(filter?.bulan),
         tahun: Number(filter?.tahun),
         ...(search && {

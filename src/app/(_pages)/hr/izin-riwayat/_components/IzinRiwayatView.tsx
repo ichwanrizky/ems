@@ -50,6 +50,21 @@ export default function IzinRiwayatView(props: Props) {
   );
 
   useEffect(() => {
+    if (alertPage.status) {
+      const timer = setTimeout(() => {
+        setAlertPage({
+          status: false,
+          color: "",
+          message: "",
+          subMessage: "",
+        });
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [alertPage]);
+
+  useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
       setCurrentPage(1);

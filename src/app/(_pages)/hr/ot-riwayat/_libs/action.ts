@@ -1,7 +1,9 @@
 "use server";
+import { authOptions } from "@/libs/AuthOptions";
 import { HandleError } from "@/libs/Error";
 import prisma from "@/libs/Prisma";
-import { RiwayatOvertimeProps } from "@/types";
+import { AccessSubDepartmentProps, RiwayatOvertimeProps } from "@/types";
+import { getServerSession } from "next-auth";
 
 export const getRiwayatOt = async (
   search?: string,
@@ -19,6 +21,8 @@ export const getRiwayatOt = async (
   total_data: number;
 }> => {
   try {
+    const session: any = await getServerSession(authOptions);
+
     const condition = {
       where: {
         status: {
@@ -27,6 +31,11 @@ export const getRiwayatOt = async (
         tahun: Number(filter?.tahun),
         bulan: Number(filter?.bulan),
         department_id: Number(filter?.department),
+        sub_department_id: {
+          in: session.user.access_sub_department.map(
+            (item: any) => item.sub_department.id
+          ),
+        },
         ...(filter?.sub_department && {
           sub_department_id: Number(filter?.sub_department),
         }),

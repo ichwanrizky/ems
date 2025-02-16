@@ -18,6 +18,8 @@ export const getPengajuanIzin = async (
   data: PengajuanIzinProps[] | [];
 }> => {
   try {
+    const session: any = await getServerSession(authOptions);
+
     const result = (await prisma.pengajuan_izin.findMany({
       select: {
         id: true,
@@ -37,12 +39,27 @@ export const getPengajuanIzin = async (
         pegawai: {
           select: {
             nama: true,
+            sub_department: {
+              select: {
+                id: true,
+                nama_sub_department: true,
+                manager: true,
+                supervisor: true,
+              },
+            },
           },
         },
       },
       where: {
         status: 0,
         department_id: Number(filter?.department),
+        pegawai: {
+          sub_department_id: {
+            in: session.user.access_sub_department.map(
+              (item: any) => item.sub_department.id
+            ),
+          },
+        },
         ...(search && {
           pegawai: {
             nama: {
@@ -61,10 +78,19 @@ export const getPengajuanIzin = async (
       };
     }
 
+    const newData = result.map((item) => ({
+      ...item,
+      approval:
+        Number(session.user.id) === item.pegawai.sub_department.manager ||
+        Number(session.user.id) === item.pegawai.sub_department.supervisor
+          ? true
+          : false,
+    }));
+
     return {
       status: true,
       message: "Data fetched successfully",
-      data: result,
+      data: newData,
     };
   } catch (error) {
     return HandleError(error) as any;

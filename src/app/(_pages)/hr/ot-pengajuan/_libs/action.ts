@@ -22,31 +22,6 @@ export const getPegawaiOt = async (
   try {
     const session: any = await getServerSession(authOptions);
 
-    const listData = await prisma.sub_department.findMany({
-      select: {
-        id: true,
-      },
-      where: {
-        OR: [
-          {
-            leader: Number(session.user.id),
-          },
-          {
-            supervisor: Number(session.user.id),
-          },
-        ],
-      },
-    });
-
-    let condition = {};
-    if (listData) {
-      condition = {
-        sub_department_id: {
-          in: listData.map((item) => item.id),
-        },
-      };
-    }
-
     const result = await prisma.pegawai.findMany({
       select: {
         id: true,
@@ -56,8 +31,14 @@ export const getPegawaiOt = async (
         is_active: true,
         is_deleted: false,
         is_overtime: true,
-        sub_department_id: sub_department_id,
-        ...condition,
+        sub_department_id: {
+          in: session.user.access_sub_department.map(
+            (item: any) => item.sub_department.id
+          ),
+        },
+        sub_department: {
+          id: sub_department_id,
+        },
       },
       orderBy: {
         nama: "asc",
@@ -147,31 +128,6 @@ export const getPengajuanOt = async (
   try {
     const session: any = await getServerSession(authOptions);
 
-    const listData = await prisma.sub_department.findMany({
-      select: {
-        id: true,
-      },
-      where: {
-        OR: [
-          {
-            leader: Number(session.user.id),
-          },
-          {
-            supervisor: Number(session.user.id),
-          },
-        ],
-      },
-    });
-
-    let condition = {};
-    if (listData) {
-      condition = {
-        sub_department_id: {
-          in: listData.map((item) => item.id),
-        },
-      };
-    }
-
     const result = await prisma.pengajuan_overtime.findMany({
       select: {
         id: true,
@@ -202,7 +158,11 @@ export const getPengajuanOt = async (
       where: {
         status: 0,
         department_id: Number(filter?.department),
-        ...condition,
+        sub_department_id: {
+          in: session.user.access_sub_department.map(
+            (item: any) => item.sub_department.id
+          ),
+        },
         ...(search && {
           OR: [
             {

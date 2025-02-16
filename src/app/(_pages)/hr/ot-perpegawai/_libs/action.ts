@@ -1,8 +1,14 @@
 "use server";
+import { authOptions } from "@/libs/AuthOptions";
 import { HandleError } from "@/libs/Error";
 import prisma from "@/libs/Prisma";
 import { OvertimeMonthlyProps } from "@/types";
+import { getServerSession } from "next-auth";
 
+type PegawaiAbsen = {
+  id: number;
+  nama: string;
+};
 export const getOvertimePegawai = async (filter: {
   bulan: number;
   tahun: number;
@@ -99,5 +105,53 @@ export const deleteOvertimePegawai = async (
     };
   } catch (error) {
     return HandleError(error);
+  }
+};
+
+export const getPegawaiOvertime = async (
+  department: number | string
+): Promise<{
+  status: boolean;
+  message: string;
+  data: PegawaiAbsen[] | [];
+}> => {
+  try {
+    const session: any = await getServerSession(authOptions);
+
+    const result = (await prisma.pegawai.findMany({
+      select: {
+        id: true,
+        nama: true,
+      },
+      where: {
+        is_active: true,
+        is_deleted: false,
+        department_id: Number(department),
+        sub_department_id: {
+          in: session.user.access_sub_department.map(
+            (item: any) => item.sub_department.id
+          ),
+        },
+      },
+      orderBy: {
+        nama: "asc",
+      },
+    })) as PegawaiAbsen[];
+
+    if (!result) {
+      return {
+        status: false,
+        message: "Data not found",
+        data: [],
+      };
+    }
+
+    return {
+      status: true,
+      message: "Data fetched successfully",
+      data: result,
+    };
+  } catch (error) {
+    return HandleError(error) as any;
   }
 };

@@ -258,7 +258,14 @@ export type PengajuanIzinProps = {
   };
   pegawai: {
     nama: string;
+    sub_department: {
+      id: number;
+      nama_sub_department: string;
+      manager: number | null;
+      supervisor: number | null;
+    };
   };
+  approval: boolean;
 };
 
 export type RiwayatIzinProps = {

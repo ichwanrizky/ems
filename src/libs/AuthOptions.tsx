@@ -57,6 +57,20 @@ export const authOptions: NextAuthOptions = {
                   },
                 },
               },
+              leader_user: {
+                select: {
+                  id: true,
+                  nama_sub_department: true,
+                  department_id: true,
+                },
+              },
+              supervisor_user: {
+                select: {
+                  id: true,
+                  nama_sub_department: true,
+                  department_id: true,
+                },
+              },
             },
             where: {
               username,
@@ -124,13 +138,42 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (result.user && result.menu.length > 0 && result.checkPassword) {
+          let accessSubDepartments = [];
+
+          // Check if leader_user or supervisor_user exists
+          if (
+            result.user.leader_user.length > 0 ||
+            result.user.supervisor_user.length > 0
+          ) {
+            accessSubDepartments = [
+              ...result.user.leader_user.map((item) => ({
+                sub_department: item,
+              })),
+              ...result.user.supervisor_user.map((item) => ({
+                sub_department: item,
+              })),
+            ];
+          } else {
+            accessSubDepartments =
+              result.user.roles?.access_sub_department?.map((access) => ({
+                sub_department: access.sub_department,
+              })) || [];
+          }
+
+          // Remove duplicates based on sub_department.id
+          const uniqueAccessSubDepartments = Array.from(
+            new Map(
+              accessSubDepartments.map((item) => [item.sub_department.id, item])
+            ).values()
+          );
+
           return {
             id: result.user.id.toString(),
             username: result.user.username,
             role_id: result.user.roles?.id,
             role_name: result.user.roles?.role_name,
             access_department: result.user.roles?.access_department,
-            access_sub_department: result.user.roles?.access_sub_department,
+            access_sub_department: uniqueAccessSubDepartments,
             menu: result.menu,
           };
         }

@@ -27,7 +27,6 @@ type AbsensiPegawaiViewProps = {
 };
 export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
   const { accessDepartment, accessMenu } = props;
-  console.log("🚀 ~ AbsensiPegawaiView ~ accessMenu:", accessMenu);
 
   const [loadingPage, setLoadingPage] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
@@ -59,6 +58,21 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
   );
 
   const [selectedAbsen, setSelectedAbsen] = useState({} as any);
+
+  useEffect(() => {
+    if (alertPage.status) {
+      const timer = setTimeout(() => {
+        setAlertPage({
+          status: false,
+          color: "",
+          message: "",
+          subMessage: "",
+        });
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [alertPage]);
 
   useEffect(() => {
     setFilter((prevFilter) => ({
@@ -377,12 +391,21 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
                             <button
                               type="button"
                               className="btn btn-primary btn-sm mt-2"
-                              onClick={() =>
-                                handleCreateAbsen(item.tanggal, {
-                                  id: item.id,
-                                  nama: item.nama,
-                                })
-                              }
+                              onClick={() => {
+                                if (accessMenu.update) {
+                                  handleCreateAbsen(item.tanggal, {
+                                    id: item.id,
+                                    nama: item.nama,
+                                  });
+                                } else {
+                                  setAlertPage({
+                                    status: true,
+                                    color: "danger",
+                                    message: "You don't have access to delete",
+                                    subMessage: "",
+                                  });
+                                }
+                              }}
                             >
                               CREATE
                             </button>

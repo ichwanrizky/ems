@@ -21,6 +21,8 @@ export const getPegawaiAbsen = async (
   data: PegawaiAbsen[] | [];
 }> => {
   try {
+    const session: any = await getServerSession(authOptions);
+
     const result = (await prisma.pegawai.findMany({
       select: {
         id: true,
@@ -30,6 +32,11 @@ export const getPegawaiAbsen = async (
         is_active: true,
         is_deleted: false,
         department_id: Number(department),
+        sub_department_id: {
+          in: session.user.access_sub_department.map(
+            (item: any) => item.sub_department.id
+          ),
+        },
       },
       orderBy: {
         nama: "asc",

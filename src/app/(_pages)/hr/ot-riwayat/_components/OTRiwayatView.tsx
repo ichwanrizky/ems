@@ -79,8 +79,8 @@ export default function OTRiwayatView(props: Props) {
   }, [searchTerm]);
 
   useEffect(() => {
-    fetchData(debouncedSearchTerm, filter);
-  }, [debouncedSearchTerm, filter]);
+    fetchData(debouncedSearchTerm, filter, currentPage);
+  }, [debouncedSearchTerm, filter, currentPage]);
 
   const fetchData = async (
     search: string,
@@ -364,9 +364,7 @@ export default function OTRiwayatView(props: Props) {
                 currentPage={currentPage}
                 totalPage={totalPage}
                 maxPagination={maxPagination}
-                setCurrentPage={() => {
-                  setCurrentPage;
-                }}
+                setCurrentPage={setCurrentPage}
               />
             </div>
           </div>

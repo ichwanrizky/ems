@@ -7,11 +7,12 @@ import {
   OvertimeMonthlyProps,
 } from "@/types";
 import React, { useEffect, useState } from "react";
+
 import {
-  deleteAbsensiPerpegawai,
-  getPegawaiAbsen,
-} from "../../absensiperpegawai/_libs/action";
-import { deleteOvertimePegawai, getOvertimePegawai } from "../_libs/action";
+  deleteOvertimePegawai,
+  getOvertimePegawai,
+  getPegawaiOvertime,
+} from "../_libs/action";
 import Select from "react-select";
 import { FilterBulan } from "@/libs/FilterBulan";
 import { FilterTahun } from "@/libs/FilterTahun";
@@ -54,6 +55,21 @@ export default function OTPegawaiView(props: OTPegawaiViewProps) {
   const [otDataa, setOtData] = useState([] as OvertimeMonthlyProps[]);
 
   useEffect(() => {
+    if (alertPage.status) {
+      const timer = setTimeout(() => {
+        setAlertPage({
+          status: false,
+          color: "",
+          message: "",
+          subMessage: "",
+        });
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [alertPage]);
+
+  useEffect(() => {
     setFilter((prevFilter) => ({
       ...prevFilter,
       pegawai: "",
@@ -68,7 +84,7 @@ export default function OTPegawaiView(props: OTPegawaiViewProps) {
   const fetchDataPegawai = async (department = "" as string | number) => {
     setLoadingPage(true);
     try {
-      const result = await getPegawaiAbsen(department);
+      const result = await getPegawaiOvertime(department);
       if (result.status) {
         setPegawaiData(
           result.data as {

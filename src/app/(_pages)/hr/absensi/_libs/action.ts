@@ -1,9 +1,11 @@
 "use server";
 
+import { authOptions } from "@/libs/AuthOptions";
 import { ConvertDate, ConvertDateZeroHours } from "@/libs/ConvertDate";
 import { HandleError } from "@/libs/Error";
 import prisma from "@/libs/Prisma";
 import { AbsenProps } from "@/types";
+import { getServerSession } from "next-auth";
 
 export const getAbsensi = async (
   search: string,
@@ -19,6 +21,8 @@ export const getAbsensi = async (
   data: AbsenProps[] | [];
 }> => {
   try {
+    const session: any = await getServerSession(authOptions);
+
     const result = (await prisma.pegawai.findMany({
       select: {
         id: true,
@@ -56,6 +60,11 @@ export const getAbsensi = async (
         is_active: true,
         is_deleted: false,
         department_id: Number(filter!.department),
+        sub_department_id: {
+          in: session.user.access_sub_department.map(
+            (item: any) => item.sub_department.id
+          ),
+        },
         ...(filter!.sub_department && {
           sub_department_id: Number(filter!.sub_department),
         }),
