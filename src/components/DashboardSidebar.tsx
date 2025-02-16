@@ -14,11 +14,9 @@ export default function DashboardSidebar({ menu }: { menu: MenuProps }) {
   return (
     <aside className="sidebar-wrapper" data-simplebar="true">
       <div className="sidebar-header">
-        <div className="logo-icon">
-          <img src="/assets/images/logo-icon.png" className="logo-img" alt="" />
-        </div>
+        <div className="logo-icon"></div>
         <div className="logo-name flex-grow-1">
-          <h5 className="mb-0">Maxton</h5>
+          <h5 className="mb-0">PANJI JAYA</h5>
         </div>
         <div className="sidebar-close">
           <span className="material-icons-outlined">close</span>

@@ -85,11 +85,7 @@ export default function LoginPage({ searchParams }: { searchParams: any }) {
                 </div>
               )}
               <div className="card-body p-5">
-                <img
-                  src="/assets/images/logo1.png"
-                  className="mb-4"
-                  width={145}
-                />
+                <img src="/img/panji.png" className="mb-4" width={80} />
                 <h4 className="fw-bold">PANJI JAYA</h4>
                 <p className="mb-0">ENTERPRISE MANAGEMENT SYSTEM</p>
                 <div className="form-body my-5">

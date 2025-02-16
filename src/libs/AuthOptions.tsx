@@ -29,6 +29,7 @@ export const authOptions: NextAuthOptions = {
             select: {
               id: true,
               username: true,
+              name: true,
               password: true,
               roles: {
                 select: {
@@ -170,6 +171,7 @@ export const authOptions: NextAuthOptions = {
           return {
             id: result.user.id.toString(),
             username: result.user.username,
+            name: result.user.name,
             role_id: result.user.roles?.id,
             role_name: result.user.roles?.role_name,
             access_department: result.user.roles?.access_department,
@@ -187,6 +189,7 @@ export const authOptions: NextAuthOptions = {
       if (account?.provider === "credentials") {
         token.id = user.id;
         token.username = user.username;
+        token.name = user.name;
         token.role_id = user.role_id;
         token.role_name = user.role_name;
         token.access_department = user.access_department;
@@ -210,6 +213,10 @@ export const authOptions: NextAuthOptions = {
 
       if ("username" in token) {
         session.user.username = token.username;
+      }
+
+      if ("name" in token) {
+        session.user.name = token.name;
       }
 
       if ("role_id" in token) {

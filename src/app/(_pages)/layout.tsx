@@ -11,6 +11,7 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const session: any = await getServerSession(authOptions);
+  console.log("🚀 ~ session:", session);
 
   if (!session) redirect("/auth/logout");
 
@@ -70,7 +71,10 @@ export default async function DashboardLayout({
       </head>
       <body>
         <DashboardSidebar menu={session.user.menu} />
-        <DashboardHeader />
+        <DashboardHeader
+          name={session.user.name}
+          role_name={session.user.role_name}
+        />
         <main className="main-wrapper">{children}</main>
 
         <div className="overlay btn-toggle"></div>
