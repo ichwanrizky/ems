@@ -97,10 +97,22 @@ export const getMasterGaji = async (
       };
     }
 
+    const newData = result.map((item) => ({
+      ...item,
+      master_gaji_pegawai:
+        item.master_gaji_pegawai.length > 0
+          ? item.master_gaji_pegawai
+          : komponenGaji.map((e) => ({
+              id: Date.now() + Math.floor(Math.random() * 1000),
+              nominal: 0,
+              komponen: e,
+            })),
+    }));
+
     return {
       status: true,
       message: "Data fetched successfully",
-      data: result as MasterGajiProps[],
+      data: newData as MasterGajiProps[],
       komponen: komponenGaji as KomponenProps[],
     };
   } catch (error) {
