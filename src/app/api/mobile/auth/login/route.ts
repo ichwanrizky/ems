@@ -1,15 +1,15 @@
-import { DateNowFormat } from "@/libs/DateFormat";
-import prisma from "@/libs/Prisma";
 import { NextResponse } from "next/server";
+import prisma from "@/libs/Prisma";
+import { DateNowFormat } from "@/libs/DateFormat";
 
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
-    const body = await request.json();
-
-    const { username, password } = body;
+    const body = await req.formData();
+    const username = body.get("username")?.toString();
+    const password = body.get("password")?.toString();
 
     if (!username || !password) {
       return new NextResponse(
@@ -26,19 +26,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await prisma.user.findFirst({
-      select: {
-        id: true,
-        username: true,
-        password: true,
+    const getUser = await prisma.user.findFirst({
+      include: {
         pegawai: {
           select: {
             id: true,
             nama: true,
-            position: true,
             department: {
               select: {
                 nama_department: true,
+              },
+            },
+            shift: {
+              select: {
+                jam_masuk: true,
+                jam_pulang: true,
               },
             },
           },
@@ -55,7 +57,9 @@ export async function POST(request: Request) {
       },
       where: {
         username: username,
-        is_deleted: false,
+        pegawai_id: {
+          not: null,
+        },
         pegawai: {
           is_active: true,
           is_deleted: false,
@@ -64,24 +68,7 @@ export async function POST(request: Request) {
     });
 
     // invalid username
-    if (!result) {
-      return new NextResponse(
-        JSON.stringify({
-          status: false,
-          message: "Invalid username or password",
-        }),
-        {
-          status: 400,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
-    // check password
-    const checkPassword = await bcrypt.compare(password, result.password);
-    if (!checkPassword) {
+    if (!getUser) {
       return new NextResponse(
         JSON.stringify({
           status: false,
@@ -98,14 +85,13 @@ export async function POST(request: Request) {
 
     // session active
     if (
-      result.session_mobile.length > 0 &&
-      result.session_mobile[0].expired === false
+      getUser.session_mobile.length > 0 &&
+      getUser.session_mobile[0].expired === false
     ) {
       return new NextResponse(
         JSON.stringify({
           status: false,
-          message:
-            "The session is active. Kindly report this to the administrator.",
+          message: "Session active",
         }),
         {
           status: 400,
@@ -116,21 +102,41 @@ export async function POST(request: Request) {
       );
     }
 
-    const data = {
-      id: result.id,
-      pegawai_id: result.pegawai?.id,
-      username: result.username,
-      name: result.pegawai?.nama?.toUpperCase(),
-      position: result.pegawai?.position?.toUpperCase(),
-      department: result.pegawai?.department?.nama_department?.toUpperCase(),
+    // check password
+    const checkPassword = await bcrypt.compare(password, getUser.password);
+
+    // invalid password
+    if (!checkPassword) {
+      return new NextResponse(
+        JSON.stringify({
+          status: false,
+          message: "Invalid username or password",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    // new json
+    const newDataUser = {
+      id: getUser.id,
+      username: getUser.username,
+      pegawaiId: getUser.pegawai?.id,
+      pegawaiName: getUser.pegawai?.nama.toUpperCase(),
+      department: getUser.pegawai?.department?.nama_department.toUpperCase(),
     };
 
-    const token = await jwt.sign({ data: data }, process.env.JWT);
+    // generate token
+    const token = await jwt.sign({ data: newDataUser }, process.env.JWT);
 
     // insert session
     const session = await prisma.session_mobile.create({
       data: {
-        user_id: result.id,
+        user_id: getUser.id,
         token: token,
         created_at: DateNowFormat(),
       },
@@ -140,7 +146,7 @@ export async function POST(request: Request) {
       return new NextResponse(
         JSON.stringify({
           status: false,
-          message: "Something went wrong, please try again",
+          message: "Failed to create session",
         }),
         {
           status: 500,
@@ -156,7 +162,7 @@ export async function POST(request: Request) {
         status: true,
         message: "Login success",
         data: {
-          ...data,
+          ...newDataUser,
           accessToken: token,
         },
       }),
@@ -168,10 +174,25 @@ export async function POST(request: Request) {
       }
     );
   } catch (error) {
+    if (error instanceof Error) {
+      return new NextResponse(
+        JSON.stringify({
+          status: false,
+          message: error.message,
+        }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
     return new NextResponse(
       JSON.stringify({
         status: false,
-        message: "Internal server error",
+        message: "Internal Server Error, Please try again later",
       }),
       {
         status: 500,
