@@ -82,6 +82,8 @@ export const authOptions: NextAuthOptions = {
           // check password
           const checkPassword = await bcrypt.compare(password, user?.password);
 
+          if (user?.roles === null) return { user, menu: [], checkPassword };
+
           const menu = await prisma.menu_group.findMany({
             select: {
               id: true,
