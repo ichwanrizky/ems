@@ -400,3 +400,29 @@ export type GajiProps = {
   };
   department_id: number;
 };
+
+export type SlipGajiDataProps = {
+  bulan: number;
+  tahun: number;
+  pegawai: {
+    id: number;
+    nama: string;
+    status_nikah: string;
+    position: string;
+  };
+  department: {
+    nama_department: string;
+  };
+  gaji: {
+    id: number;
+    bulan: number;
+    tahun: number;
+    pegawai_id: number;
+    tipe: string;
+    komponen: string;
+    komponen_id: number;
+    nominal: string;
+    urut: number;
+    gaji_pegawai_id: number;
+  }[];
+};
