@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { getSlipGaji } from "../_libs/action";
 import { SlipGajiDataProps } from "@/types";
 import Alert from "@/components/Alert";
+import { PDFDownloadLink } from "@react-pdf/renderer";
+import SlipGajiPdf from "@/libs/SlipGaji";
 
 export default function SlipGajiView({ uuid }: { uuid: string }) {
   const [loadingPage, setLoadingPage] = useState(true);
@@ -96,17 +98,35 @@ export default function SlipGajiView({ uuid }: { uuid: string }) {
                       <span>Tahun:</span>
                       <span>{slipGajiData.tahun}</span>
                     </div>
-                    <a
-                      download="Slip Gaji ALDA SINTA  (Januari 2025).pdf"
-                      href="blob:https://ems.panji-jaya.co.id/e8c88887-2b94-4944-af6c-6a12a487c1ee"
+
+                    <PDFDownloadLink
+                      document={<SlipGajiPdf gajiPegawai={slipGajiData} />}
+                      fileName={`Slip Gaji ${
+                        slipGajiData.pegawai.nama
+                      } (${monthNames(slipGajiData.bulan)} ${
+                        slipGajiData.tahun
+                      }).pdf`}
                     >
-                      <button
-                        type="button"
-                        className="btn btn-success btn-sm mt-3"
-                      >
-                        Download PDF
-                      </button>
-                    </a>
+                      {({ loading }) =>
+                        loading ? (
+                          <button
+                            type="button"
+                            className="btn btn-success btn-sm mt-3"
+                            disabled
+                          >
+                            <span className="spinner-border spinner-border-sm"></span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className="btn btn-success btn-sm mt-3"
+                          >
+                            <i className="bi bi-file-earmark-pdf"></i>
+                            Download PDF
+                          </button>
+                        )
+                      }
+                    </PDFDownloadLink>
                   </div>
 
                   <hr />

@@ -412,9 +412,13 @@ export default function GajiView(props: GajiViewProps) {
                           }).format(item.nominal)}
                         </td>
                         <td align="center">
-                          {
-                            // slip gaji
-                          }
+                          <a
+                            href={`/slipgaji/${item.uuid}`}
+                            target="_blank"
+                            className="btn btn-success btn-sm"
+                          >
+                            <i className="bi bi-file-earmark-pdf"></i> SLIP GAJI
+                          </a>
                         </td>
                       </tr>
                     ))
