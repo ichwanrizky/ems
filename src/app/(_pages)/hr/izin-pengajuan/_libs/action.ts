@@ -68,6 +68,16 @@ export const getPengajuanIzin = async (
           },
         }),
       },
+      orderBy: [
+        {
+          tanggal: "desc",
+        },
+        {
+          pegawai: {
+            nama: "asc",
+          },
+        },
+      ],
     })) as PengajuanIzinProps[];
 
     if (!result) {

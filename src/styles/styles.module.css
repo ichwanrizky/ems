@@ -1,3 +1,8 @@
 .datePicker {
     width: 100%;
   }
+
+.redDisabled {
+  color: red !important; /* Make the text red */
+  pointer-events: none; /* Disable clicking */
+}
