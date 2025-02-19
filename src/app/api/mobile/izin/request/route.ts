@@ -79,7 +79,7 @@ export async function GET(req: Request) {
           message: "Request Success",
           data: {
             ...existSession,
-            url: `${process.env.IZIN_URL}/pengajuan-izin/${existSession.uuid}`,
+            url: `${process.env.NEXTAUTH_URL}/pengajuan-izin/${existSession.uuid}`,
           },
         }),
         {
@@ -123,7 +123,7 @@ export async function GET(req: Request) {
         message: "Request Success",
         data: {
           ...createSession,
-          url: `${process.env.IZIN_URL}/pengajuan-izin/${createSession.uuid}`,
+          url: `${process.env.NEXTAUTH_URL}/pengajuan-izin/${createSession.uuid}`,
         },
       }),
       {
