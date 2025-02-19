@@ -301,7 +301,13 @@ export default function IzinRiwayatView(props: Props) {
                         </td>
                         <td align="center">{item.jumlah_hari}</td>
                         <td align="center">{item.jumlah_jam}</td>
-                        <td align="center"></td>
+                        <td align="center">
+                          {item.jenis_izin.kode === "S" && (
+                            <a href={`/izin/${item.uuid}.png`} target="_blank">
+                              MC
+                            </a>
+                          )}
+                        </td>
                         <td>{item.keterangan?.toUpperCase()}</td>
                         <td align="center">
                           {item.status === 1 ? (

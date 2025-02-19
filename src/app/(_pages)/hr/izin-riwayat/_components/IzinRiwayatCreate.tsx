@@ -352,6 +352,18 @@ export default function IzinRiwayatCreate(props: Props) {
               onKeyDown={(e) => {
                 e.preventDefault();
               }}
+              excludeDates={tglMerahData?.map(
+                (item) => new Date(item.tanggal || "")
+              )}
+              dayClassName={(date) =>
+                tglMerahData?.some(
+                  (item) =>
+                    new Date(item.tanggal || "").toDateString() ===
+                    date.toDateString()
+                )
+                  ? styles.redDisabled // Apply red color class
+                  : ""
+              }
             />
           </div>
 
