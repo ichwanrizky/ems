@@ -58,6 +58,16 @@ export default function SlipGajiView({ uuid }: { uuid: string }) {
         <div className="row">
           <div className="col-12 col-md-8 col-lg-6 col-xl-5 col-xxl-4 mx-auto">
             <div className="card rounded-4 mb-0 border-top border-4 border-primary">
+              {alertPage.status && (
+                <div className="card-body">
+                  <Alert
+                    color={alertPage.color}
+                    message={alertPage.message}
+                    subMessage={alertPage.subMessage}
+                  />
+                </div>
+              )}
+
               <div className="card-header p-4 text-center">
                 <h4 className="fw-bold">SLIP GAJI</h4>
               </div>
@@ -72,7 +82,7 @@ export default function SlipGajiView({ uuid }: { uuid: string }) {
                   </div>
                   Loading...
                 </div>
-              ) : slipGajiData && uuid ? (
+              ) : slipGajiData ? (
                 <div
                   className="card-body px-4"
                   style={{ maxHeight: "70vh", overflowY: "auto" }}
@@ -294,13 +304,7 @@ export default function SlipGajiView({ uuid }: { uuid: string }) {
                   </div>
                 </div>
               ) : (
-                <div className="card-body px-4">
-                  <Alert
-                    color={"danger"}
-                    message={"Failed"}
-                    subMessage={"Data not found"}
-                  />
-                </div>
+                <div className="card-body px-4 text-center"></div>
               )}
             </div>
           </div>

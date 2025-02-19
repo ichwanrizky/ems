@@ -150,6 +150,7 @@ export default function PengajuanIzinView({ uuid }: { uuid: string }) {
       reader.readAsDataURL(file);
     }
   };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (confirm("Submit this data?")) {
