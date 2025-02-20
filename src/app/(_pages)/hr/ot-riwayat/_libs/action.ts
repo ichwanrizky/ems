@@ -2,7 +2,7 @@
 import { authOptions } from "@/libs/AuthOptions";
 import { HandleError } from "@/libs/Error";
 import prisma from "@/libs/Prisma";
-import { AccessSubDepartmentProps, RiwayatOvertimeProps } from "@/types";
+import { RiwayatOvertimeProps } from "@/types";
 import { getServerSession } from "next-auth";
 
 export const getRiwayatOt = async (

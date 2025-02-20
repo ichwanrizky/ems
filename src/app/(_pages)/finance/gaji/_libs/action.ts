@@ -320,7 +320,13 @@ export const createGaji = async (data: {
           }
         } else if (item.jenis_izin === "G3") {
           totalG3 += item.jumlah_jam !== null && jumlahJam(item.jumlah_jam);
-        } else if (item.jenis_izin === "P/M") {
+        } else if (
+          item.jenis_izin === "P/M" ||
+          item.jenis_izin === "TA1" ||
+          item.jenis_izin === "TA2" ||
+          item.jenis_izin === "LA1" ||
+          item.jenis_izin === "LA2"
+        ) {
           totalPM += 1;
         }
 
@@ -341,7 +347,14 @@ export const createGaji = async (data: {
         }
 
         // LUPA ABSEN
-        if (!item.tanggal_absen && item.jenis_izin === "P/M") {
+        if (
+          !item.tanggal_absen &&
+          (item.jenis_izin === "P/M" ||
+            item.jenis_izin === "TA1" ||
+            item.jenis_izin === "TA2" ||
+            item.jenis_izin === "LA1" ||
+            item.jenis_izin === "LA2")
+        ) {
           totalAttend += 1;
         }
 

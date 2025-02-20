@@ -426,3 +426,30 @@ export type SlipGajiDataProps = {
     gaji_pegawai_id: number;
   }[];
 };
+
+export type ReportAttdProps = {
+  pegawai_id: number;
+  nama: string;
+  status_nikah: string;
+  department_id: number;
+  nama_department: string;
+  sub_department_id: number;
+  nama_sub_department: string;
+  type_gaji: string;
+  workdate_count: number;
+  attend_count: number;
+  attend_weekend_count: number;
+  notattend_count: number;
+  late_count: number;
+  cuti_count: number;
+  cuti_s_count: number;
+  izin_count: number;
+  izin_s_count: number;
+  sakit_count: number;
+  g1_count: number;
+  g2_count: number;
+  g3_count: number;
+  pm_count: number;
+  overtime: number;
+  overtime_total: number;
+};
