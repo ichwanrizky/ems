@@ -1,17 +1,17 @@
 "use client";
 import {
   AccessDepartmentProps,
-  AccessProps,
   isLoadingProps,
   ReportAttdProps,
 } from "@/types";
 import React, { useEffect, useState } from "react";
 import { getReportAttdBulan } from "../_libs/action";
-import { FilterTahun } from "@/libs/FilterTahun";
-import { FilterBulan } from "@/libs/FilterBulan";
 import Alert from "@/components/Alert";
 import Pagination from "@/components/Pagination";
 import * as XLSX from "xlsx";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import styles from "@/styles/styles.module.css";
 
 type Props = {
   accessDepartment: AccessDepartmentProps;
@@ -34,9 +34,19 @@ export default function ReportAttdTanggalView(props: Props) {
 
   const [filter, setFilter] = useState({
     department: accessDepartment[0].department.id?.toString() || "",
-    tahun: new Date().getFullYear() as string | number,
-    bulan: (new Date().getMonth() + 1) as string | number,
+    startDate: undefined as Date | undefined,
+    endDate: undefined as Date | undefined,
   });
+  console.log(filter);
+
+  const handleDateChange = (dates: any) => {
+    const [start, end] = dates;
+    setFilter((prevFilter) => ({
+      ...prevFilter,
+      startDate: start,
+      endDate: end,
+    }));
+  };
 
   const [reportData, setReportData] = useState([] as ReportAttdProps[]);
 
@@ -64,15 +74,19 @@ export default function ReportAttdTanggalView(props: Props) {
   }, [alertPage]);
 
   useEffect(() => {
-    fetchData(debouncedSearchTerm, filter);
+    if (filter.startDate && filter.endDate) {
+      fetchData(debouncedSearchTerm, filter);
+    } else {
+      setLoadingPage(false);
+    }
   }, [debouncedSearchTerm, filter]);
 
   const fetchData = async (
     search: string,
     filter: {
       department: string | number;
-      tahun: string | number;
-      bulan: string | number;
+      startDate: Date | undefined;
+      endDate: Date | undefined;
     }
   ) => {
     setLoadingPage(true);
@@ -153,10 +167,7 @@ export default function ReportAttdTanggalView(props: Props) {
         });
         worksheet["!cols"] = colWidths;
         XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-        XLSX.writeFile(
-          workbook,
-          `DATA REPORT ATTD ${filter.bulan}-${filter.tahun}.xlsx`
-        );
+        XLSX.writeFile(workbook, `DATA REPORT ATTD.xlsx`);
       } catch (error) {
         setAlertPage({
           status: true,
@@ -207,25 +218,25 @@ export default function ReportAttdTanggalView(props: Props) {
               ))}
             </select>
 
-            <select
-              className="form-select me-2"
-              onChange={(e) => {
-                setFilter({ ...filter, tahun: e.target.value });
+            <DatePicker
+              autoComplete="off"
+              dropdownMode="select"
+              wrapperClassName={styles.datePicker}
+              className="form-select"
+              scrollableYearDropdown
+              dateFormat={"yyyy-MM-dd"}
+              showMonthDropdown
+              showYearDropdown
+              selected={filter.startDate}
+              onChange={handleDateChange}
+              startDate={filter.startDate}
+              endDate={filter.endDate}
+              selectsRange
+              onKeyDown={(e) => {
+                e.preventDefault();
               }}
-              value={filter.tahun}
-            >
-              <FilterTahun />
-            </select>
-
-            <select
-              className="form-select me-2"
-              onChange={(e) => {
-                setFilter({ ...filter, bulan: e.target.value });
-              }}
-              value={filter.bulan}
-            >
-              <FilterBulan />
-            </select>
+              required
+            />
           </div>
         </div>
 

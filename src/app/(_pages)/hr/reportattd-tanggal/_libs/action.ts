@@ -9,8 +9,8 @@ export const getReportAttdBulan = async (
   search?: string,
   filter?: {
     department: string | number;
-    tahun: string | number;
-    bulan: string | number;
+    startDate: Date | undefined;
+    endDate: Date | undefined;
   }
 ): Promise<{
   status: boolean;
@@ -20,10 +20,7 @@ export const getReportAttdBulan = async (
   try {
     const session: any = await getServerSession(authOptions);
 
-    const listDates = getDatesInMonth(
-      Number(filter?.tahun),
-      Number(filter?.bulan) - 1
-    );
+    const listDates = getDatesInRange(filter?.startDate, filter?.endDate);
 
     const listTanggalMerah = await prisma.tanggal_merah_list.findMany({
       select: {
@@ -32,8 +29,10 @@ export const getReportAttdBulan = async (
       where: {
         tanggal_merah: {
           department_id: 1,
-          tahun: Number(filter?.tahun),
-          bulan: Number(filter?.bulan),
+        },
+        tanggal: {
+          gte: filter?.startDate,
+          lte: filter?.endDate,
         },
       },
       orderBy: {
@@ -45,72 +44,82 @@ export const getReportAttdBulan = async (
       (item: any) => item.tanggal.toISOString().split("T")[0]
     );
 
-    const tanggalKerja = listDates.filter(
-      (item: any) => !tanggalMerah.includes(item)
-    );
-
     const tanggalKerjaQuery = listDates
       .map((date) => `SELECT '${date}' as tanggal`)
       .join(" UNION ");
 
     const dataQuery = `
     SELECT
-      p.id,
-      p.nama,
-      p.status_nikah,
-      p.department_id,
-      dp.nama_department,
-      p.sub_department_id,
-      sd.nama_sub_department,
-      p.type_gaji,
-      d.tanggal,
-      tml.tanggal as tanggal_libur,
-      a.tanggal AS tanggal_absen,
-      a.absen_masuk,
-      a.absen_pulang,
-      a.late,
-      i.tanggal AS tanggal_izin,
-      i.jenis_izin_kode as jenis_izin,
-      i.jumlah_hari,
-      i.jumlah_jam,
-      ot.tanggal AS tanggal_ot,
-      ot.jam AS jam_ot,
-      ot.total AS total_ot 
-    FROM
-      pegawai p
-      CROSS JOIN (${tanggalKerjaQuery}) d
-      LEFT JOIN absen a ON p.id = a.pegawai_id 
+    p.id,
+    p.nama,
+    p.status_nikah,
+    p.department_id,
+    dp.nama_department,
+    p.sub_department_id,
+    sd.nama_sub_department,
+    p.type_gaji,
+    d.tanggal,
+    tml.tanggal AS tanggal_libur,
+    a.tanggal AS tanggal_absen,
+    a.absen_masuk,
+    a.absen_pulang,
+    a.late,
+    i.tanggal AS tanggal_izin,
+    i.jenis_izin_kode AS jenis_izin,
+    i.jumlah_hari,
+    i.jumlah_jam,
+    ot.tanggal AS tanggal_ot,
+    ot.jam AS jam_ot,
+    ot.total AS total_ot 
+  FROM
+    pegawai p
+    CROSS JOIN (${tanggalKerjaQuery}) d
+    LEFT JOIN absen a 
+      ON p.id = a.pegawai_id 
       AND d.tanggal = a.tanggal
-      LEFT JOIN izin i ON p.id = i.pegawai_id 
+    LEFT JOIN izin i 
+      ON p.id = i.pegawai_id 
       AND d.tanggal = i.tanggal 
-      JOIN department dp ON p.department_id = dp.id
-      JOIN sub_department sd ON p.sub_department_id = sd.id
-      LEFT JOIN tanggal_merah tm ON dp.id = tm.department_id AND tm.bulan = ${
-        filter?.bulan
-      } AND tm.tahun = ${filter?.tahun}
-      LEFT JOIN tanggal_merah_list tml ON tm.id = tml.tanggal_merah_id AND tml.tanggal = d.tanggal
-      LEFT JOIN (
-        SELECT
-            pegawai_id,
-            tanggal,
-            jam,
-            total,
-            ROW_NUMBER() OVER (PARTITION BY pegawai_id, tanggal ORDER BY tanggal) AS rn
-        FROM
-            overtime
-    ) ot ON ot.pegawai_id = p.id AND ot.tanggal = d.tanggal AND ot.rn = 1
-    WHERE
-      p.department_id = ${filter?.department}
-      AND p.is_active = true
-      AND p.is_deleted = false
-      AND p.sub_department_id IN (${session.user.access_sub_department.map(
-        (item: any) => item.sub_department.id
-      )})
-    ${search ? `AND (p.nama LIKE '%${search}%')` : ""}
-    ORDER BY
-      p.nama,
-      d.tanggal
+    JOIN department dp 
+      ON p.department_id = dp.id
+    JOIN sub_department sd 
+      ON p.sub_department_id = sd.id
+    LEFT JOIN tanggal_merah tm 
+      ON tm.department_id = p.department_id 
+    LEFT JOIN tanggal_merah_list tml 
+      ON tm.id = tml.tanggal_merah_id
+      AND tml.tanggal = d.tanggal
+    LEFT JOIN (
+      SELECT
+          pegawai_id,
+          tanggal,
+          jam,
+          total,
+          ROW_NUMBER() OVER (PARTITION BY pegawai_id, tanggal ORDER BY tanggal) AS rn
+      FROM
+          overtime
+    ) ot ON ot.pegawai_id = p.id 
+         AND ot.tanggal = d.tanggal 
+         AND ot.rn = 1
+  WHERE
+    p.department_id = ${filter?.department}
+    AND p.is_active = true
+    AND p.is_deleted = false
+    AND p.sub_department_id IN (${session.user.access_sub_department.map(
+      (item: any) => item.sub_department.id
+    )})
+  ${search ? `AND (p.nama LIKE '%${search}%')` : ""}
+  ORDER BY
+    p.nama,
+    d.tanggal
   `;
+
+    console.log(dataQuery);
+    return {
+      status: true,
+      message: "Data fetched successfully",
+      data: [],
+    };
 
     const rowData = (await prisma.$queryRawUnsafe(dataQuery)) as any;
 
@@ -307,15 +316,18 @@ export const getReportAttdBulan = async (
   }
 };
 
-function getDatesInMonth(year: number, month: number) {
+function getDatesInRange(startDate: any, endDate: any) {
   let dates = [];
-  let date = new Date(year, month, 1);
-  while (date.getMonth() === month) {
-    const formattedDate = new Date(date);
+  let currentDate = new Date(startDate);
+  const lastDate = new Date(endDate);
+
+  while (currentDate <= lastDate) {
+    const formattedDate = new Date(currentDate);
     formattedDate.setHours(formattedDate.getHours() + 7);
     dates.push(formattedDate.toISOString().split("T")[0]);
-    date.setDate(date.getDate() + 1);
+    currentDate.setDate(currentDate.getDate() + 1);
   }
+
   return dates;
 }
 
