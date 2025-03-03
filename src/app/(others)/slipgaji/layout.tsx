@@ -13,10 +13,23 @@ export default function SlipGajiLayout({
         <title>EMS PJ - SLIP GAJI</title>
         {/*favicon*/}
         <link
-          rel="icon"
-          href="/assets/images/favicon-32x32.png"
-          type="image/png"
+          rel="apple-touch-icon"
+          sizes="180x180"
+          href="/apple-touch-icon.png"
         />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="32x32"
+          href="/favicon-32x32.png"
+        />
+        <link
+          rel="icon"
+          type="image/png"
+          sizes="16x16"
+          href="/favicon-16x16.png"
+        />
+        <link rel="manifest" href="/site.webmanifest" />
         {/* loader*/}
         <link href="/assets/css/pace.min.css" rel="stylesheet" />
         {/*plugins*/}

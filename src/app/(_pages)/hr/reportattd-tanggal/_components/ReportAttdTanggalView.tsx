@@ -5,7 +5,7 @@ import {
   ReportAttdProps,
 } from "@/types";
 import React, { useEffect, useState } from "react";
-import { getReportAttdBulan } from "../_libs/action";
+// import { getReportAttdBulan } from "../_libs/action";
 import Alert from "@/components/Alert";
 import Pagination from "@/components/Pagination";
 import * as XLSX from "xlsx";
@@ -89,29 +89,29 @@ export default function ReportAttdTanggalView(props: Props) {
       endDate: Date | undefined;
     }
   ) => {
-    setLoadingPage(true);
-    try {
-      const result = await getReportAttdBulan(search, filter);
-      if (result.status) {
-        setReportData(result.data);
-      } else {
-        setAlertPage({
-          status: true,
-          color: "danger",
-          message: "Failed",
-          subMessage: result.message,
-        });
-      }
-    } catch (error) {
-      setAlertPage({
-        status: true,
-        color: "danger",
-        message: "Error",
-        subMessage: "Something went wrong, please refresh and try again",
-      });
-    } finally {
-      setLoadingPage(false);
-    }
+    // setLoadingPage(true);
+    // try {
+    //   const result = await getReportAttdBulan(search, filter);
+    //   if (result.status) {
+    //     setReportData(result.data);
+    //   } else {
+    //     setAlertPage({
+    //       status: true,
+    //       color: "danger",
+    //       message: "Failed",
+    //       subMessage: result.message,
+    //     });
+    //   }
+    // } catch (error) {
+    //   setAlertPage({
+    //     status: true,
+    //     color: "danger",
+    //     message: "Error",
+    //     subMessage: "Something went wrong, please refresh and try again",
+    //   });
+    // } finally {
+    //   setLoadingPage(false);
+    // }
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {

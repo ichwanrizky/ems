@@ -24,8 +24,8 @@ export default function DashboardHeader({
               data-bs-toggle="dropdown"
             >
               <img
-                src="/assets/images/avatars/01.png"
-                className="rounded-circle p-1 border"
+                src="/assets/images/avatars/93.png"
+                className="rounded-circle p-1 border bg-white"
                 width={45}
                 height={45}
                 alt=""
@@ -37,8 +37,8 @@ export default function DashboardHeader({
                 <div className="text-center">
                   {/* Smaller Profile Image */}
                   <img
-                    src="/assets/images/avatars/01.png"
-                    className="rounded-circle p-1 shadow mb-2"
+                    src="/assets/images/avatars/93.png"
+                    className="rounded-circle p-1 shadow mb-2 bg-white"
                     width={80}
                     height={80}
                     alt=""

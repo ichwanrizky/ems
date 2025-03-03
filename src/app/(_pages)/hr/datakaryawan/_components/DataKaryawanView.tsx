@@ -47,7 +47,7 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
     [] as AccessSubDepartmentProps
   );
   const [filter, setFilter] = useState({
-    department: "",
+    department: accessDepartment[0].department.id?.toString() || "",
     sub_department: "",
     active: true,
   });
@@ -230,6 +230,7 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                 }
                 setCurrentPage(1);
               }}
+              value={filter.department}
             >
               <option value="">-- DEPT --</option>
               {accessDepartment?.map((item, index: number) => (
@@ -359,7 +360,7 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                             <i className="bi bi-three-dots" />
                           </Button>
                         </td>
-                        <td align="center">{item.number}</td>
+                        <td align="center">{item.id}</td>
                         <td align="center" style={{ whiteSpace: "nowrap" }}>
                           {item.panji_id}
                         </td>
