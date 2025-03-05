@@ -128,7 +128,7 @@ export default function LoginPage({ searchParams }: { searchParams: any }) {
                     </div>
                     <div className="col-md-6"></div>
                     <div className="col-md-6 text-end">
-                      <a href="auth-basic-forgot-password.html">
+                      <a href="http://wa.me/628117779914" target="_blank">
                         Forgot Password ?
                       </a>
                     </div>
