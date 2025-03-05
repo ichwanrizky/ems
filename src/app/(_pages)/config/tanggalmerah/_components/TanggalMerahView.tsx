@@ -1,6 +1,10 @@
 "use client";
 import Button from "@/components/Button";
-import { DepartmentProps, isLoadingProps } from "@/types";
+import {
+  AccessDepartmentProps,
+  DepartmentProps,
+  isLoadingProps,
+} from "@/types";
 import React, { useEffect, useState } from "react";
 import {
   deleteTanggalMerah,
@@ -14,11 +18,11 @@ import { DisplayMonthName } from "@/libs/DisplayDate";
 import TanggalMerahEdit from "./TanggalMerahEdit";
 
 type Props = {
-  departmentData: DepartmentProps[];
+  accessDepartment: AccessDepartmentProps;
 };
 
 export default function TanggalMerahView(props: Props) {
-  const { departmentData } = props;
+  const { accessDepartment } = props;
 
   const [loadingPage, setLoadingPage] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
@@ -30,7 +34,7 @@ export default function TanggalMerahView(props: Props) {
   });
 
   const [filter, setFilter] = useState({
-    department: departmentData[0].id as string | number,
+    department: (accessDepartment[0].department.id as string | number) || "",
     tahun: new Date().getFullYear() as string | number,
   });
 
@@ -205,9 +209,9 @@ export default function TanggalMerahView(props: Props) {
               value={filter.department}
             >
               <option value="">--DEPT--</option>
-              {departmentData?.map((item, index: number) => (
-                <option value={item.id} key={index}>
-                  {item.nama_department?.toUpperCase()}
+              {accessDepartment?.map((item, index: number) => (
+                <option value={item.department.id} key={index}>
+                  {item.department.nama_department?.toUpperCase()}
                 </option>
               ))}
             </select>
@@ -331,7 +335,7 @@ export default function TanggalMerahView(props: Props) {
             setIsCreateOpen(false);
             fetchData(filter);
           }}
-          departmentData={departmentData}
+          departmentData={accessDepartment}
         />
       )}
 
@@ -342,7 +346,7 @@ export default function TanggalMerahView(props: Props) {
             setIsEditOpen(false);
             fetchData(filter);
           }}
-          departmentData={departmentData}
+          departmentData={accessDepartment}
           tanggalMerahEdit={tanggalMerahEdit}
         />
       )}

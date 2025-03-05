@@ -1,28 +1,21 @@
 "use client";
 import Alert from "@/components/Alert";
-import Button from "@/components/Button";
-import {
-  AccessDepartmentProps,
-  DepartmentProps,
-  isLoadingProps,
-  SubDepartmentProps,
-} from "@/types";
-import React, { useEffect, useState } from "react";
-import SubDepartmentCreate from "./SubDepartmentCreate";
-import {
-  deleteSubDepartment,
-  getSubDepartment,
-  getSubDepartmentId,
-} from "../_libs/action";
 import Pagination from "@/components/Pagination";
-import SubDepartmentEdit from "./SubDepartmentEdit";
+import { AccessDepartmentProps, isLoadingProps } from "@/types";
+import React, { useEffect, useState } from "react";
+import { getUser, getUserId } from "../_libs/action";
+import Button from "@/components/Button";
+import UserEdit from "./UserEdit";
 
-type SubDepartmentViewProps = {
+type UserViewProps = {
   accessDepartment: AccessDepartmentProps;
 };
 
-export default function SubDepartmentView(props: SubDepartmentViewProps) {
+export default function UserView(props: UserViewProps) {
   const { accessDepartment } = props;
+
+  const [currentPage, setCurrentPage] = useState(1 as number);
+  const [totalData, setTotalData] = useState(0 as number);
 
   const [loadingPage, setLoadingPage] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
@@ -32,20 +25,37 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
     message: "",
     subMessage: "",
   });
+
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [isCreateOpen, setIsCreateOpen] = useState(false);
+
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const [userData, setUserData] = useState(
+    [] as {
+      number: number;
+      id: number;
+      username: string;
+      pegawai: {
+        id: number;
+        nama: string;
+        telp: string;
+      };
+    }[]
+  );
+  const [userEdit, setUserEdit] = useState<{
+    id: number;
+    username: string;
+    pegawai: {
+      id: number;
+      nama: string;
+      telp: string;
+    };
+  } | null>();
+
   const [filter, setFilter] = useState({
     department: accessDepartment[0].department.id || "",
   });
-
-  const [subDepartmentData, setSubDepartmentData] = useState(
-    [] as SubDepartmentProps[]
-  );
-  const [subDepartmentEdit, setSubDepartmentEdit] = useState(
-    {} as SubDepartmentProps
-  );
 
   useEffect(() => {
     if (alertPage.status) {
@@ -71,20 +81,22 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
   }, [searchTerm]);
 
   useEffect(() => {
-    fetchData(debouncedSearchTerm, filter);
-  }, [debouncedSearchTerm, filter]);
+    fetchData(debouncedSearchTerm, filter, currentPage);
+  }, [debouncedSearchTerm, filter, currentPage]);
 
   const fetchData = async (
     search: string,
-    filter: {
+    filter?: {
       department: string | number;
-    }
+    },
+    currentPage?: number
   ) => {
     setLoadingPage(true);
     try {
-      const result = await getSubDepartment(search, filter);
+      const result = await getUser(search, filter, currentPage);
       if (result.status) {
-        setSubDepartmentData(result.data as SubDepartmentProps[]);
+        setUserData(result.data as []);
+        setTotalData(result.total_data);
       } else {
         setAlertPage({
           status: true,
@@ -112,9 +124,9 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
   const handleGetEdit = async (id: number) => {
     setIsLoadingAction({ ...isLoadingAction, [id]: true });
     try {
-      const result = await getSubDepartmentId(id);
+      const result = await getUserId(id);
       if (result.status) {
-        setSubDepartmentEdit(result.data as SubDepartmentProps);
+        setUserEdit(result.data);
         setIsEditOpen(true);
       } else {
         setAlertPage({
@@ -136,41 +148,9 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
     }
   };
 
-  const handleDelete = async (id: number) => {
-    if (confirm("Delete this data?")) {
-      setIsLoadingAction({ ...isLoadingAction, [id]: true });
-      try {
-        const result = await deleteSubDepartment(id);
-        if (result.status) {
-          setAlertPage({
-            status: true,
-            color: "success",
-            message: "Success",
-            subMessage: result.message,
-          });
-          fetchData("", filter);
-        } else {
-          setAlertPage({
-            status: true,
-            color: "danger",
-            message: "Failed",
-            subMessage: result.message,
-          });
-        }
-      } catch (error) {
-        setAlertPage({
-          status: true,
-          color: "danger",
-          message: "Error",
-          subMessage: "Something went wrong, please refresh and try again",
-        });
-      } finally {
-        setIsLoadingAction({ ...isLoadingAction, [id]: false });
-      }
-    }
-
-    return;
-  };
+  const maxPagination = 5;
+  const itemPerPage = 10;
+  const totalPage = Math.ceil(totalData / itemPerPage);
 
   return (
     <>
@@ -192,27 +172,20 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
         <div className="col-auto flex-grow-1 overflow-auto">
           <div className="btn-group position-static">
             <select
-              className="form-select"
-              onChange={(e) =>
-                setFilter({ ...filter, department: e.target.value })
-              }
-              value={filter.department}
+              className="form-select me-2 ms-2"
+              onChange={(e) => {
+                setFilter({ ...filter, department: e.target.value });
+              }}
             >
-              <option value="">--DEPT--</option>
               {accessDepartment?.map((item, index: number) => (
                 <option value={item.department.id} key={index}>
-                  {item.department.nama_department?.toUpperCase()}
+                  {item.department.nama_department}
                 </option>
               ))}
             </select>
           </div>
         </div>
-
-        <div className="col-auto">
-          <div className="d-flex align-items-center gap-2 justify-content-lg-end">
-            <Button type="createTable" onClick={() => setIsCreateOpen(true)} />
-          </div>
-        </div>
+        <div className="col-auto"></div>
       </div>
 
       <div className="card mt-4">
@@ -232,18 +205,16 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
                   <tr>
                     <th style={{ width: "1%" }}></th>
                     <th style={{ width: "1%" }}>NO</th>
-                    <th>DEPT.</th>
-                    <th>SUB DEPT.</th>
-                    <th style={{ width: "10%" }}>LEADER</th>
-                    <th style={{ width: "10%" }}>SUPERVISOR</th>
-                    <th style={{ width: "10%" }}>MANAGER</th>
-                    <th style={{ width: "10%" }}>AKSES IZIN</th>
+                    <th>NAMA</th>
+                    <th style={{ width: "20%" }}>USERNAME</th>
+                    <th style={{ width: "20%" }}>TELP</th>
+                    <th style={{ width: "10%" }}></th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingPage ? (
                     <tr>
-                      <td colSpan={8} align="center">
+                      <td colSpan={6} align="center">
                         <div
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
@@ -253,8 +224,8 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
                         Loading...
                       </td>
                     </tr>
-                  ) : subDepartmentData.length > 0 ? (
-                    subDepartmentData.map((item, index) => (
+                  ) : userData.length > 0 ? (
+                    userData.map((item, index) => (
                       <tr key={index}>
                         <td align="center">
                           <Button
@@ -262,29 +233,44 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
                             indexData={index}
                             isLoading={isLoadingAction[item.id]}
                             onEdit={() => handleGetEdit(item.id)}
-                            onDelete={() => handleDelete(item.id)}
+                            // onDelete={() => handleDelete(item.id)}
                           >
                             <i className="bi bi-three-dots" />
                           </Button>
                         </td>
-                        <td align="center">{index + 1}</td>
-                        <td>
-                          {item.department?.nama_department?.toUpperCase()}
-                        </td>
-                        <td>{item.nama_sub_department?.toUpperCase()}</td>
-                        <td>{item.leader_user?.name?.toUpperCase()}</td>
-                        <td>{item.supervisor_user?.name?.toUpperCase()}</td>
-                        <td>{item.manager_user?.name?.toUpperCase()}</td>
+                        <td align="center">{item.number}</td>
+                        <td align="left">{item.pegawai.nama?.toUpperCase()}</td>
+                        <td align="left">{item.username}</td>
+                        <td align="left">{item.pegawai.telp}</td>
                         <td align="center">
-                          {item.akses_izin
-                            ?.map((e) => e.jenis_izin.kode)
-                            .join(", ")}
+                          {isLoadingAction[item.id] ? (
+                            <button
+                              type="button"
+                              className="btn btn-success btn-sm"
+                              disabled
+                            >
+                              <span
+                                className="spinner-border spinner-border-sm me-2"
+                                role="status"
+                                aria-hidden="true"
+                              ></span>
+                              LOADING ...
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="btn btn-success btn-sm"
+                              //   onClick={() => handleReset(item.id)}
+                            >
+                              RESET PASS
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={8} align="center">
+                      <td colSpan={6} align="center">
                         No data available
                       </td>
                     </tr>
@@ -293,36 +279,24 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
               </table>
 
               <Pagination
-                currentPage={1}
-                maxPagination={1}
-                totalPage={1}
-                setCurrentPage={() => {}}
+                currentPage={currentPage}
+                totalPage={totalPage}
+                maxPagination={maxPagination}
+                setCurrentPage={setCurrentPage}
               />
             </div>
           </div>
         </div>
       </div>
 
-      {isCreateOpen && (
-        <SubDepartmentCreate
-          isOpen={isCreateOpen}
-          onClose={() => {
-            setIsCreateOpen(false);
-            fetchData("", filter);
-          }}
-          departmentData={accessDepartment}
-        />
-      )}
-
       {isEditOpen && (
-        <SubDepartmentEdit
+        <UserEdit
           isOpen={isEditOpen}
           onClose={() => {
             setIsEditOpen(false);
-            fetchData("", filter);
+            fetchData("", filter, currentPage);
           }}
-          departmentData={accessDepartment}
-          subDepartmentEdit={subDepartmentEdit}
+          userEdit={userEdit}
         />
       )}
     </>

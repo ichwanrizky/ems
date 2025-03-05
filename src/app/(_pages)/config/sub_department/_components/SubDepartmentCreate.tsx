@@ -2,13 +2,13 @@
 import Modal from "@/components/Modal";
 import React, { useEffect, useState } from "react";
 import { createSubDepartment, getAtasan, getJenisIzin } from "../_libs/action";
-import { AtasanProps, DepartmentProps } from "@/types";
+import { AccessDepartmentProps, AtasanProps, DepartmentProps } from "@/types";
 import Select from "react-select";
 
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  departmentData: DepartmentProps[];
+  departmentData: AccessDepartmentProps;
 };
 
 export default function SubDepartmentCreate(props: Props) {
@@ -165,8 +165,8 @@ export default function SubDepartmentCreate(props: Props) {
         >
           <option value="">--SELECT--</option>
           {departmentData?.map((item, index) => (
-            <option value={item.id} key={index}>
-              {item.nama_department?.toUpperCase()}
+            <option value={item.department.id} key={index}>
+              {item.department.nama_department?.toUpperCase()}
             </option>
           ))}
         </select>

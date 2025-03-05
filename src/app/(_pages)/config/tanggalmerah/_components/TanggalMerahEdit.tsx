@@ -1,6 +1,6 @@
 "use client";
 import Modal from "@/components/Modal";
-import { DepartmentProps } from "@/types";
+import { AccessDepartmentProps, DepartmentProps } from "@/types";
 import React, { useEffect, useState } from "react";
 import Select from "react-select";
 import { createTanggalMerah, editTanggalMerah } from "../_libs/action";
@@ -8,7 +8,7 @@ import { createTanggalMerah, editTanggalMerah } from "../_libs/action";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  departmentData: DepartmentProps[];
+  departmentData: AccessDepartmentProps;
   tanggalMerahEdit: {
     id: number;
     bulan: number;
@@ -222,8 +222,8 @@ export default function TanggalMerahEdit(props: Props) {
         >
           <option value="">--SELECT--</option>
           {departmentData?.map((item, index) => (
-            <option value={item.id} key={index}>
-              {item.nama_department?.toUpperCase()}
+            <option value={item.department.id} key={index}>
+              {item.department.nama_department?.toUpperCase()}
             </option>
           ))}
         </select>
