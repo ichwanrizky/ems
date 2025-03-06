@@ -2,7 +2,11 @@ import { checkSessionMobile } from "@/libs/CheckSessionMobile";
 import { NextResponse } from "next/server";
 import prisma from "@/libs/Prisma";
 import { DateNowFormat } from "@/libs/DateFormat";
-import { ConvertDateZeroHours, DatePlus7Format } from "@/libs/ConvertDate";
+import {
+  ConvertDateZeroHours,
+  ConvertDateZeroHours2,
+  DatePlus7Format,
+} from "@/libs/ConvertDate";
 import { HandleErrorMobile } from "@/libs/ErrorMobile";
 
 export async function POST(req: Request) {
@@ -88,7 +92,7 @@ export async function POST(req: Request) {
     const getAbsen = await prisma.absen.findFirst({
       where: {
         pegawai_id: session[1].pegawaiId,
-        tanggal: ConvertDateZeroHours(DateNowFormat()),
+        tanggal: ConvertDateZeroHours2(DateNowFormat()),
       },
     });
 
@@ -107,34 +111,18 @@ export async function POST(req: Request) {
       );
     }
 
-    let jam_masuk_department = DateNowFormat();
+    let jam_masuk_department = new Date();
 
     const shiftTime = new Date(
-      dataDepartment.pegawai[0].shift.jam_masuk as any
+      dataDepartment?.pegawai?.[0]?.shift?.jam_masuk as any
     );
 
-    jam_masuk_department.setHours(
-      shiftTime.getUTCHours(),
-      shiftTime.getUTCMinutes(),
-      shiftTime.getUTCSeconds(),
-      0
-    );
+    const hours = shiftTime.getUTCHours();
+    const minutes = shiftTime.getUTCMinutes();
+    const seconds = shiftTime.getUTCSeconds();
+
+    jam_masuk_department.setHours(hours, minutes, seconds, 0);
     jam_masuk_department = DatePlus7Format(jam_masuk_department);
-
-    if (getAbsen) {
-      return new NextResponse(
-        JSON.stringify({
-          status: false,
-          message: "Gagal, absen sudah dilakukan",
-        }),
-        {
-          status: 401,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
 
     const absenMasukWithoutSecond = new Date(DateNowFormat());
     absenMasukWithoutSecond.setSeconds(0);
@@ -181,7 +169,7 @@ export async function POST(req: Request) {
     const createAbsen = await prisma.absen.create({
       data: {
         pegawai_id: session[1].pegawaiId,
-        tanggal: ConvertDateZeroHours(DateNowFormat()),
+        tanggal: ConvertDateZeroHours2(DateNowFormat()),
         absen_masuk: DateNowFormat(),
         shift_id: dataDepartment.pegawai[0]?.shift?.id
           ? dataDepartment.pegawai[0]?.shift?.id

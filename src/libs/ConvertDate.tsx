@@ -28,3 +28,9 @@ export const ConvertDateZeroHours = (date: Date) => {
   formattedDate.setHours(formattedDate.getHours() + 7);
   return formattedDate as Date;
 };
+
+export const ConvertDateZeroHours2 = (date: Date) => {
+  const currentDate = new Date(date);
+  currentDate.setUTCHours(0, 0, 0, 0); // Set to UTC midnight
+  return currentDate;
+};
