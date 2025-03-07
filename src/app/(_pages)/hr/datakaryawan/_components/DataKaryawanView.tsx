@@ -156,35 +156,39 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
   };
 
   const handleCreateUser = async (id: number) => {
-    setIsLoadingAction({ ...isLoadingAction, [id]: true });
-    try {
-      const result = await createUserPegawai(id);
-      if (result.status) {
-        setAlertPage({
-          status: true,
-          color: "success",
-          message: "Success",
-          subMessage: result.message,
-        });
-        fetchData("", filter, 1);
-      } else {
+    if (confirm("Create user?")) {
+      setIsLoadingAction({ ...isLoadingAction, [id]: true });
+      try {
+        const result = await createUserPegawai(id);
+        if (result.status) {
+          setAlertPage({
+            status: true,
+            color: "success",
+            message: "Success",
+            subMessage: result.message,
+          });
+          fetchData("", filter, 1);
+        } else {
+          setAlertPage({
+            status: true,
+            color: "danger",
+            message: "Failed",
+            subMessage: result.message,
+          });
+        }
+      } catch (error) {
         setAlertPage({
           status: true,
           color: "danger",
-          message: "Failed",
-          subMessage: result.message,
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
         });
+      } finally {
+        setIsLoadingAction({ ...isLoadingAction, [id]: false });
       }
-    } catch (error) {
-      setAlertPage({
-        status: true,
-        color: "danger",
-        message: "Error",
-        subMessage: "Something went wrong, please refresh and try again",
-      });
-    } finally {
-      setIsLoadingAction({ ...isLoadingAction, [id]: false });
     }
+
+    return;
   };
 
   const maxPagination = 5;
@@ -376,7 +380,7 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                           {item.is_active ? "ACTIVE" : "INACTIVE"}
                         </td>
                         <td align="center">
-                          {item.user.length === 0 ? (
+                          {item.user.length === 0 || item.user[0].is_deleted ? (
                             isLoadingAction[item.id] ? (
                               <button
                                 type="button"

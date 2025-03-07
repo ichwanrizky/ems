@@ -72,6 +72,7 @@ export const getPegawai = async (
         user: {
           select: {
             id: true,
+            is_deleted: true,
           },
           take: 1,
         },
@@ -365,9 +366,6 @@ export const createUserPegawai = async (
     const getPegawai = await prisma.pegawai.findFirst({
       where: {
         id: pegawaiId,
-        // user: {
-        //   none: {},
-        // },
       },
     });
 
@@ -378,16 +376,38 @@ export const createUserPegawai = async (
       };
     }
 
-    const result = await prisma.user.create({
-      data: {
-        username: getPegawai.telp.toString(),
-        password: await bcrypt.hash(getPegawai.telp, 10),
-        name: getPegawai.nama?.toUpperCase(),
-        telp: getPegawai.telp.toString(),
-        pegawai_id: getPegawai.id,
-        created_at: DateNowFormat(),
+    const checkUser = await prisma.user.findFirst({
+      select: {
+        id: true,
+        is_deleted: true,
+      },
+      where: {
+        pegawai_id: pegawaiId,
       },
     });
+
+    let result;
+    if (checkUser) {
+      result = await prisma.user.update({
+        where: {
+          id: checkUser.id,
+        },
+        data: {
+          is_deleted: false,
+        },
+      });
+    } else {
+      result = await prisma.user.create({
+        data: {
+          username: getPegawai.telp.toString(),
+          password: await bcrypt.hash(getPegawai.telp, 10),
+          name: getPegawai.nama?.toUpperCase(),
+          telp: getPegawai.telp.toString(),
+          pegawai_id: getPegawai.id,
+          created_at: DateNowFormat(),
+        },
+      });
+    }
 
     if (!result) {
       return {

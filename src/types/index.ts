@@ -174,6 +174,7 @@ export type PegawaiProps = {
   is_active: boolean;
   user: {
     id: number;
+    is_deleted: boolean;
   }[];
 };
 
