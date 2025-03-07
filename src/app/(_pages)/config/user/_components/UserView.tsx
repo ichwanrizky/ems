@@ -3,7 +3,7 @@ import Alert from "@/components/Alert";
 import Pagination from "@/components/Pagination";
 import { AccessDepartmentProps, isLoadingProps } from "@/types";
 import React, { useEffect, useState } from "react";
-import { getUser, getUserId } from "../_libs/action";
+import { deleteUser, getUser, getUserId, resetPassword } from "../_libs/action";
 import Button from "@/components/Button";
 import UserEdit from "./UserEdit";
 
@@ -148,6 +148,78 @@ export default function UserView(props: UserViewProps) {
     }
   };
 
+  const handleDelete = async (id: number) => {
+    if (confirm("Delete this data?")) {
+      setIsLoadingAction({ ...isLoadingAction, [id]: true });
+      try {
+        const result = await deleteUser(id);
+        if (result.status) {
+          setAlertPage({
+            status: true,
+            color: "success",
+            message: "Success",
+            subMessage: result.message,
+          });
+          fetchData("", filter, currentPage);
+        } else {
+          setAlertPage({
+            status: true,
+            color: "danger",
+            message: "Failed",
+            subMessage: result.message,
+          });
+        }
+      } catch (error) {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
+        });
+      } finally {
+        setIsLoadingAction({ ...isLoadingAction, [id]: false });
+      }
+    }
+
+    return;
+  };
+
+  const handleResetPassword = async (id: number) => {
+    if (confirm("Reset password this data?")) {
+      setIsLoadingAction({ ...isLoadingAction, [id]: true });
+      try {
+        const result = await resetPassword(id);
+        if (result.status) {
+          setAlertPage({
+            status: true,
+            color: "success",
+            message: "Success",
+            subMessage: result.message,
+          });
+          fetchData("", filter, 1);
+        } else {
+          setAlertPage({
+            status: true,
+            color: "danger",
+            message: "Failed",
+            subMessage: result.message,
+          });
+        }
+      } catch (error) {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
+        });
+      } finally {
+        setIsLoadingAction({ ...isLoadingAction, [id]: false });
+      }
+    }
+
+    return;
+  };
+
   const maxPagination = 5;
   const itemPerPage = 10;
   const totalPage = Math.ceil(totalData / itemPerPage);
@@ -233,7 +305,7 @@ export default function UserView(props: UserViewProps) {
                             indexData={index}
                             isLoading={isLoadingAction[item.id]}
                             onEdit={() => handleGetEdit(item.id)}
-                            // onDelete={() => handleDelete(item.id)}
+                            onDelete={() => handleDelete(item.id)}
                           >
                             <i className="bi bi-three-dots" />
                           </Button>
@@ -260,7 +332,7 @@ export default function UserView(props: UserViewProps) {
                             <button
                               type="button"
                               className="btn btn-success btn-sm"
-                              //   onClick={() => handleReset(item.id)}
+                              onClick={() => handleResetPassword(item.id)}
                             >
                               RESET PASS
                             </button>

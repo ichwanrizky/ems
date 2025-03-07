@@ -2,6 +2,7 @@
 
 import { HandleError } from "@/libs/Error";
 import prisma from "@/libs/Prisma";
+const bcrypt = require("bcrypt");
 
 export const getUser = async (
   search?: string,
@@ -170,6 +171,163 @@ export const getUserId = async (
           telp: string;
         };
       },
+    };
+  } catch (error) {
+    return HandleError(error) as any;
+  }
+};
+
+export const editUser = async (data: {
+  id: number;
+  username: string;
+  new_password?: string;
+  re_new_password?: string;
+}): Promise<{
+  status: boolean;
+  message: string;
+}> => {
+  try {
+    const username = await prisma.user.findFirst({
+      where: {
+        username: data.username,
+        id: {
+          not: data.id,
+        },
+      },
+    });
+
+    if (username) {
+      return {
+        status: false,
+        message: "Username already exist",
+      };
+    }
+
+    let password = "";
+    if (data.new_password && data.re_new_password) {
+      if (data.new_password !== data.re_new_password) {
+        return {
+          status: false,
+          message: "Password not match",
+        };
+      }
+
+      password = await bcrypt.hash(data.new_password, 10);
+
+      if (!password) {
+        return {
+          status: false,
+          message: "Edit data failed",
+        };
+      }
+    }
+
+    const result = await prisma.user.update({
+      where: {
+        id: data.id,
+      },
+      data: {
+        username: data.username,
+        ...(data.new_password && { password: password }),
+      },
+    });
+
+    if (!result) {
+      return {
+        status: false,
+        message: "Edit data failed",
+      };
+    }
+
+    return {
+      status: true,
+      message: "Edit data successfully",
+    };
+  } catch (error) {
+    return HandleError(error);
+  }
+};
+
+export const deleteUser = async (
+  id: number
+): Promise<{
+  status: boolean;
+  message: string;
+}> => {
+  try {
+    const result = await prisma.user.update({
+      where: {
+        id,
+        is_deleted: false,
+      },
+      data: {
+        is_deleted: true,
+      },
+    });
+
+    if (!result) {
+      return {
+        status: false,
+        message: "Delete data failed",
+      };
+    }
+
+    return {
+      status: true,
+      message: "Delete data successfully",
+    };
+  } catch (error) {
+    return HandleError(error) as any;
+  }
+};
+
+export const resetPassword = async (
+  id: number
+): Promise<{
+  status: boolean;
+  message: string;
+}> => {
+  try {
+    const user = await prisma.user.findFirst({
+      select: {
+        id: true,
+        telp: true,
+      },
+      where: {
+        id,
+        is_deleted: false,
+      },
+    });
+
+    if (!user) {
+      return {
+        status: false,
+        message: "User not found",
+      };
+    }
+
+    const password = await bcrypt.hash(user.telp, 10);
+
+    const result = await prisma.user.update({
+      where: {
+        id,
+        is_deleted: false,
+      },
+      data: {
+        password: password,
+      },
+    });
+
+    if (!result) {
+      return {
+        status: false,
+        message: "Reset password data failed",
+      };
+    }
+
+    return {
+      status: true,
+      message: "Reset password data successfully",
     };
   } catch (error) {
     return HandleError(error) as any;
