@@ -140,16 +140,16 @@ export const createAbsensiPerpegawai = async (data: {
         return false;
       }
 
-      const jam_masuk_department = shift.shift?.jam_masuk as Date;
-      jam_masuk_department.setFullYear(
-        ConvertDateZeroHours(data.date as Date).getFullYear()
-      );
-      jam_masuk_department.setMonth(
-        ConvertDateZeroHours(data.date as Date).getMonth()
-      );
-      jam_masuk_department.setDate(
-        ConvertDateZeroHours(data.date as Date).getDate()
-      );
+      let jam_masuk_department = new Date();
+
+      const shiftTime = new Date(shift.shift?.jam_masuk as any);
+
+      const hours = shiftTime.getUTCHours();
+      const minutes = shiftTime.getUTCMinutes();
+      const seconds = shiftTime.getUTCSeconds();
+
+      jam_masuk_department.setHours(hours, minutes, seconds, 0);
+      jam_masuk_department = DatePlus7Format(jam_masuk_department);
 
       const absenMasukWithoutSecond = ConvertDateZeroHours(data.date as Date);
       absenMasukWithoutSecond.setHours(
@@ -249,16 +249,16 @@ export const editAbsensiPerpegawai = async (data: {
         return false;
       }
 
-      const jam_masuk_department = shift.shift?.jam_masuk as Date;
-      jam_masuk_department.setFullYear(
-        ConvertDateZeroHours(data.date as Date).getFullYear()
-      );
-      jam_masuk_department.setMonth(
-        ConvertDateZeroHours(data.date as Date).getMonth()
-      );
-      jam_masuk_department.setDate(
-        ConvertDateZeroHours(data.date as Date).getDate()
-      );
+      let jam_masuk_department = new Date();
+
+      const shiftTime = new Date(shift.shift?.jam_masuk as any);
+
+      const hours = shiftTime.getUTCHours();
+      const minutes = shiftTime.getUTCMinutes();
+      const seconds = shiftTime.getUTCSeconds();
+
+      jam_masuk_department.setHours(hours, minutes, seconds, 0);
+      jam_masuk_department = DatePlus7Format(jam_masuk_department);
 
       const absenMasukWithoutSecond = ConvertDateZeroHours(data.date as Date);
       absenMasukWithoutSecond.setHours(
