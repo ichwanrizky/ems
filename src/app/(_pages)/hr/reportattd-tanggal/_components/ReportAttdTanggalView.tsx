@@ -12,6 +12,7 @@ import * as XLSX from "xlsx";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "@/styles/styles.module.css";
+import { getReportAttdTanggal } from "../_libs/action";
 
 type Props = {
   accessDepartment: AccessDepartmentProps;
@@ -37,7 +38,6 @@ export default function ReportAttdTanggalView(props: Props) {
     startDate: undefined as Date | undefined,
     endDate: undefined as Date | undefined,
   });
-  console.log(filter);
 
   const handleDateChange = (dates: any) => {
     const [start, end] = dates;
@@ -89,29 +89,29 @@ export default function ReportAttdTanggalView(props: Props) {
       endDate: Date | undefined;
     }
   ) => {
-    // setLoadingPage(true);
-    // try {
-    //   const result = await getReportAttdBulan(search, filter);
-    //   if (result.status) {
-    //     setReportData(result.data);
-    //   } else {
-    //     setAlertPage({
-    //       status: true,
-    //       color: "danger",
-    //       message: "Failed",
-    //       subMessage: result.message,
-    //     });
-    //   }
-    // } catch (error) {
-    //   setAlertPage({
-    //     status: true,
-    //     color: "danger",
-    //     message: "Error",
-    //     subMessage: "Something went wrong, please refresh and try again",
-    //   });
-    // } finally {
-    //   setLoadingPage(false);
-    // }
+    setLoadingPage(true);
+    try {
+      const result = await getReportAttdTanggal(search, filter);
+      if (result.status) {
+        setReportData(result.data);
+      } else {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Failed",
+          subMessage: result.message,
+        });
+      }
+    } catch (error) {
+      setAlertPage({
+        status: true,
+        color: "danger",
+        message: "Error",
+        subMessage: "Something went wrong, please refresh and try again",
+      });
+    } finally {
+      setLoadingPage(false);
+    }
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -167,7 +167,12 @@ export default function ReportAttdTanggalView(props: Props) {
         });
         worksheet["!cols"] = colWidths;
         XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-        XLSX.writeFile(workbook, `DATA REPORT ATTD.xlsx`);
+        XLSX.writeFile(
+          workbook,
+          `DATA REPORT ATTD ${
+            filter.startDate!.toISOString().split("T")[0]
+          } - ${filter.endDate!.toISOString().split("T")[0]} .xlsx`
+        );
       } catch (error) {
         setAlertPage({
           status: true,
