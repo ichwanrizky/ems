@@ -80,11 +80,21 @@ export const createOt = async (data: {
   message: string;
 }> => {
   try {
+    const formattedDate2 = new Date(data.jam_awal as Date);
+    formattedDate2.setHours(formattedDate2.getHours() + 7);
+    formattedDate2.setSeconds(0);
+    formattedDate2.setMilliseconds(0);
+
+    const formattedDate3 = new Date(data.jam_akhir as Date);
+    formattedDate3.setHours(formattedDate3.getHours() + 7);
+    formattedDate3.setSeconds(0);
+    formattedDate3.setMilliseconds(0);
+
     const result = await prisma.pengajuan_overtime.create({
       data: {
         tanggal: ConvertDateZeroHours(data.tgl_ot as Date),
-        jam_from: DatePlus7Format(data.jam_awal as Date),
-        jam_to: DatePlus7Format(data.jam_akhir as Date),
+        jam_from: formattedDate2,
+        jam_to: formattedDate3,
         department_id: Number(data.department_id),
         sub_department_id: Number(data.sub_department_id),
         job_desc: data.job_desc?.toUpperCase(),
