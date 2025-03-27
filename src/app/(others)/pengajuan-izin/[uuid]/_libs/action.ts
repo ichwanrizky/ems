@@ -204,7 +204,7 @@ export const createPengajuanIzin = async (data: {
           bulan: ConvertDateZeroHours(data.tgl_izin as Date).getMonth() + 1,
           tahun: ConvertDateZeroHours(data.tgl_izin as Date).getFullYear(),
           keterangan: data.keterangan,
-          jumlah_hari: data.is_hari ? jumlah_hari : null,
+          jumlah_hari: data.is_hari ? jumlah_hari : "1",
           jumlah_jam: data.is_jam ? data.jumlah_jam?.toString() : null,
           department_id: Number(data.department_id),
         },
