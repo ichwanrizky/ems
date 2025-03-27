@@ -51,7 +51,7 @@ export default function PengajuanIzinView({ uuid }: { uuid: string }) {
     tgl_izin: null as Date | null,
     is_jam: false,
     is_hari: false,
-    jumlah_hari: 0,
+    jumlah_hari: 1,
     jumlah_jam: 0,
     keterangan: "",
     mc_base64: "",
@@ -97,7 +97,7 @@ export default function PengajuanIzinView({ uuid }: { uuid: string }) {
       ...prev,
       is_jam: false,
       is_hari: false,
-      jumlah_hari: 0,
+      jumlah_hari: 1,
       jumlah_jam: 0,
     }));
 
@@ -345,26 +345,28 @@ export default function PengajuanIzinView({ uuid }: { uuid: string }) {
                         />
                       </div>
 
-                      {formData.is_hari && (
-                        <div className="form-group mb-3">
-                          <label htmlFor="jumlah_hari" className="form-label">
-                            JUMLAH HARI
-                          </label>
-                          <input
-                            id="jumlah_hari"
-                            type="text"
-                            className="form-control"
-                            required
-                            value={formData.jumlah_hari}
-                            onChange={(e) =>
-                              setFormData({
-                                ...formData,
-                                jumlah_hari: Number(e.target.value),
-                              })
-                            }
-                          />
-                        </div>
-                      )}
+                      {formData.is_hari &&
+                        formData.jenis_izin !== "CS" &&
+                        formData.jenis_izin !== "IS" && (
+                          <div className="form-group mb-3">
+                            <label htmlFor="jumlah_hari" className="form-label">
+                              JUMLAH HARI
+                            </label>
+                            <input
+                              id="jumlah_hari"
+                              type="text"
+                              className="form-control"
+                              required
+                              value={formData.jumlah_hari}
+                              onChange={(e) =>
+                                setFormData({
+                                  ...formData,
+                                  jumlah_hari: Number(e.target.value),
+                                })
+                              }
+                            />
+                          </div>
+                        )}
 
                       {formData.is_jam && (
                         <div className="form-group mb-3">

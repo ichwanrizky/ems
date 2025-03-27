@@ -191,6 +191,11 @@ export const createPengajuanIzin = async (data: {
     }
 
     const result = await prisma.$transaction(async (prisma) => {
+      const jumlah_hari =
+        data.jenis_izin === "CS" || data.jenis_izin === "IS"
+          ? "0.5"
+          : data.jumlah_hari?.toString();
+
       const createIzin = await prisma.pengajuan_izin.create({
         data: {
           jenis_izin_kode: data.jenis_izin,
@@ -199,7 +204,7 @@ export const createPengajuanIzin = async (data: {
           bulan: ConvertDateZeroHours(data.tgl_izin as Date).getMonth() + 1,
           tahun: ConvertDateZeroHours(data.tgl_izin as Date).getFullYear(),
           keterangan: data.keterangan,
-          jumlah_hari: data.is_hari ? data.jumlah_hari?.toString() : null,
+          jumlah_hari: data.is_hari ? jumlah_hari : null,
           jumlah_jam: data.is_jam ? data.jumlah_jam?.toString() : null,
           department_id: Number(data.department_id),
         },
