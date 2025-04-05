@@ -18,7 +18,6 @@ export default function SlipGajiView({ uuid }: { uuid: string }) {
   const [slipGajiData, setSlipGajiData] = useState<SlipGajiDataProps | null>(
     null
   );
-  console.log("🚀 ~ SlipGajiView ~ slipGajiData:", slipGajiData);
 
   useEffect(() => {
     fetchData(uuid);
@@ -266,6 +265,27 @@ export default function SlipGajiView({ uuid }: { uuid: string }) {
                       </span>
                     </div>
                   </div>
+
+                  {/* THR */}
+                  {slipGajiData.thr > 0 && (
+                    <div className="mb-3">
+                      <div
+                        className="d-flex justify-content-between fw-bold mt-3 p-3"
+                        style={{
+                          fontSize: "14pt",
+                          backgroundColor: "#f6ffed", // Light green background
+                          border: "2px solid #52c41a", // Green border
+                          borderRadius: "5px",
+                          color: "#52c41a",
+                        }}
+                      >
+                        <span>THR {slipGajiData?.tahun}</span>
+                        <span style={{ color: "#52c41a" }}>
+                          {slipGajiData.thr.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                    </div>
+                  )}
 
                   {/* INFO */}
                   <div className="mb-3">
