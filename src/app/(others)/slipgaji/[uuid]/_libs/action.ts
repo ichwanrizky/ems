@@ -48,10 +48,30 @@ export const getSlipGaji = async (
       };
     }
 
+    let nominalThr = 0;
+    const thr = await prisma.thr.findFirst({
+      select: {
+        net_thr: true,
+      },
+      where: {
+        pegawai_id: result.pegawai.id,
+        tahun: result.tahun,
+        bulan: result.bulan,
+      },
+    });
+    if (thr) {
+      nominalThr = thr.net_thr;
+    }
+
+    const finalResult = {
+      ...result,
+      thr: nominalThr,
+    };
+
     return {
       status: true,
       message: "Data fetched successfully",
-      data: result as SlipGajiDataProps,
+      data: finalResult as SlipGajiDataProps,
     };
   } catch (error) {
     return HandleError(error) as any;

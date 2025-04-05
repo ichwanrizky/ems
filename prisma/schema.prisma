@@ -67,6 +67,7 @@ model department {
   adjustment         adjustment[]
   gaji_pegawai       gaji_pegawai[]
   pph21              pph21[]
+  thr                thr[]
 }
 
 model sub_department {
@@ -232,6 +233,7 @@ model pegawai {
   gaji_pegawai               gaji_pegawai[]
   gaji                       gaji[]
   pph21                      pph21[]
+  thr                        thr[]
 }
 
 model pegawai_history {
@@ -467,4 +469,17 @@ model pph21 {
   pegawai       pegawai    @relation(fields: [pegawai_id], references: [id])
   gaji          Int        @default(0)
   pph21         Int        @default(0)
+}
+
+model thr {
+  id            Int        @id @default(autoincrement())
+  bulan         Int
+  tahun         Int
+  department_id Int
+  department    department @relation(fields: [department_id], references: [id])
+  pegawai_id    Int
+  pegawai       pegawai    @relation(fields: [pegawai_id], references: [id])
+  thr           Int        @default(0)
+  pph21         Int        @default(0)
+  net_thr       Int        @default(0)
 }

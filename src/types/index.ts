@@ -426,6 +426,7 @@ export type SlipGajiDataProps = {
     urut: number;
     gaji_pegawai_id: number;
   }[];
+  thr: number;
 };
 
 export type ReportAttdProps = {

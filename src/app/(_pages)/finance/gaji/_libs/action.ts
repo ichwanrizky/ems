@@ -674,12 +674,32 @@ export const createGaji = async (data: {
         )
         .reduce((acc: any, item: any) => acc + item.nominal, 0);
 
+      // check thr
+      let nominalThr = 0;
+      let pajakThr = 0;
+      const thr = await prisma.thr.findFirst({
+        select: {
+          thr: true,
+          pph21: true,
+        },
+        where: {
+          bulan: Number(data.bulan),
+          tahun: Number(data.tahun),
+          pegawai_id: Number(item.pegawai_id),
+        },
+      });
+
+      if (thr) {
+        nominalThr = thr.thr;
+        pajakThr = thr.pph21;
+      }
+
       // new pph21
-      const nominalPph21 = Math.round(newPph(ter, gajiBruto));
+      const nominalPph21 = Math.round(newPph(ter, gajiBruto + nominalThr));
       if (nominalPph21 > 0) {
         gajiData = gajiData.map((i: any) => {
           if (i.komponen_id === 13) {
-            return { ...i, nominal: nominalPph21 };
+            return { ...i, nominal: nominalPph21 - pajakThr };
           }
           return i;
         });
@@ -699,7 +719,7 @@ export const createGaji = async (data: {
         bulan: Number(data.bulan),
         tahun: Number(data.tahun),
         nominal: gajiBruto - gajiPengurangan,
-        pph: nominalPph21,
+        pph: nominalPph21 - pajakThr,
         gaji: gajiData,
       });
     }

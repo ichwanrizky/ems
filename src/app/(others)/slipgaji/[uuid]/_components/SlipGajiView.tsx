@@ -18,6 +18,7 @@ export default function SlipGajiView({ uuid }: { uuid: string }) {
   const [slipGajiData, setSlipGajiData] = useState<SlipGajiDataProps | null>(
     null
   );
+  console.log("🚀 ~ SlipGajiView ~ slipGajiData:", slipGajiData);
 
   useEffect(() => {
     fetchData(uuid);
