@@ -1,7 +1,7 @@
 "use client";
 import Alert from "@/components/Alert";
 import Pagination from "@/components/Pagination";
-import { AccessDepartmentProps, isLoadingProps } from "@/types";
+import { AccessDepartmentProps, AccessProps, isLoadingProps } from "@/types";
 import React, { useEffect, useState } from "react";
 import { deleteUser, getUser, getUserId, resetPassword } from "../_libs/action";
 import Button from "@/components/Button";
@@ -9,10 +9,11 @@ import UserEdit from "./UserEdit";
 
 type UserViewProps = {
   accessDepartment: AccessDepartmentProps;
+  accessMenu: AccessProps;
 };
 
 export default function UserView(props: UserViewProps) {
-  const { accessDepartment } = props;
+  const { accessDepartment, accessMenu } = props;
 
   const [currentPage, setCurrentPage] = useState(1 as number);
   const [totalData, setTotalData] = useState(0 as number);
@@ -304,8 +305,30 @@ export default function UserView(props: UserViewProps) {
                             type="actionTable"
                             indexData={index}
                             isLoading={isLoadingAction[item.id]}
-                            onEdit={() => handleGetEdit(item.id)}
-                            onDelete={() => handleDelete(item.id)}
+                            onEdit={() => {
+                              if (accessMenu.update) {
+                                handleGetEdit(item.id);
+                              } else {
+                                setAlertPage({
+                                  status: true,
+                                  color: "danger",
+                                  message: "You don't have access to edit",
+                                  subMessage: "",
+                                });
+                              }
+                            }}
+                            onDelete={() => {
+                              if (accessMenu.delete) {
+                                handleDelete(item.id);
+                              } else {
+                                setAlertPage({
+                                  status: true,
+                                  color: "danger",
+                                  message: "You don't have access to delete",
+                                  subMessage: "",
+                                });
+                              }
+                            }}
                           >
                             <i className="bi bi-three-dots" />
                           </Button>
@@ -332,7 +355,18 @@ export default function UserView(props: UserViewProps) {
                             <button
                               type="button"
                               className="btn btn-success btn-sm"
-                              onClick={() => handleResetPassword(item.id)}
+                              onClick={() => {
+                                if (accessMenu.update) {
+                                  handleResetPassword(item.id);
+                                } else {
+                                  setAlertPage({
+                                    status: true,
+                                    color: "danger",
+                                    message: "You don't have access to edit",
+                                    subMessage: "",
+                                  });
+                                }
+                              }}
                             >
                               RESET PASS
                             </button>

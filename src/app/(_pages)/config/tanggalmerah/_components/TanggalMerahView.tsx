@@ -1,10 +1,6 @@
 "use client";
 import Button from "@/components/Button";
-import {
-  AccessDepartmentProps,
-  DepartmentProps,
-  isLoadingProps,
-} from "@/types";
+import { AccessDepartmentProps, AccessProps, isLoadingProps } from "@/types";
 import React, { useEffect, useState } from "react";
 import {
   deleteTanggalMerah,
@@ -19,10 +15,11 @@ import TanggalMerahEdit from "./TanggalMerahEdit";
 
 type Props = {
   accessDepartment: AccessDepartmentProps;
+  accessMenu: AccessProps;
 };
 
 export default function TanggalMerahView(props: Props) {
-  const { accessDepartment } = props;
+  const { accessDepartment, accessMenu } = props;
 
   const [loadingPage, setLoadingPage] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
@@ -237,7 +234,12 @@ export default function TanggalMerahView(props: Props) {
 
         <div className="col-auto">
           <div className="d-flex align-items-center gap-2 justify-content-lg-end">
-            <Button type="createTable" onClick={() => setIsCreateOpen(true)} />
+            {accessMenu.insert && (
+              <Button
+                type="createTable"
+                onClick={() => setIsCreateOpen(true)}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -286,8 +288,30 @@ export default function TanggalMerahView(props: Props) {
                             type="actionTable"
                             indexData={index}
                             isLoading={isLoadingAction[item.id]}
-                            onEdit={() => handleGetEdit(item.id)}
-                            onDelete={() => handleDelete(item.id)}
+                            onEdit={() => {
+                              if (accessMenu.update) {
+                                handleGetEdit(item.id);
+                              } else {
+                                setAlertPage({
+                                  status: true,
+                                  color: "danger",
+                                  message: "You don't have access to edit",
+                                  subMessage: "",
+                                });
+                              }
+                            }}
+                            onDelete={() => {
+                              if (accessMenu.delete) {
+                                handleDelete(item.id);
+                              } else {
+                                setAlertPage({
+                                  status: true,
+                                  color: "danger",
+                                  message: "You don't have access to delete",
+                                  subMessage: "",
+                                });
+                              }
+                            }}
                           >
                             <i className="bi bi-three-dots" />
                           </Button>

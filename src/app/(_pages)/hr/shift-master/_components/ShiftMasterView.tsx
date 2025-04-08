@@ -260,8 +260,30 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
                             type="actionTable"
                             indexData={index}
                             isLoading={isLoadingAction[item.id]}
-                            onEdit={() => handleGetEdit(item.id)}
-                            onDelete={() => handleDelete(item.id)}
+                            onEdit={() => {
+                              if (accessMenu.update) {
+                                handleGetEdit(item.id);
+                              } else {
+                                setAlertPage({
+                                  status: true,
+                                  color: "danger",
+                                  message: "You don't have access to edit",
+                                  subMessage: "",
+                                });
+                              }
+                            }}
+                            onDelete={() => {
+                              if (accessMenu.delete) {
+                                handleDelete(item.id);
+                              } else {
+                                setAlertPage({
+                                  status: true,
+                                  color: "danger",
+                                  message: "You don't have access to delete",
+                                  subMessage: "",
+                                });
+                              }
+                            }}
                           >
                             <i className="bi bi-three-dots" />
                           </Button>
