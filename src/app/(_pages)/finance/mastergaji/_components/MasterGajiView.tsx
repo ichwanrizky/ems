@@ -6,6 +6,7 @@ import { getMasterGaji, updateMasterGaji } from "../_libs/action";
 import Alert from "@/components/Alert";
 import Pagination from "@/components/Pagination";
 import { NumericFormat } from "react-number-format";
+import * as XLSX from "xlsx";
 
 type MasterGajiViewProps = {
   accessDepartment: AccessDepartmentProps;
@@ -16,7 +17,6 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
   const { accessDepartment, accessMenu } = props;
 
   const [loadingPage, setLoadingPage] = useState(true);
-  const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
   const [alertPage, setAlertPage] = useState({
     status: false,
     color: "",
@@ -225,6 +225,63 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
     }
   };
 
+  const exportToExcel = async () => {
+    if (confirm("Export Excel this data?")) {
+      setLoadingPage(true);
+      try {
+        const headerTitles = [
+          "NO",
+          "NAMA",
+          ...komponenGaji.map((item) => item.komponen?.toUpperCase()),
+        ];
+
+        const data = masterGajiData.map((item, index: number) => {
+          const row: any = {
+            NO: index + 1,
+            NAMA: item.nama?.toUpperCase(),
+          };
+
+          komponenGaji.forEach((komponen, idx) => {
+            const key = komponen.komponen?.toUpperCase(); // harus sama dengan header
+            const nominal = item.master_gaji_pegawai[idx]?.nominal || 0;
+            row[key] = nominal;
+          });
+
+          return row;
+        });
+
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.aoa_to_sheet([headerTitles]);
+        XLSX.utils.sheet_add_json(worksheet, data, {
+          skipHeader: true,
+          origin: "A2",
+        });
+        const colWidths = headerTitles.map((title, index) => {
+          const maxContentWidth = Math.max(
+            ...data.map((row: any) =>
+              row[title] ? row[title].toString().length : 0
+            )
+          );
+          return { wch: Math.max(title.length, maxContentWidth) };
+        });
+        worksheet["!cols"] = colWidths;
+        XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+        XLSX.writeFile(workbook, `DATA MASTER GAJI.xlsx`);
+      } catch (error) {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
+        });
+      } finally {
+        setLoadingPage(false);
+      }
+    }
+
+    return;
+  };
+
   return (
     <>
       <div className="row g-3">
@@ -264,6 +321,15 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
 
         <div className="col-auto">
           <div className="d-flex align-items-center gap-2 justify-content-lg-end">
+            {komponenGaji.length > 0 && (
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={() => exportToExcel()}
+              >
+                EXPORT EXCEL
+              </button>
+            )}
             {accessMenu.insert && (
               <Button type="saveTable" onClick={handleSubmit} />
             )}
