@@ -21,10 +21,15 @@ jobs:
       - name: SSH into VPS and Deploy
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} << 'EOF'
+            export NVM_DIR="\$HOME/.nvm"
+            [ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
+
+            export PATH="\$HOME/.bun/bin:\$PATH"
+
             cd ${{ secrets.PROJECT_DIR }}
             git pull origin main
             npx prisma db push || true
             pm2 kill
             npm run build
-            pm2 start bun --name ems -- run start -p 8081
+            pm2 start bun --name ems -- run start --p 8081
           EOF
