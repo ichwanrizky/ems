@@ -190,6 +190,24 @@ export const createPengajuanIzin = async (data: {
       };
     }
 
+    const checkDoubleData = await prisma.pengajuan_izin.findFirst({
+      select: {
+        id: true,
+      },
+      where: {
+        pegawai_id: Number(data.pegawai_id),
+        jenis_izin_kode: data.jenis_izin,
+        tanggal: ConvertDateZeroHours(data.tgl_izin as Date),
+      },
+    });
+
+    if (checkDoubleData) {
+      return {
+        status: false,
+        message: "Data already submitted",
+      };
+    }
+
     const result = await prisma.$transaction(async (prisma) => {
       const jumlah_hari =
         data.jenis_izin === "CS" || data.jenis_izin === "IS"
