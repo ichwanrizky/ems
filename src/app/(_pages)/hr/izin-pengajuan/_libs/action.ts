@@ -219,6 +219,8 @@ export const approvalPengajuanIzin = async (
           i++;
         }
 
+        // TODO: CONSOLE HERE IF ERR: REQUEST ERROR
+        // console.log(izinData);
         await prisma.izin.createMany({
           data: izinData,
         });
