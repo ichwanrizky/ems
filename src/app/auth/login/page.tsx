@@ -87,7 +87,7 @@ export default function LoginPage({ searchParams }: { searchParams: any }) {
               <div className="card-body p-5">
                 <img src="/img/panji.png" className="mb-4" width={80} />
                 <h4 className="fw-bold">PANJI JAYA</h4>
-                <p className="mb-0">ENTERPRISE MANAGEMENT SYSTEMs</p>
+                <p className="mb-0">ENTERPRISE MANAGEMENT SYSTEMss</p>
                 <div className="form-body my-5">
                   <form className="row g-3" onSubmit={handleSubmit}>
                     <div className="col-12">
