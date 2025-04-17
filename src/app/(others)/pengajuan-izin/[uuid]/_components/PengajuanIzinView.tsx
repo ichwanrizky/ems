@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { createPengajuanIzin, getRequestPengajuanIziun } from "../_libs/action";
+import { createPengajuanIzin, getRequestPengajuanIzin } from "../_libs/action";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "@/styles/styles.module.css";
@@ -64,7 +64,7 @@ export default function PengajuanIzinView({ uuid }: { uuid: string }) {
   const fetchData = async (uuid: string) => {
     setLoadingPage(true);
     try {
-      const result = await getRequestPengajuanIziun(uuid);
+      const result = await getRequestPengajuanIzin(uuid);
       if (result.status) {
         setPengajuanIzinData(result.data);
         setFormData({

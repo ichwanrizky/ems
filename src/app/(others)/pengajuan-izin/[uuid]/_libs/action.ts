@@ -6,7 +6,7 @@ import prisma from "@/libs/Prisma";
 const path = require("path");
 const fs = require("fs");
 
-export const getRequestPengajuanIziun = async (
+export const getRequestPengajuanIzin = async (
   uuid: string
 ): Promise<{
   status: boolean;
