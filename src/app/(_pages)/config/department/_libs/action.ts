@@ -67,6 +67,7 @@ export const getDepartmentId = async (
       },
       where: {
         is_deleted: false,
+        id: id,
       },
     })) as DepartmentProps;
 
