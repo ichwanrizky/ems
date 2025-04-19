@@ -13,6 +13,9 @@ export const getSubDepartmentMultipleDepartment = async (
 }> => {
   try {
     const result = (await prisma.sub_department.findMany({
+      include: {
+        department: true,
+      },
       where: {
         is_deleted: false,
         department_id: {

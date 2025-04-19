@@ -200,6 +200,11 @@ export const getAccessByRoles = async (
             select: {
               id: true,
               nama_sub_department: true,
+              department: {
+                select: {
+                  nama_department: true,
+                },
+              },
             },
           },
         },
@@ -248,7 +253,7 @@ export const getAccessByRoles = async (
       })),
       sub_department_id: result.accessSubDepartment.map((item) => ({
         value: item.sub_department.id,
-        label: item.sub_department.nama_sub_department,
+        label: `${item.sub_department.department.nama_department} - (${item.sub_department.nama_sub_department})`,
       })),
       access: result.access.map((item) => ({
         menu_id: item.menu_id,

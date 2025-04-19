@@ -344,7 +344,10 @@ export default function AccessEdit({
                         }}
                         options={subDepartmentData?.map((e) => ({
                           value: e.id,
-                          label: e.nama_sub_department,
+                          label:
+                            e.department?.nama_department +
+                            " - " +
+                            e.nama_sub_department,
                         }))}
                         onChange={(e: any) => {
                           setFormData({
