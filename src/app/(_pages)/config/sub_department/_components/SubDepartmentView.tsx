@@ -18,11 +18,11 @@ import Pagination from "@/components/Pagination";
 import SubDepartmentEdit from "./SubDepartmentEdit";
 
 type SubDepartmentViewProps = {
-  accessDepartment: AccessDepartmentProps;
+  departmentData: DepartmentProps[] | [];
 };
 
 export default function SubDepartmentView(props: SubDepartmentViewProps) {
-  const { accessDepartment } = props;
+  const { departmentData } = props;
 
   const [loadingPage, setLoadingPage] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
@@ -37,7 +37,7 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [filter, setFilter] = useState({
-    department: accessDepartment[0].department.id || "",
+    department: departmentData[0]?.id || "",
   });
 
   const [subDepartmentData, setSubDepartmentData] = useState(
@@ -199,9 +199,9 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
               value={filter.department}
             >
               <option value="">--DEPT--</option>
-              {accessDepartment?.map((item, index: number) => (
-                <option value={item.department.id} key={index}>
-                  {item.department.nama_department?.toUpperCase()}
+              {departmentData?.map((item, index: number) => (
+                <option value={item.id} key={index}>
+                  {item.nama_department?.toUpperCase()}
                 </option>
               ))}
             </select>
@@ -310,7 +310,7 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
             setIsCreateOpen(false);
             fetchData("", filter);
           }}
-          departmentData={accessDepartment}
+          departmentData={departmentData}
         />
       )}
 
@@ -321,7 +321,7 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
             setIsEditOpen(false);
             fetchData("", filter);
           }}
-          departmentData={accessDepartment}
+          departmentData={departmentData}
           subDepartmentEdit={subDepartmentEdit}
         />
       )}

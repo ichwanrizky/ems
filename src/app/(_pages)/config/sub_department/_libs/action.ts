@@ -2,7 +2,7 @@
 
 import { HandleError } from "@/libs/Error";
 import prisma from "@/libs/Prisma";
-import { AtasanProps, SubDepartmentProps } from "@/types";
+import { AtasanProps, DepartmentProps, SubDepartmentProps } from "@/types";
 
 export const getSubDepartmentMultipleDepartment = async (
   department_id: { value: number; label: string }[]
@@ -402,6 +402,39 @@ export const deleteSubDepartment = async (
     return {
       status: true,
       message: "Delete data successfully",
+    };
+  } catch (error) {
+    return HandleError(error) as any;
+  }
+};
+
+export const getDepartment = async (): Promise<{
+  status: boolean;
+  message: string;
+  data: DepartmentProps[] | [];
+}> => {
+  try {
+    const result = await prisma.department.findMany({
+      where: {
+        is_deleted: false,
+      },
+      orderBy: {
+        id: "asc",
+      },
+    });
+
+    if (!result) {
+      return {
+        status: false,
+        message: "Data not found",
+        data: [],
+      };
+    }
+
+    return {
+      status: true,
+      message: "Data fetched successfully",
+      data: result as DepartmentProps[],
     };
   } catch (error) {
     return HandleError(error) as any;

@@ -13,7 +13,7 @@ import Select from "react-select";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
-  departmentData: AccessDepartmentProps;
+  departmentData: DepartmentProps[] | [];
   subDepartmentEdit: SubDepartmentProps;
 };
 
@@ -175,8 +175,8 @@ export default function SubDepartmentEdit(props: Props) {
         >
           <option value="">--SELECT--</option>
           {departmentData?.map((item, index) => (
-            <option value={item.department.id} key={index}>
-              {item.department.nama_department?.toUpperCase()}
+            <option value={item.id} key={index}>
+              {item.nama_department?.toUpperCase()}
             </option>
           ))}
         </select>
