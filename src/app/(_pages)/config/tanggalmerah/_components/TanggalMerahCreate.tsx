@@ -266,7 +266,7 @@ export default function TanggalMerahCreate(props: Props) {
 
       <div className="form-group mb-3">
         <label htmlFor="date_holiday" className="form-label">
-          TAHUN
+          TANGGAL
         </label>
         <Select
           instanceId={"date_holiday"}
