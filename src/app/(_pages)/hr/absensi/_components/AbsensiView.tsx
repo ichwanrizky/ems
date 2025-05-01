@@ -49,6 +49,7 @@ export default function AbsensiView(props: AbsensiViewProps) {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
   const [absensiData, setAbsensiData] = useState([] as AbsenProps[]);
+  console.log("🚀 ~ AbsensiView ~ absensiData:", absensiData);
 
   useEffect(() => {
     if (alertPage.status) {
@@ -278,7 +279,12 @@ export default function AbsensiView(props: AbsensiViewProps) {
                               : "-"
                             : ""}
                         </td>
-                        <td align="center">{item.absen[0]?.late}</td>
+                        <td align="center">
+                          {item.izin.length === 0 ||
+                          !item.izin.some((e) => e.jenis_izin.kode === "G2")
+                            ? item.absen[0]?.late
+                            : 0}
+                        </td>
                         <td align="left">
                           {item.izin?.map((e, index) => (
                             <React.Fragment key={index}>
