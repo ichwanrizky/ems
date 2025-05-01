@@ -183,6 +183,20 @@ export async function POST(req: Request) {
       let late = 0;
       if (differenceInMinutes > 0) late = differenceInMinutes;
 
+      const libur = await prisma.tanggal_merah_list.findFirst({
+        select: {
+          id: true,
+        },
+        where: {
+          tanggal_merah: {
+            department_id: dataDepartment.id,
+          },
+          tanggal: ConvertDateZeroHours2(DateNowFormat()),
+        },
+      });
+
+      if (libur) late = 0;
+
       const createAbsen = await prisma.absen.create({
         data: {
           pegawai_id: session[1].pegawaiId,
