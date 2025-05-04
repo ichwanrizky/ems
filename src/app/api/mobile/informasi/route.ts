@@ -80,6 +80,24 @@ export async function GET(req: Request) {
       },
     });
 
+    const dataShift = await prisma.department.findFirst({
+      select: {
+        shift: {
+          select: {
+            jam_masuk: true,
+            jam_pulang: true,
+          },
+        },
+      },
+      where: {
+        pegawai: {
+          some: {
+            id: session[1].pegawaiId,
+          },
+        },
+      },
+    });
+
     if (!dataInfo) {
       return new NextResponse(
         JSON.stringify({
@@ -95,6 +113,32 @@ export async function GET(req: Request) {
       );
     }
 
+    const shiftDepartment = dataShift?.shift
+      ?.map((s) => {
+        const masuk = new Date(s.jam_masuk as any)
+          .toLocaleString("id-ID", optionsDate)
+          .replaceAll(".", ":");
+        const pulang = new Date(s.jam_pulang as any)
+          .toLocaleString("id-ID", optionsDate)
+          .replaceAll(".", ":");
+        return `${masuk} - ${pulang}`;
+      })
+      .join(", ");
+
+    let shifts = "";
+
+    if (dataInfo.shift == null) {
+      shifts = shiftDepartment as any;
+    } else {
+      shifts =
+        new Date(dataInfo.shift?.jam_masuk as any)
+          .toLocaleString("id-ID", optionsDate)
+          .replaceAll(".", ":") +
+        " - " +
+        new Date(dataInfo.shift?.jam_pulang as any)
+          .toLocaleString("id-ID", optionsDate)
+          .replaceAll(".", ":");
+    }
     return new NextResponse(
       JSON.stringify({
         status: true,
@@ -106,14 +150,7 @@ export async function GET(req: Request) {
               "id-ID",
               optionsDate3
             ),
-            shift:
-              new Date(dataInfo.shift?.jam_masuk as any)
-                .toLocaleString("id-ID", optionsDate)
-                .replaceAll(".", ":") +
-              " - " +
-              new Date(dataInfo.shift?.jam_pulang as any)
-                .toLocaleString("id-ID", optionsDate)
-                .replaceAll(".", ":"),
+            shift: shifts,
             department: dataInfo.department?.nama_department.toUpperCase(),
           },
         },
