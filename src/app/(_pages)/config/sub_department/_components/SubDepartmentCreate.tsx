@@ -200,7 +200,7 @@ export default function SubDepartmentCreate(props: Props) {
           }}
           options={atasanData?.map((e) => ({
             value: e.id,
-            label: e.pegawai?.nama?.toUpperCase(),
+            label: e.name?.toUpperCase(),
           }))}
           onChange={(e: any) => {
             setFormData({
@@ -213,7 +213,7 @@ export default function SubDepartmentCreate(props: Props) {
               ? atasanData
                   ?.map((e) => ({
                     value: e.id,
-                    label: e.pegawai?.nama?.toUpperCase(),
+                    label: e.name?.toUpperCase(),
                   }))
                   .find((option) => option.value === formData.leader)
               : null
@@ -234,7 +234,7 @@ export default function SubDepartmentCreate(props: Props) {
           }}
           options={atasanData?.map((e) => ({
             value: e.id,
-            label: e.pegawai?.nama?.toUpperCase(),
+            label: e.name?.toUpperCase(),
           }))}
           onChange={(e: any) => {
             setFormData({
@@ -247,7 +247,7 @@ export default function SubDepartmentCreate(props: Props) {
               ? atasanData
                   ?.map((e) => ({
                     value: e.id,
-                    label: e.pegawai?.nama?.toUpperCase(),
+                    label: e.name?.toUpperCase(),
                   }))
                   .find((option) => option.value === formData.supervisor)
               : null
@@ -268,7 +268,7 @@ export default function SubDepartmentCreate(props: Props) {
           }}
           options={atasanData?.map((e) => ({
             value: e.id,
-            label: e.pegawai?.nama?.toUpperCase(),
+            label: e.name?.toUpperCase(),
           }))}
           onChange={(e: any) => {
             setFormData({
@@ -281,7 +281,7 @@ export default function SubDepartmentCreate(props: Props) {
               ? atasanData
                   ?.map((e) => ({
                     value: e.id,
-                    label: e.pegawai?.nama?.toUpperCase(),
+                    label: e.name?.toUpperCase(),
                   }))
                   .find((option) => option.value === formData.manager)
               : null

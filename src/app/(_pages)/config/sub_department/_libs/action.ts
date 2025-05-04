@@ -51,6 +51,7 @@ export const getAtasan = async (): Promise<{
     const result = (await prisma.user.findMany({
       select: {
         id: true,
+        name: true,
         pegawai: {
           select: {
             id: true,
@@ -60,6 +61,9 @@ export const getAtasan = async (): Promise<{
       },
       where: {
         is_deleted: false,
+        role_id: {
+          not: null,
+        },
       },
       orderBy: {
         name: "asc",

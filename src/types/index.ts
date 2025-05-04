@@ -216,6 +216,7 @@ export type PegawaiShiftProps = {
 
 export type AtasanProps = {
   id?: number;
+  name?: string;
   username?: string;
   pegawai: {
     id: number;
