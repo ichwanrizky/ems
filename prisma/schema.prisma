@@ -148,6 +148,7 @@ model user {
   created_at         DateTime?            @db.DateTime(0)
   is_deleted         Boolean              @default(false)
   pegawai_id         Int?
+  is_userluar        Boolean              @default(false)
   pegawai            pegawai?             @relation(fields: [pegawai_id], references: [id])
   leader_user        sub_department[]     @relation("leader_user")
   supervisor_user    sub_department[]     @relation("supervisor_user")

@@ -49,7 +49,6 @@ export default function AbsensiView(props: AbsensiViewProps) {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
 
   const [absensiData, setAbsensiData] = useState([] as AbsenProps[]);
-  console.log("🚀 ~ AbsensiView ~ absensiData:", absensiData);
 
   useEffect(() => {
     if (alertPage.status) {
