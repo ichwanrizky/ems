@@ -398,10 +398,19 @@ export async function POST(req: Request) {
           },
         });
       } else {
+        const shiftOffset = adjustShiftDateIfOvernight(
+          shiftPegawai.jam_masuk,
+          shiftPegawai.jam_pulang
+        );
+
+        const shiftDate = new Date(DateNowFormat());
+        shiftDate.setDate(shiftDate.getDate() + shiftOffset);
+        const tanggalAbsen = ConvertDateZeroHours2(shiftDate);
+
         var createAbsen = await prisma.absen.create({
           data: {
             pegawai_id: session[1].pegawaiId,
-            tanggal: ConvertDateZeroHours2(DateNowFormat()),
+            tanggal: tanggalAbsen,
             absen_pulang: DateNowFormat(),
             shift_id: shiftPegawai.id,
             bulan: new Date(DateNowFormat()).getMonth() + 1,
@@ -463,4 +472,11 @@ function calculateDistance(lat1: any, lon1: any, lat2: any, lon2: any) {
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   const distance = R * c;
   return distance * 1000;
+}
+
+function adjustShiftDateIfOvernight(shiftMasuk: any, shiftPulang: any) {
+  const masukHour = shiftMasuk.getUTCHours();
+  const pulangHour = shiftPulang.getUTCHours();
+
+  return pulangHour < masukHour ? -1 : 0;
 }
