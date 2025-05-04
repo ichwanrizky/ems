@@ -84,6 +84,7 @@ export async function GET(req: Request) {
       select: {
         shift: {
           select: {
+            keterangan: true,
             jam_masuk: true,
             jam_pulang: true,
           },
@@ -121,7 +122,7 @@ export async function GET(req: Request) {
         const pulang = new Date(s.jam_pulang as any)
           .toLocaleString("id-ID", optionsDate)
           .replaceAll(".", ":");
-        return `${masuk} - ${pulang}`;
+        return `${s.keterangan}: ${masuk} - ${pulang}`;
       })
       .join("\n");
 
