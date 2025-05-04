@@ -1,8 +1,10 @@
 "use client";
 import Modal from "@/components/Modal";
 import Script from "next/script";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { editUser } from "../_libs/action";
+import { getRoles } from "../../roles/_libs/action";
+import { RolesProps } from "@/types";
 
 type Props = {
   isOpen: boolean;
@@ -15,6 +17,10 @@ type Props = {
           id: number;
           nama: string;
           telp: string;
+        };
+        roles: {
+          id: number;
+          role_name: string;
         };
       }
     | null
@@ -31,13 +37,49 @@ export default function UserEdit(props: Props) {
     subMessage: "",
   });
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+  const [isLoadingPage, setIsLoadingPage] = useState(true);
+
+  const [rolesData, setRolesData] = useState([] as RolesProps[]);
 
   const [formData, setFormData] = useState({
     id: userEdit?.id || 0,
+    role_id: userEdit?.roles?.id || (null as number | null),
     username: userEdit?.username || "",
     new_password: "",
     re_new_password: "",
   });
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
+  if (!isOpen) return null;
+
+  const fetchRoles = async () => {
+    setIsLoadingPage(true);
+    try {
+      const result = await getRoles();
+      if (result.status) {
+        setRolesData(result.data as RolesProps[]);
+      } else {
+        setAlertModal({
+          status: true,
+          color: "danger",
+          message: "Failed",
+          subMessage: result.message,
+        });
+      }
+    } catch (error) {
+      setAlertModal({
+        status: true,
+        color: "danger",
+        message: "Error",
+        subMessage: "Something went wrong, please refresh and try again",
+      });
+    } finally {
+      setIsLoadingPage(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -97,6 +139,28 @@ export default function UserEdit(props: Props) {
     }
   };
 
+  if (isLoadingPage) {
+    return (
+      <Modal
+        modalTitle="EDIT DATA"
+        onClose={onClose}
+        alert={alertModal}
+        isLoadingModal={false}
+        isLoadingSubmit={isLoadingSubmit}
+        onSubmit={handleSubmit}
+      >
+        <div className="d-flex justify-content-center">
+          <span
+            className="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          LOADING ...
+        </div>
+      </Modal>
+    );
+  }
+
   return (
     <Modal
       modalTitle="EDIT DATA"
@@ -134,6 +198,27 @@ export default function UserEdit(props: Props) {
         />
       </div>
       <hr />
+
+      <div className="form-group mb-3">
+        <label htmlFor="role" className="form-label">
+          ROLE
+        </label>
+        <select
+          id="role"
+          className="form-select"
+          value={formData.role_id || ""}
+          onChange={(e) =>
+            setFormData({ ...formData, role_id: Number(e.target.value) })
+          }
+        >
+          <option value="">--SELECT--</option>
+          {rolesData?.map((item, index) => (
+            <option value={item.id} key={index}>
+              {item.role_name?.toUpperCase()}
+            </option>
+          ))}
+        </select>
+      </div>
 
       <div className="form-group mb-3">
         <label htmlFor="username" className="form-label">
@@ -206,4 +291,7 @@ export default function UserEdit(props: Props) {
       </div>
     </Modal>
   );
+}
+function setRolesData(arg0: RolesProps[]) {
+  throw new Error("Function not implemented.");
 }

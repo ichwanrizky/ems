@@ -52,6 +52,10 @@ export default function UserView(props: UserViewProps) {
       nama: string;
       telp: string;
     };
+    roles: {
+      id: number;
+      role_name: string;
+    };
   } | null>();
 
   const [filter, setFilter] = useState({

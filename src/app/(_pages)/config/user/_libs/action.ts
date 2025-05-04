@@ -31,6 +31,7 @@ export const getUser = async (
     const condition = {
       where: {
         is_deleted: false,
+        is_userluar: false,
         pegawai: {
           is_deleted: false,
           is_active: true,
@@ -121,6 +122,10 @@ export const getUserId = async (
       nama: string;
       telp: string;
     };
+    roles: {
+      id: number;
+      role_name: string;
+    };
   } | null;
 }> => {
   try {
@@ -135,10 +140,17 @@ export const getUserId = async (
             telp: true,
           },
         },
+        roles: {
+          select: {
+            id: true,
+            role_name: true,
+          },
+        },
       },
       where: {
         id: id,
         is_deleted: false,
+        is_userluar: false,
         pegawai: {
           is_active: true,
           is_deleted: false,
@@ -170,6 +182,10 @@ export const getUserId = async (
           nama: string;
           telp: string;
         };
+        roles: {
+          id: number;
+          role_name: string;
+        };
       },
     };
   } catch (error) {
@@ -179,6 +195,7 @@ export const getUserId = async (
 
 export const editUser = async (data: {
   id: number;
+  role_id: number | null;
   username: string;
   new_password?: string;
   re_new_password?: string;
@@ -225,9 +242,11 @@ export const editUser = async (data: {
     const result = await prisma.user.update({
       where: {
         id: data.id,
+        is_userluar: false,
       },
       data: {
         username: data.username,
+        role_id: data.role_id,
         ...(data.new_password && { password: password }),
       },
     });
@@ -259,6 +278,7 @@ export const deleteUser = async (
       where: {
         id,
         is_deleted: false,
+        is_userluar: false,
       },
       data: {
         is_deleted: true,
@@ -296,6 +316,7 @@ export const resetPassword = async (
       where: {
         id,
         is_deleted: false,
+        is_userluar: false,
       },
     });
 
@@ -312,6 +333,7 @@ export const resetPassword = async (
       where: {
         id,
         is_deleted: false,
+        is_userluar: false,
       },
       data: {
         password: password,
