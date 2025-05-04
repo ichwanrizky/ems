@@ -123,7 +123,7 @@ export async function GET(req: Request) {
           .replaceAll(".", ":");
         return `${masuk} - ${pulang}`;
       })
-      .join(", ");
+      .join("\n");
 
     let shifts = "";
 
