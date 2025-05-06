@@ -628,7 +628,7 @@ export const createGaji = async (data: {
 
         // JP (1%)
         if (i.id === 15) {
-          if (bpjs_tk > 9077600) nominal = Math.round(9077600 * 0.01);
+          if (bpjs_tk > 10547400) nominal = Math.round(10547400 * 0.01);
           else nominal = Math.round(bpjs_tk * 0.01);
         }
 
@@ -637,7 +637,7 @@ export const createGaji = async (data: {
           nominal = Math.round(bpjs_tk * 0.02);
         }
 
-        //   JUMLAH HARI KERJA
+        // JUMLAH HARI KERJA
         if (i.id === 18) {
           nominal = item.attend_count + item.attend_weekend_count;
         }
