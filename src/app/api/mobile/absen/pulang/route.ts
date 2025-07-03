@@ -245,16 +245,12 @@ export async function POST(req: Request) {
 
     // TODO: OTHER DEPT / FLEXIBLE SHIFT
     else {
-      const getAbsen = await prisma.absen.findFirst({
+      const getShiftPegawai = await prisma.pegawai.findFirst({
         select: {
-          id: true,
           shift: true,
-          absen_masuk: true,
-          absen_pulang: true,
         },
         where: {
-          pegawai_id: session[1].pegawaiId,
-          tanggal: ConvertDateZeroHours2(DateNowFormat()),
+          id: session[1].pegawaiId,
         },
       });
 
@@ -265,12 +261,12 @@ export async function POST(req: Request) {
         jam_pulang: any;
       };
 
-      if (getAbsen) {
+      if (getShiftPegawai?.shift) {
         shiftPegawai = {
-          id: getAbsen.shift?.id,
-          keterangan: getAbsen.shift?.keterangan,
-          jam_masuk: getAbsen.shift?.jam_masuk,
-          jam_pulang: getAbsen.shift?.jam_pulang,
+          id: getShiftPegawai.shift?.id,
+          keterangan: getShiftPegawai.shift?.keterangan,
+          jam_masuk: getShiftPegawai.shift?.jam_masuk,
+          jam_pulang: getShiftPegawai.shift?.jam_pulang,
         };
       } else {
         const shiftQuery = `SELECT
@@ -369,6 +365,22 @@ export async function POST(req: Request) {
         );
       }
 
+      const shiftOffset = adjustShiftDateIfOvernight(
+        shiftPegawai.jam_masuk,
+        shiftPegawai.jam_pulang
+      );
+
+      const shiftDate = new Date(DateNowFormat());
+      shiftDate.setDate(shiftDate.getDate() + shiftOffset);
+      const tanggalAbsen = ConvertDateZeroHours2(shiftDate);
+
+      const getAbsen = await prisma.absen.findFirst({
+        where: {
+          pegawai_id: session[1].pegawaiId,
+          tanggal: tanggalAbsen,
+        },
+      });
+
       if (getAbsen?.absen_pulang) {
         return new NextResponse(
           JSON.stringify({
@@ -398,15 +410,6 @@ export async function POST(req: Request) {
           },
         });
       } else {
-        const shiftOffset = adjustShiftDateIfOvernight(
-          shiftPegawai.jam_masuk,
-          shiftPegawai.jam_pulang
-        );
-
-        const shiftDate = new Date(DateNowFormat());
-        shiftDate.setDate(shiftDate.getDate() + shiftOffset);
-        const tanggalAbsen = ConvertDateZeroHours2(shiftDate);
-
         var createAbsen = await prisma.absen.create({
           data: {
             pegawai_id: session[1].pegawaiId,
