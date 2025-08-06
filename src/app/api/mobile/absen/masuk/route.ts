@@ -338,7 +338,7 @@ export async function POST(req: Request) {
         );
       }
 
-      if (differenceInMinutes < -120) {
+      if (differenceInMinutes < -270) {
         return new NextResponse(
           JSON.stringify({
             status: false,
