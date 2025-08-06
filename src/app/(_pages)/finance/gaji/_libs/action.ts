@@ -721,6 +721,7 @@ export const createGaji = async (data: {
         nominal: gajiBruto - gajiPengurangan,
         pph: nominalPph21 - pajakThr,
         gaji: gajiData,
+        gajiBruto: gajiBruto,
       });
     }
 
@@ -756,7 +757,7 @@ export const createGaji = async (data: {
             tahun: Number(item.tahun),
             department_id: Number(data.department_id),
             pegawai_id: Number(item.pegawai_id),
-            gaji: Number(item.nominal),
+            gaji: Number(item.gajiBruto),
             pph21: Number(item.pph),
           },
         }),
