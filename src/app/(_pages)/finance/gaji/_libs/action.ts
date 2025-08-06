@@ -695,7 +695,7 @@ export const createGaji = async (data: {
       }
 
       // new pph21
-      const nominalPph21 = Math.round(newPph(ter, gajiBruto + nominalThr));
+      const nominalPph21 = Math.floor(newPph(ter, gajiBruto + nominalThr));
       if (nominalPph21 > 0) {
         gajiData = gajiData.map((i: any) => {
           if (i.komponen_id === 13) {
@@ -734,6 +734,7 @@ export const createGaji = async (data: {
             pegawai_id: Number(item.pegawai_id),
             nominal: Number(item.nominal),
             department_id: Number(data.department_id),
+            publish: true,
             gaji: {
               createMany: {
                 data: item.gaji?.map((item2: any) => ({
