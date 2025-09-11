@@ -44,7 +44,10 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
   const [pegawaiData, setPegawaiData] = useState([] as PegawaiProps[]);
 
   const [selectedSubDepartment, setSelectedSubDepartment] = useState(
-    [] as AccessSubDepartmentProps
+    accessSubDepartment.filter(
+      (e) =>
+        e.sub_department.department_id === accessDepartment[0].department.id
+    ) || ([] as AccessSubDepartmentProps)
   );
   const [filter, setFilter] = useState({
     department: accessDepartment[0].department.id?.toString() || "",

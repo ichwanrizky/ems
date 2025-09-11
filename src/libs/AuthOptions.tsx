@@ -155,6 +155,9 @@ export const authOptions: NextAuthOptions = {
               ...result.user.supervisor_user.map((item) => ({
                 sub_department: item,
               })),
+              ...(result.user.roles?.access_sub_department?.map((access) => ({
+                sub_department: access.sub_department,
+              })) || []),
             ];
           } else {
             accessSubDepartments =

@@ -8,4 +8,4 @@ export function mainMiddleware(request: NextRequest) {
   return res;
 }
 
-export default withAuth(mainMiddleware, ["/config/"]);
+export default withAuth(mainMiddleware, ["/hr/", "/finance/", "/config/"]);
