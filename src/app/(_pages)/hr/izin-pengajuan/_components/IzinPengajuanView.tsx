@@ -294,7 +294,7 @@ export default function IzinPengajuanView(props: Props) {
                         <td align="center">{item.jumlah_jam}</td>
                         <td align="center">
                           {item.jenis_izin.kode === "S" && (
-                            <a href={`/izin/${item.uuid}.png`} target="_blank">
+                            <a href={`/files_mc/${item.uuid}.png`} target="_blank">
                               MC
                             </a>
                           )}
