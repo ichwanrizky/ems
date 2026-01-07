@@ -695,15 +695,16 @@ export const createGaji = async (data: {
       }
 
       // new pph21
-      const nominalPph21 = Math.floor(newPph(ter, gajiBruto + nominalThr));
-      if (nominalPph21 > 0) {
-        gajiData = gajiData.map((i: any) => {
-          if (i.komponen_id === 13) {
-            return { ...i, nominal: nominalPph21 - pajakThr };
-          }
-          return i;
-        });
-      }
+      // const nominalPph21 = Math.floor(newPph(ter, gajiBruto + nominalThr));
+      // if (nominalPph21 > 0) {
+      //   gajiData = gajiData.map((i: any) => {
+      //     if (i.komponen_id === 13) {
+      //       return { ...i, nominal: nominalPph21 - pajakThr };
+      //     }
+      //     return i;
+      //   });
+      // }
+      const nominalPph21 = 0;
 
       // pengurangan gaji
       const gajiPengurangan = gajiData
