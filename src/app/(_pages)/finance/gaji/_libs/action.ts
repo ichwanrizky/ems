@@ -63,15 +63,14 @@ export type ExportGajiProps = {
 export const getPegawaiGaji = async (
   department_id: number,
   bulan: number,
-  tahun: number
+  tahun: number,
 ): Promise<{
   status: boolean;
   message: string;
-  data:
-    | {
-        id: number;
-        nama: string;
-      }[];
+  data: {
+    id: number;
+    nama: string;
+  }[];
 }> => {
   try {
     const result = await prisma.pegawai.findMany({
@@ -128,7 +127,7 @@ export const createGaji = async (data: {
   try {
     const listDates = getDatesInMonth(
       Number(data.tahun),
-      Number(data.bulan) - 1
+      Number(data.bulan) - 1,
     );
 
     const listTanggalMerah = await prisma.tanggal_merah_list.findMany({
@@ -148,11 +147,11 @@ export const createGaji = async (data: {
     });
 
     const tanggalMerah = listTanggalMerah.map(
-      (item: any) => item.tanggal.toISOString().split("T")[0]
+      (item: any) => item.tanggal.toISOString().split("T")[0],
     );
 
     const tanggalKerja = listDates.filter(
-      (item: any) => !tanggalMerah.includes(item)
+      (item: any) => !tanggalMerah.includes(item),
     );
 
     const tanggalKerjaQuery = listDates
@@ -575,7 +574,7 @@ export const createGaji = async (data: {
             nominal = item.izin_count + item.izin_s_count;
           else if (i.tipe === "pengurangan")
             nominal = Math.round(
-              (basic_fix / 22) * (item.izin_count + item.izin_s_count)
+              (basic_fix / 22) * (item.izin_count + item.izin_s_count),
             );
         }
 
@@ -596,7 +595,7 @@ export const createGaji = async (data: {
           else if (i.tipe === "pengurangan")
             nominal = Math.round(
               (basic_salary / 22 / 8 / 60) * item.late_count +
-                (komponen_fix / 22 / 8 / 60) * item.late_count
+                (komponen_fix / 22 / 8 / 60) * item.late_count,
             );
         }
 
@@ -608,7 +607,7 @@ export const createGaji = async (data: {
             const totalGatepass = item.g1_count + item.g2_count + item.g3_count;
             nominal = Math.round(
               (basic_salary / 22 / 8 / 60) * totalGatepass +
-                (komponen_fix / 22 / 8 / 60) * totalGatepass
+                (komponen_fix / 22 / 8 / 60) * totalGatepass,
             );
           }
         }
@@ -670,7 +669,7 @@ export const createGaji = async (data: {
       const gajiBruto = gajiData
         .filter(
           (i: any) =>
-            i.tipe === "penambahan" && i.pegawai_id === item.pegawai_id
+            i.tipe === "penambahan" && i.pegawai_id === item.pegawai_id,
         )
         .reduce((acc: any, item: any) => acc + item.nominal, 0);
 
@@ -695,22 +694,21 @@ export const createGaji = async (data: {
       }
 
       // new pph21
-      // const nominalPph21 = Math.floor(newPph(ter, gajiBruto + nominalThr));
-      // if (nominalPph21 > 0) {
-      //   gajiData = gajiData.map((i: any) => {
-      //     if (i.komponen_id === 13) {
-      //       return { ...i, nominal: nominalPph21 - pajakThr };
-      //     }
-      //     return i;
-      //   });
-      // }
-      const nominalPph21 = 0;
+      const nominalPph21 = Math.floor(newPph(ter, gajiBruto + nominalThr));
+      if (nominalPph21 > 0) {
+        gajiData = gajiData.map((i: any) => {
+          if (i.komponen_id === 13) {
+            return { ...i, nominal: nominalPph21 - pajakThr };
+          }
+          return i;
+        });
+      }
 
       // pengurangan gaji
       const gajiPengurangan = gajiData
         .filter(
           (i: any) =>
-            i.tipe === "pengurangan" && i.pegawai_id === item.pegawai_id
+            i.tipe === "pengurangan" && i.pegawai_id === item.pegawai_id,
         )
         .reduce((acc: any, item: any) => acc + item.nominal, 0);
 
@@ -781,7 +779,7 @@ export const getGaji = async (
     department: string | number;
     tahun: string | number;
     bulan: string | number;
-  }
+  },
 ): Promise<{
   status: boolean;
   message: string;
@@ -835,7 +833,7 @@ export const getGaji = async (
 };
 
 export const deleteGaji = async (
-  id: number
+  id: number,
 ): Promise<{
   status: boolean;
   message: string;
@@ -887,7 +885,7 @@ export const exportExcelGaji = async (
     department: string | number;
     tahun: string | number;
     bulan: string | number;
-  }
+  },
 ): Promise<{
   status: boolean;
   message: string;
