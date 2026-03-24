@@ -55,41 +55,38 @@ export default function TanggalMerahCreate(props: Props) {
     setFormData({ ...formData, tanggal: [] });
     try {
       const result = await fetch(
-        `https://api-harilibur.vercel.app/api?year=${tahun}&month=${bulan}`
+        `/api/hari-libur?year=${tahun}&month=${bulan}`
       );
-
       let dates = [] as string[];
 
       if (result.ok) {
         const data = await result.json();
-        data?.map((item: any) => {
-          if (item.is_national_holiday) {
-            const day = item.holiday_date.split("-")[2];
-            const paddedDay = day.padStart(2, "0");
-            dates.push(paddedDay);
-          }
+
+        // API baru: data ada di data.data, field "date" langsung tanpa is_national_holiday
+        data?.data?.map((item: any) => {
+          const day = item.date.split("-")[2];
+          const paddedDay = day.padStart(2, "0");
+          dates.push(paddedDay);
         });
       }
 
       const monthIndex = Number(bulan) - 1;
       const endDate = new Date(Number(tahun), Number(bulan), 0);
-
       const arrDateMonths = [];
 
+      // Tambahkan Sabtu & Minggu
       for (let day = 1; day <= endDate.getDate(); day++) {
         const date = new Date(Number(tahun), monthIndex, day);
+        const formattedDate = String(date.getDate()).padStart(2, "0");
 
         if (date.getDay() === 6 || date.getDay() === 0) {
-          const formattedDate = `${String(date.getDate()).padStart(2, "0")}`;
-          dates.push(formattedDate);
-
-          dates = dates.filter((d) => d !== formattedDate);
-
-          // Add the new date
-          dates.push(formattedDate);
+          // Hindari duplikat jika hari libur nasional jatuh di Sabtu/Minggu
+          if (!dates.includes(formattedDate)) {
+            dates.push(formattedDate);
+          }
         }
 
-        arrDateMonths.push(`${String(date.getDate()).padStart(2, "0")}`);
+        arrDateMonths.push(formattedDate);
       }
 
       dates.sort((a, b) => parseInt(a) - parseInt(b));
