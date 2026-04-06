@@ -13,6 +13,16 @@ type PphViewProps = {
   accessDepartment: AccessDepartmentProps;
 };
 
+type PphData = {
+  id: number;
+  gaji: number;
+  pph21: number;
+  thr: number | null;
+  pegawai_id: number;
+  nama: string;
+  npwp: string | null;
+};
+
 export default function PphView(props: PphViewProps) {
   const { accessDepartment } = props;
 
@@ -33,30 +43,13 @@ export default function PphView(props: PphViewProps) {
     tahun: new Date().getFullYear() as number | string,
   });
 
-  const [pphData, setPphData] = useState(
-    [] as {
-      id: number;
-      gaji: number;
-      pph21: number;
-      pegawai: {
-        id: number;
-        nama: string;
-        npwp: string;
-      };
-    }[]
-  );
+  const [pphData, setPphData] = useState<PphData[]>([]);
 
   useEffect(() => {
     if (alertPage.status) {
       const timer = setTimeout(() => {
-        setAlertPage({
-          status: false,
-          color: "",
-          message: "",
-          subMessage: "",
-        });
+        setAlertPage({ status: false, color: "", message: "", subMessage: "" });
       }, 2000);
-
       return () => clearTimeout(timer);
     }
   }, [alertPage]);
@@ -65,7 +58,6 @@ export default function PphView(props: PphViewProps) {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
     }, 500);
-
     return () => clearTimeout(handler);
   }, [searchTerm]);
 
@@ -79,7 +71,7 @@ export default function PphView(props: PphViewProps) {
       department: string | number;
       tahun: string | number;
       bulan: string | number;
-    }
+    },
   ) => {
     setLoadingPage(true);
     try {
@@ -110,20 +102,26 @@ export default function PphView(props: PphViewProps) {
     setSearchTerm(e.target.value);
   };
 
+  const formatCurrency = (value: number | null) =>
+    new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      minimumFractionDigits: 0,
+    }).format(value ?? 0);
+
   const exportToExcel = async () => {
     if (confirm("Export Excel this data?")) {
       setIsLoadingAction({ ...isLoadingAction, [0]: true });
       try {
-        const headerTitles = ["NO", "NAMA", "NPWP", "GAJI", "PPH21"];
-        const data = pphData.map((item, index: number) => {
-          return {
-            NO: index + 1,
-            NAMA: item.pegawai.nama?.toUpperCase(),
-            NPWP: item.pegawai.npwp,
-            GAJI: item.gaji,
-            PPH21: item.pph21,
-          };
-        });
+        const headerTitles = ["NO", "NAMA", "NPWP", "GAJI", "THR", "PPH21"];
+        const data = pphData.map((item, index) => ({
+          NO: index + 1,
+          NAMA: item.nama?.toUpperCase(),
+          NPWP: item.npwp ?? "-",
+          GAJI: item.gaji,
+          THR: item.thr ?? 0,
+          PPH21: item.pph21,
+        }));
 
         const workbook = XLSX.utils.book_new();
         const worksheet = XLSX.utils.aoa_to_sheet([headerTitles]);
@@ -131,11 +129,11 @@ export default function PphView(props: PphViewProps) {
           skipHeader: true,
           origin: "A2",
         });
-        const colWidths = headerTitles.map((title, index) => {
+        const colWidths = headerTitles.map((title) => {
           const maxContentWidth = Math.max(
             ...data.map((row: any) =>
-              row[title] ? row[title].toString().length : 0
-            )
+              row[title] ? row[title].toString().length : 0,
+            ),
           );
           return { wch: Math.max(title.length, maxContentWidth) };
         });
@@ -143,7 +141,7 @@ export default function PphView(props: PphViewProps) {
         XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
         XLSX.writeFile(
           workbook,
-          `DATA PPH ${filter.bulan}-${filter.tahun}.xlsx`
+          `DATA PPH ${filter.bulan}-${filter.tahun}.xlsx`,
         );
       } catch (error) {
         setAlertPage({
@@ -156,8 +154,6 @@ export default function PphView(props: PphViewProps) {
         setIsLoadingAction({ ...isLoadingAction, [0]: false });
       }
     }
-
-    return;
   };
 
   return (
@@ -187,7 +183,7 @@ export default function PphView(props: PphViewProps) {
               value={filter.department}
             >
               <option value="">-- DEPT --</option>
-              {accessDepartment?.map((item, index: number) => (
+              {accessDepartment?.map((item, index) => (
                 <option value={item.department.id} key={index}>
                   {item.department.nama_department}
                 </option>
@@ -209,7 +205,6 @@ export default function PphView(props: PphViewProps) {
             </select>
           </div>
         </div>
-        <div className="col-auto flex-grow-1 overflow-auto"></div>
 
         <div className="col-auto">
           <div className="d-flex align-items-center gap-2 justify-content-lg-end">
@@ -227,7 +222,7 @@ export default function PphView(props: PphViewProps) {
                 <button
                   type="button"
                   className="btn btn-success"
-                  onClick={() => exportToExcel()}
+                  onClick={exportToExcel}
                 >
                   EXPORT EXCEL
                 </button>
@@ -253,14 +248,15 @@ export default function PphView(props: PphViewProps) {
                   <tr>
                     <th style={{ width: "1%" }}>NO</th>
                     <th>NAMA</th>
-                    <th style={{ width: "25%" }}>GAJI</th>
-                    <th style={{ width: "25%" }}>PPH</th>
+                    <th style={{ width: "20%" }}>GAJI</th>
+                    <th style={{ width: "20%" }}>THR</th>
+                    <th style={{ width: "20%" }}>PPH21</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingPage ? (
                     <tr>
-                      <td colSpan={4} align="center">
+                      <td colSpan={5} align="center">
                         <div
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
@@ -274,26 +270,15 @@ export default function PphView(props: PphViewProps) {
                     pphData.map((item, index) => (
                       <tr key={index}>
                         <td align="center">{index + 1}</td>
-                        <td>{item.pegawai.nama?.toUpperCase()}</td>
-                        <td align="right">
-                          {new Intl.NumberFormat("id-ID", {
-                            style: "currency",
-                            currency: "IDR",
-                            minimumFractionDigits: 0,
-                          }).format(item.gaji)}
-                        </td>
-                        <td align="right">
-                          {new Intl.NumberFormat("id-ID", {
-                            style: "currency",
-                            currency: "IDR",
-                            minimumFractionDigits: 0,
-                          }).format(item.pph21)}
-                        </td>
+                        <td>{item.nama?.toUpperCase()}</td>
+                        <td align="right">{formatCurrency(item.gaji)}</td>
+                        <td align="right">{formatCurrency(item.thr)}</td>
+                        <td align="right">{formatCurrency(item.pph21)}</td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={4} align="center">
+                      <td colSpan={5} align="center">
                         No data available
                       </td>
                     </tr>
