@@ -46,13 +46,9 @@ export const getTokenMobile = async (
       },
     };
 
-    const totalData = await prisma.session_mobile.count({
-      ...condition,
-    });
-
-    const itemPerPage = currentPage ? 10 : totalData;
-
-    const result = await prisma.session_mobile.findMany({
+    const [totalData, result] = await Promise.all([
+      prisma.session_mobile.count({ ...condition }),
+      prisma.session_mobile.findMany({
       select: {
         id: true,
         token: true,
@@ -75,9 +71,10 @@ export const getTokenMobile = async (
           },
         },
       },
-      skip: currentPage ? (currentPage - 1) * itemPerPage : 0,
-      take: itemPerPage,
-    });
+      skip: currentPage ? (currentPage - 1) * 10 : 0,
+      take: currentPage ? 10 : undefined,
+    }),
+    ]);
 
     if (!result) {
       return {
@@ -90,7 +87,7 @@ export const getTokenMobile = async (
 
     const newData = result.map((item, index) => ({
       number: currentPage
-        ? (Number(currentPage) - 1) * itemPerPage + index + 1
+        ? (Number(currentPage) - 1) * 10 + index + 1
         : index + 1,
       ...item,
     }));

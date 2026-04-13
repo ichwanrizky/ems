@@ -53,13 +53,9 @@ export const getUserLuar = async (
       },
     };
 
-    const totalData = await prisma.user.count({
-      ...condition,
-    });
-
-    const itemPerPage = currentPage ? 10 : totalData;
-
-    const result = await prisma.user.findMany({
+    const [totalData, result] = await Promise.all([
+      prisma.user.count({ ...condition }),
+      prisma.user.findMany({
       select: {
         id: true,
         username: true,
@@ -76,9 +72,10 @@ export const getUserLuar = async (
       orderBy: {
         name: "asc",
       },
-      skip: currentPage ? (currentPage - 1) * itemPerPage : 0,
-      take: itemPerPage,
-    });
+      skip: currentPage ? (currentPage - 1) * 10 : 0,
+      take: currentPage ? 10 : undefined,
+    }),
+    ]);
 
     if (!result) {
       return {
@@ -91,7 +88,7 @@ export const getUserLuar = async (
 
     const newData = result.map((item, index) => ({
       number: currentPage
-        ? (Number(currentPage) - 1) * itemPerPage + index + 1
+        ? (Number(currentPage) - 1) * 10 + index + 1
         : index + 1,
       ...item,
     }));

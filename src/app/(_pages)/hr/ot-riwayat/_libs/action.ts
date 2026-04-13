@@ -67,13 +67,9 @@ export const getRiwayatOt = async (
       },
     };
 
-    const totalData = await prisma.pengajuan_overtime.count({
-      ...condition,
-    });
-
-    const itemPerPage = currentPage ? 10 : totalData;
-
-    const result = await prisma.pengajuan_overtime.findMany({
+    const [totalData, result] = await Promise.all([
+      prisma.pengajuan_overtime.count({ ...condition }),
+      prisma.pengajuan_overtime.findMany({
       select: {
         id: true,
         pengajuan_overtime_pegawai: {
@@ -111,9 +107,10 @@ export const getRiwayatOt = async (
       orderBy: {
         tanggal: "desc",
       },
-      skip: currentPage ? (currentPage - 1) * itemPerPage : 0,
-      take: itemPerPage,
-    });
+      skip: currentPage ? (currentPage - 1) * 10 : 0,
+      take: currentPage ? 10 : undefined,
+    }),
+    ]);
 
     if (!result) {
       return {
@@ -126,7 +123,7 @@ export const getRiwayatOt = async (
 
     const newData = result.map((item, index) => ({
       number: currentPage
-        ? (Number(currentPage) - 1) * itemPerPage + index + 1
+        ? (Number(currentPage) - 1) * 10 + index + 1
         : index + 1,
       ...item,
     }));

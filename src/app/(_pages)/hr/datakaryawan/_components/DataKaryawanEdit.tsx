@@ -44,7 +44,7 @@ export default function DataKaryawanEdit(props: DataKaryawanEditProps) {
     nik_ktp: pegawaiData.nik_ktp || ("" as string | number),
     position: pegawaiData.position || "",
     tmp_lahir: pegawaiData.tmp_lahir || "",
-    tgl_lahir: pegawaiData.tgl_lahir || (null as Date | null),
+    tgl_lahir: pegawaiData.tgl_lahir ? new Date(pegawaiData.tgl_lahir) : (null as Date | null),
     jk: pegawaiData.jk || "",
     agama: pegawaiData.agama || "",
     telp: pegawaiData.telp || ("" as string | number),
@@ -63,6 +63,8 @@ export default function DataKaryawanEdit(props: DataKaryawanEditProps) {
     no_rek: pegawaiData.no_rek || "",
     bpjs_tk: pegawaiData.bpjs_tk || "",
     bpjs_kes: pegawaiData.bpjs_kes || "",
+    is_active: pegawaiData.is_active ?? true,
+    is_overtime: pegawaiData.is_overtime ?? false,
   });
 
   useEffect(() => {
@@ -206,6 +208,56 @@ export default function DataKaryawanEdit(props: DataKaryawanEditProps) {
                       </div>
                     </div>
                   </div>
+                  <hr />
+
+                  <div className="form-group mb-3">
+                    <div className="row">
+                      <div className="col-sm-6">
+                        <label htmlFor="is_active" className="form-label">
+                          STATUS PEGAWAI
+                        </label>
+                        <select
+                          autoComplete="off"
+                          className="form-select"
+                          id="is_active"
+                          required
+                          value={formData.is_active ? "1" : "0"}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              is_active: e.target.value === "1",
+                            })
+                          }
+                        >
+                          <option value="1">AKTIF</option>
+                          <option value="0">TIDAK AKTIF</option>
+                        </select>
+                      </div>
+
+                      <div className="col-sm-6">
+                        <label htmlFor="is_overtime" className="form-label">
+                          IS OVERTIME
+                        </label>
+                        <select
+                          autoComplete="off"
+                          className="form-select"
+                          id="is_overtime"
+                          required
+                          value={formData.is_overtime ? "1" : "0"}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              is_overtime: e.target.value === "1",
+                            })
+                          }
+                        >
+                          <option value="0">TIDAK</option>
+                          <option value="1">YA</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
                   <hr />
 
                   <div className="form-group mb-3">
@@ -762,7 +814,7 @@ export default function DataKaryawanEdit(props: DataKaryawanEditProps) {
                 </div>
 
                 <div className="card-footer py-3">
-                  <a href="/config/access" className="btn btn-secondary me-2">
+                  <a href="/hr/datakaryawan" className="btn btn-secondary me-2">
                     CLOSE
                   </a>
 

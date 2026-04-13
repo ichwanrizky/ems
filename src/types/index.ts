@@ -172,6 +172,7 @@ export type PegawaiProps = {
   };
   tgl_join?: Date;
   is_active: boolean;
+  is_overtime: boolean;
   user: {
     id: number;
     is_deleted: boolean;
@@ -206,6 +207,8 @@ export type PegawaiCreateProps = {
   no_rek: string;
   bpjs_tk: string;
   bpjs_kes: string;
+  is_active: boolean;
+  is_overtime: boolean;
 };
 
 export type PegawaiShiftProps = {

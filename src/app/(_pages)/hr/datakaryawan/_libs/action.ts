@@ -44,13 +44,9 @@ export const getPegawai = async (
       },
     };
 
-    const totalData = await prisma.pegawai.count({
-      ...condition,
-    });
-
-    const itemPerPage = currentPage ? 10 : totalData;
-
-    const result = (await prisma.pegawai.findMany({
+    const [totalData, result] = await Promise.all([
+      prisma.pegawai.count({ ...condition }),
+      prisma.pegawai.findMany({
       select: {
         id: true,
         panji_id: true,
@@ -89,9 +85,10 @@ export const getPegawai = async (
           nama: "asc",
         },
       ],
-      skip: currentPage ? (currentPage - 1) * itemPerPage : 0,
-      take: itemPerPage,
-    })) as PegawaiProps[];
+      skip: currentPage ? (currentPage - 1) * 10 : 0,
+      take: currentPage ? 10 : undefined,
+    }) as Promise<PegawaiProps[]>,
+    ]);
 
     if (!result) {
       return {
@@ -104,7 +101,7 @@ export const getPegawai = async (
 
     const newData = result.map((item, index) => ({
       number: currentPage
-        ? (Number(currentPage) - 1) * itemPerPage + index + 1
+        ? (Number(currentPage) - 1) * 10 + index + 1
         : index + 1,
       ...item,
     }));
@@ -153,6 +150,8 @@ export const getPegawaiId = async (
         no_rek: true,
         bpjs_kes: true,
         bpjs_tk: true,
+        is_active: true,
+        is_overtime: true,
         department: {
           select: {
             id: true,
@@ -300,6 +299,8 @@ export const editDataKaryawan = async (
         bpjs_kes: data.bpjs_kes,
         department_id: data.department_id,
         sub_department_id: data.sub_department_id,
+        is_active: data.is_active,
+        is_overtime: data.is_overtime,
       },
       where: {
         id: data.id,

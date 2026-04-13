@@ -5,7 +5,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-bs-theme="dark">
-      {children}
+      <body>{children}</body>
     </html>
   );
 }
