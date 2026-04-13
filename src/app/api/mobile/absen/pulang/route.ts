@@ -8,6 +8,10 @@ import {
   DatePlus7Format,
 } from "@/libs/ConvertDate";
 import { HandleErrorMobile } from "@/libs/ErrorMobile";
+import {
+  hasAnyLocation,
+  isWithinAllowedZone,
+} from "@/libs/AttendanceLocation";
 
 export async function POST(req: Request) {
   try {
@@ -35,62 +39,61 @@ export async function POST(req: Request) {
     const dataDepartment = await prisma.department.findFirst({
       include: {
         pegawai: {
-          where: {
-            id: session[1].pegawaiId,
-          },
-          select: {
-            shift: true,
-          },
+          where: { id: session[1].pegawaiId },
+          select: { shift: true },
         },
         shift: true,
       },
       where: {
-        pegawai: {
-          some: {
-            id: session[1].pegawaiId,
-          },
-        },
+        pegawai: { some: { id: session[1].pegawaiId } },
       },
     });
 
-    if (
-      !dataDepartment ||
-      !dataDepartment.latitude ||
-      !dataDepartment.longitude
-    ) {
+    if (!dataDepartment) {
       return new NextResponse(
         JSON.stringify({
           status: false,
           message: "Unauthorized, Department pegawai belum diset",
         }),
-        {
-          status: 400,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const distance = calculateDistance(
-      dataDepartment.latitude,
-      dataDepartment.longitude,
+    // Fetch secondary & personal locations in parallel
+    const [deptLocations, pegawaiLocations] = await Promise.all([
+      prisma.department_location.findMany({
+        where: { department_id: dataDepartment.id },
+      }),
+      prisma.pegawai_location.findMany({
+        where: { pegawai_id: session[1].pegawaiId },
+      }),
+    ]);
+
+    if (!hasAnyLocation(dataDepartment, deptLocations, pegawaiLocations)) {
+      return new NextResponse(
+        JSON.stringify({
+          status: false,
+          message: "Unauthorized, Lokasi absen belum dikonfigurasi",
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    const inZone = isWithinAllowedZone(
       latitude,
-      longitude
+      longitude,
+      dataDepartment,
+      deptLocations,
+      pegawaiLocations
     );
 
-    if (distance > Number(dataDepartment.radius)) {
+    if (!inZone) {
       return new NextResponse(
         JSON.stringify({
           status: false,
           message: "Gagal, Anda belum berada di dalam zona absen",
         }),
-        {
-          status: 400,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -458,24 +461,6 @@ export async function POST(req: Request) {
   }
 }
 
-function calculateDistance(lat1: any, lon1: any, lat2: any, lon2: any) {
-  function toRad(x: any) {
-    return (x * Math.PI) / 180;
-  }
-
-  const R = 6371; // Earth radius in km
-  const dLat = toRad(lat2 - lat1);
-  const dLon = toRad(lon2 - lon1);
-  const a =
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(toRad(lat1)) *
-      Math.cos(toRad(lat2)) *
-      Math.sin(dLon / 2) *
-      Math.sin(dLon / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  const distance = R * c;
-  return distance * 1000;
-}
 
 function adjustShiftDateIfOvernight(shiftMasuk: any, shiftPulang: any) {
   const masukHour = shiftMasuk.getUTCHours();

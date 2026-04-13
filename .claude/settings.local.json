@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(grep -l \"prisma\\\\.\\\\w*\\\\.count\" \"/c/Users/IchwanRizky/Documents/_CODES PERSONAL/ems/src/app/\\(_pages\\)\"/**/_libs/action.ts)"
+      "Bash(grep -l \"prisma\\\\.\\\\w*\\\\.count\" \"/c/Users/IchwanRizky/Documents/_CODES PERSONAL/ems/src/app/\\(_pages\\)\"/**/_libs/action.ts)",
+      "Bash(npx prisma:*)"
     ]
   }
 }

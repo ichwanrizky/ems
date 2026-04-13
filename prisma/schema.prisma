@@ -56,6 +56,7 @@ model department {
   is_deleted         Boolean              @default(false)
   sub_department     sub_department[]
   access_department  access_department[]
+  department_location department_location[]
   shift              shift[]
   pegawai            pegawai[]
   pengajuan_izin     pengajuan_izin[]
@@ -68,6 +69,18 @@ model department {
   gaji_pegawai       gaji_pegawai[]
   pph21              pph21[]
   thr                thr[]
+}
+
+model department_location {
+  id            Int        @id @default(autoincrement())
+  nama_lokasi   String?
+  latitude      String
+  longitude     String
+  radius        String
+  department_id Int
+  department    department @relation(fields: [department_id], references: [id])
+
+  @@index([department_id])
 }
 
 model sub_department {
@@ -235,6 +248,19 @@ model pegawai {
   gaji                       gaji[]
   pph21                      pph21[]
   thr                        thr[]
+  pegawai_location           pegawai_location[]
+}
+
+model pegawai_location {
+  id          Int     @id @default(autoincrement())
+  nama_lokasi String?
+  latitude    String
+  longitude   String
+  radius      String
+  pegawai_id  Int
+  pegawai     pegawai @relation(fields: [pegawai_id], references: [id])
+
+  @@index([pegawai_id])
 }
 
 model pegawai_history {

@@ -3,7 +3,7 @@
 import { DateNowFormat } from "@/libs/DateFormat";
 import { HandleError } from "@/libs/Error";
 import prisma from "@/libs/Prisma";
-import { DepartmentProps } from "@/types";
+import { DepartmentLocationProps, DepartmentProps } from "@/types";
 
 export const getDepartment = async (
   search?: string
@@ -188,5 +188,121 @@ export const deleteDepartment = async (
     };
   } catch (error) {
     return HandleError(error) as any;
+  }
+};
+
+// ── Department Location CRUD ──────────────────────────────────────────────────
+
+export const getDepartmentLocation = async (
+  department_id: number
+): Promise<{
+  status: boolean;
+  message: string;
+  data: DepartmentLocationProps[];
+}> => {
+  try {
+    const result = await prisma.department_location.findMany({
+      select: {
+        id: true,
+        nama_lokasi: true,
+        latitude: true,
+        longitude: true,
+        radius: true,
+        department_id: true,
+      },
+      where: { department_id },
+      orderBy: { id: "asc" },
+    });
+
+    return {
+      status: true,
+      message: "Data fetched successfully",
+      data: result as DepartmentLocationProps[],
+    };
+  } catch (error) {
+    return HandleError(error) as any;
+  }
+};
+
+export const getDepartmentLocationId = async (
+  id: number
+): Promise<{
+  status: boolean;
+  message: string;
+  data: DepartmentLocationProps | null;
+}> => {
+  try {
+    const result = await prisma.department_location.findFirst({
+      select: {
+        id: true,
+        nama_lokasi: true,
+        latitude: true,
+        longitude: true,
+        radius: true,
+        department_id: true,
+      },
+      where: { id },
+    });
+
+    if (!result) return { status: false, message: "Data not found", data: null };
+
+    return {
+      status: true,
+      message: "Data fetched successfully",
+      data: result as DepartmentLocationProps,
+    };
+  } catch (error) {
+    return HandleError(error) as any;
+  }
+};
+
+export const createDepartmentLocation = async (
+  data: DepartmentLocationProps
+): Promise<{ status: boolean; message: string }> => {
+  try {
+    await prisma.department_location.create({
+      data: {
+        nama_lokasi: data.nama_lokasi || null,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        radius: data.radius,
+        department_id: Number(data.department_id),
+      },
+    });
+
+    return { status: true, message: "Add data successfully" };
+  } catch (error) {
+    return HandleError(error);
+  }
+};
+
+export const editDepartmentLocation = async (
+  data: DepartmentLocationProps
+): Promise<{ status: boolean; message: string }> => {
+  try {
+    await prisma.department_location.update({
+      where: { id: data.id },
+      data: {
+        nama_lokasi: data.nama_lokasi || null,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        radius: data.radius,
+      },
+    });
+
+    return { status: true, message: "Edit data successfully" };
+  } catch (error) {
+    return HandleError(error);
+  }
+};
+
+export const deleteDepartmentLocation = async (
+  id: number
+): Promise<{ status: boolean; message: string }> => {
+  try {
+    await prisma.department_location.delete({ where: { id } });
+    return { status: true, message: "Delete data successfully" };
+  } catch (error) {
+    return HandleError(error);
   }
 };

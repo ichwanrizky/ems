@@ -38,6 +38,43 @@ export type DepartmentProps = {
   latitude: string;
   longitude: string;
   radius: string;
+  department_location?: DepartmentLocationProps[];
+};
+
+export type DepartmentLocationProps = {
+  id?: number;
+  nama_lokasi?: string;
+  latitude: string;
+  longitude: string;
+  radius: string;
+  department_id?: number;
+};
+
+export type PegawaiLocationProps = {
+  number?: number;
+  id: number;
+  nama_lokasi?: string;
+  latitude: string;
+  longitude: string;
+  radius: string;
+  pegawai_id: number;
+  pegawai: {
+    id: number;
+    nama: string;
+    department: {
+      id: number;
+      nama_department: string;
+    };
+  };
+};
+
+export type PegawaiLocationCreateProps = {
+  id?: number;
+  nama_lokasi?: string;
+  latitude: string;
+  longitude: string;
+  radius: string;
+  pegawai_id: number | string;
 };
 
 export type SubDepartmentProps = {
