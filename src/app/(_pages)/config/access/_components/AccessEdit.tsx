@@ -14,6 +14,8 @@ import {
 import { useRouter } from "next/navigation";
 import Alert from "@/components/Alert";
 
+type SelectOption = { value: number; label: string };
+
 export default function AccessEdit({
   role_id,
   accessData,
@@ -41,10 +43,10 @@ export default function AccessEdit({
   const [formData, setFormData] = useState({
     role_id: accessData.role_id || (null as number | null),
     department_id:
-      accessData.department_id || ([] as { value: number; label: string }[]),
+      accessData.department_id || ([] as SelectOption[]),
     sub_department_id:
       accessData.sub_department_id ||
-      ([] as { value: number; label: string }[]),
+      ([] as SelectOption[]),
     access: (accessData.access as any[]) || ([] as any[]),
   });
 
@@ -105,7 +107,7 @@ export default function AccessEdit({
   };
 
   const handleGetSubDepartment = async (
-    department_id: { value: number; label: string }[]
+    department_id: SelectOption[]
   ) => {
     try {
       const result = await getSubDepartmentMultipleDepartment(department_id);
@@ -118,6 +120,40 @@ export default function AccessEdit({
         message: "Something went wrong",
         subMessage: "Please refresh and try again",
       });
+    }
+  };
+
+  const handleChangeDepartment = (selectedOptions: SelectOption[] | null) => {
+    const selectedDepartments = selectedOptions || [];
+    const selectedDepartmentIds = new Set(
+      selectedDepartments.map((item) => item.value)
+    );
+    const availableSubDepartmentIds = new Set(
+      subDepartmentData
+        .filter((item) => selectedDepartmentIds.has(item.department_id))
+        .map((item) => item.id)
+    );
+
+    setFormData((prev) => {
+      const isRemovingDepartment = prev.department_id.some(
+        (item) => !selectedDepartmentIds.has(item.value)
+      );
+
+      return {
+        ...prev,
+        department_id: selectedDepartments,
+        sub_department_id: isRemovingDepartment
+          ? prev.sub_department_id.filter((item) =>
+              availableSubDepartmentIds.has(item.value)
+            )
+          : prev.sub_department_id,
+      };
+    });
+
+    if (selectedDepartments.length > 0) {
+      handleGetSubDepartment(selectedDepartments);
+    } else {
+      setSubDepartmentData([]);
     }
   };
 
@@ -310,20 +346,13 @@ export default function AccessEdit({
                           value: e.id,
                           label: e.nama_department,
                         }))}
-                        onChange={(e: any) => {
-                          setFormData({
-                            ...formData,
-                            department_id: e,
-                            sub_department_id: [],
-                          });
-                          setSubDepartmentData([]);
-                          if (e) {
-                            handleGetSubDepartment(e);
-                          }
-                        }}
+                        onChange={(e) =>
+                          handleChangeDepartment(e as SelectOption[] | null)
+                        }
                         value={formData.department_id}
                         isMulti
                         isClearable
+                        closeMenuOnSelect={false}
                         required
                       />
                     </div>
@@ -358,6 +387,7 @@ export default function AccessEdit({
                         value={formData.sub_department_id}
                         isMulti
                         isClearable
+                        closeMenuOnSelect={false}
                         required
                       />
                     </div>

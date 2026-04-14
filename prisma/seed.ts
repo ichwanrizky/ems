@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
+const bcrypt = require("bcrypt");
 
 async function main() {
   try {
@@ -47,7 +48,7 @@ async function main() {
         { id: 8,  menu_group_id: 1, menu: "USER LUAR",        urut: 8,  path: "config/user_luar",       last_path: "user_luar" },
         { id: 9,  menu_group_id: 1, menu: "TOKEN MOBILE",     urut: 9,  path: "config/tokenmobile",     last_path: "tokenmobile" },
         { id: 10, menu_group_id: 1, menu: "TANGGAL MERAH",    urut: 10, path: "config/tanggalmerah",    last_path: "tanggalmerah" },
-        { id: 11, menu_group_id: 1, menu: "LOKASI TAMBAHAN",  urut: 11, path: "config/lokasi-tambahan", last_path: "lokasi-tambahan" },
+        { id: 11, menu_group_id: 1, menu: "LOKASI TAMBAHAN",  urut: 11, path: "config/lokasitambahan", last_path: "lokasitambahan" },
 
         // ── HR ──────────────────────────────────────────────
         { id: 12, menu_group_id: 2, menu: "DATA KARYAWAN",        urut: 1,  path: "hr/datakaryawan",       last_path: "datakaryawan" },
@@ -68,6 +69,7 @@ async function main() {
         { id: 25, menu_group_id: 3, menu: "GAJI",             urut: 2, path: "finance/gaji",          last_path: "gaji" },
         { id: 26, menu_group_id: 3, menu: "ADJUSTMENT GAJI",  urut: 3, path: "finance/adjustmengaji", last_path: "adjustmengaji" },
         { id: 27, menu_group_id: 3, menu: "PPH 21",           urut: 4, path: "finance/pph",           last_path: "pph" },
+        { id: 28, menu_group_id: 3, menu: "THR",              urut: 5, path: "finance/thr",           last_path: "thr" },
       ],
     });
 
@@ -129,12 +131,14 @@ async function main() {
     });
 
     // user
+    const password = await bcrypt.hash("sarutobi11", 10);
+
     await prisma.user.deleteMany();
     await prisma.user.create({
       data: {
         id: 1,
         username: "ichwan",
-        password: "sarutobi11",
+        password,
         name: "ICHWAN RIZKY",
         telp: "08117779914",
         role_id: 1,
@@ -142,11 +146,17 @@ async function main() {
     });
 
     // access — full access untuk ADMINISTRATOR ke semua menu
+    const menuData = await prisma.menu.findMany({
+      select: {
+        id: true,
+      },
+    });
+
     await prisma.access.deleteMany();
     await prisma.access.createMany({
-      data: Array.from({ length: 27 }, (_, i) => ({
+      data: menuData.map((menu) => ({
         role_id: 1,
-        menu_id: i + 1,
+        menu_id: menu.id,
         view: true,
         insert: true,
         update: true,
@@ -156,25 +166,9 @@ async function main() {
 
     // access department
     await prisma.access_department.deleteMany();
-    await prisma.access_department.createMany({
-      data: [
-        {
-          role_id: 1,
-          department_id: 1,
-        },
-      ],
-    });
 
     // access sub department
     await prisma.access_sub_department.deleteMany();
-    await prisma.access_sub_department.createMany({
-      data: [
-        {
-          role_id: 1,
-          sub_department_id: 1,
-        },
-      ],
-    });
 
     console.log("Seeding Complete");
   } catch (error) {
