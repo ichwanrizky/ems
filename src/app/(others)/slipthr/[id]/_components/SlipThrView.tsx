@@ -1,14 +1,9 @@
 "use client";
 import Alert from "@/components/Alert";
-import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 import { getSlipThr, SlipThrDataProps } from "../_libs/action";
 import SlipThrPdf from "@/libs/SlipThr";
-
-const PDFDownloadLink = dynamic(
-  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
-  { ssr: false }
-);
+import { PDFDownloadLink } from "@react-pdf/renderer";
 
 const monthNames = (month: number) => {
   const names = [
