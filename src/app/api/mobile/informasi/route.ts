@@ -88,6 +88,9 @@ export async function GET(req: Request) {
             jam_masuk: true,
             jam_pulang: true,
           },
+          orderBy: {
+            jam_masuk: "asc",
+          },
         },
       },
       where: {
