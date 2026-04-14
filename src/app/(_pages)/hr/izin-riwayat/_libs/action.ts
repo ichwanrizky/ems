@@ -32,11 +32,16 @@ export const getRiwayatIzin = async (
         },
         department_id: Number(filter?.department),
         pegawai: {
-          sub_department_id: {
-            in: session.user.access_sub_department.map(
-              (item: any) => item.sub_department.id
-            ),
-          },
+          OR: [
+            { sub_department_id: null },
+            {
+              sub_department_id: {
+                in: session.user.access_sub_department.map(
+                  (item: any) => item.sub_department.id
+                ),
+              },
+            },
+          ],
         },
         bulan: Number(filter?.bulan),
         tahun: Number(filter?.tahun),

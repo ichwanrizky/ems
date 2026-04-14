@@ -60,14 +60,20 @@ export const getAbsensi = async (
         is_active: true,
         is_deleted: false,
         department_id: Number(filter!.department),
-        sub_department_id: {
-          in: session.user.access_sub_department.map(
-            (item: any) => item.sub_department.id
-          ),
-        },
-        ...(filter!.sub_department && {
-          sub_department_id: Number(filter!.sub_department),
-        }),
+        ...(filter!.sub_department
+          ? { sub_department_id: Number(filter!.sub_department) }
+          : {
+              OR: [
+                { sub_department_id: null },
+                {
+                  sub_department_id: {
+                    in: session.user.access_sub_department.map(
+                      (item: any) => item.sub_department.id
+                    ),
+                  },
+                },
+              ],
+            }),
         ...(filter!.status_absen && {
           absen:
             filter!.status_absen === "1"

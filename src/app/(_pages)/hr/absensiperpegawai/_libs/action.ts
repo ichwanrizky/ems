@@ -32,11 +32,16 @@ export const getPegawaiAbsen = async (
         is_active: true,
         is_deleted: false,
         department_id: Number(department),
-        sub_department_id: {
-          in: session.user.access_sub_department.map(
-            (item: any) => item.sub_department.id
-          ),
-        },
+        OR: [
+          { sub_department_id: null },
+          {
+            sub_department_id: {
+              in: session.user.access_sub_department.map(
+                (item: any) => item.sub_department.id
+              ),
+            },
+          },
+        ],
       },
       orderBy: {
         nama: "asc",

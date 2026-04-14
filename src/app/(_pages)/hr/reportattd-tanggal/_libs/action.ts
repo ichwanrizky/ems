@@ -111,9 +111,9 @@ export const getReportAttdTanggal = async (
     p.department_id = ${filter?.department}
     AND p.is_active = true
     AND p.is_deleted = false
-    AND p.sub_department_id IN (${session.user.access_sub_department.map(
+    AND (p.sub_department_id IS NULL OR p.sub_department_id IN (${session.user.access_sub_department.map(
       (item: any) => item.sub_department.id
-    )})
+    )}))
   ${search ? `AND (p.nama LIKE '%${search}%')` : ""}
   ORDER BY
     p.nama,

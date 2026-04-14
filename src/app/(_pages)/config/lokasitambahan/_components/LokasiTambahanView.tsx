@@ -2,6 +2,7 @@
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
 import FilterSection from "@/components/FilterSection";
+import Pagination from "@/components/Pagination";
 import {
   AccessDepartmentProps,
   isLoadingProps,
@@ -203,6 +204,12 @@ export default function LokasiTambahanView({ accessDepartment, defaultDepartment
                 )}
               </tbody>
             </table>
+            <Pagination
+              currentPage={1}
+              totalPage={1}
+              maxPagination={1}
+              setCurrentPage={() => {}}
+            />
           </div>
         </div>
       </div>
