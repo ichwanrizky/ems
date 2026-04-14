@@ -93,196 +93,38 @@ export async function POST(req: Request) {
       );
     }
 
-    if (dataDepartment.id == 1) {
-      // TODO: DEPT PANJI JAYA / FIX SHIFT
+    // Determine shift: fix (from pegawai.shift) or flexible (closest by time)
+    let shiftPegawai: {
+      id: number | undefined;
+      keterangan: string | null | undefined;
+      jam_masuk: any;
+      jam_pulang: any;
+    };
 
-      if (!dataDepartment.pegawai[0].shift) {
-        return new NextResponse(
-          JSON.stringify({
-            status: false,
-            message: "Unauthorized, Shift pegawai belum diset",
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      }
-
-      const getAbsen = await prisma.absen.findFirst({
-        where: {
-          pegawai_id: session[1].pegawaiId,
-          tanggal: ConvertDateZeroHours2(DateNowFormat()),
-        },
-      });
-
-      if (getAbsen) {
-        return new NextResponse(
-          JSON.stringify({
-            status: false,
-            message: "Gagal, absen sudah dilakukan",
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      }
-
-      const shiftTime = new Date(
-        dataDepartment?.pegawai?.[0]?.shift?.jam_masuk as any
-      );
-      const hours = shiftTime.getUTCHours();
-      const minutes = shiftTime.getUTCMinutes();
-      const seconds = shiftTime.getUTCSeconds();
-
-      let jam_masuk_department = new Date();
-      jam_masuk_department.setHours(hours, minutes, seconds, 0);
-      jam_masuk_department = DatePlus7Format(jam_masuk_department);
-
-      const absenMasukWithoutSecond = new Date(DateNowFormat());
-      absenMasukWithoutSecond.setSeconds(0);
-      absenMasukWithoutSecond.setMilliseconds(0);
-
-      const difference =
-        (absenMasukWithoutSecond as any) - (jam_masuk_department as any);
-
-      const differenceInMinutes = Math.round(difference / 60000);
-
-      if (differenceInMinutes >= 300) {
-        return new NextResponse(
-          JSON.stringify({
-            status: false,
-            message: "Gagal, anda melewati batas jam absensi masuk",
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      }
-
-      if (differenceInMinutes < -120) {
-        return new NextResponse(
-          JSON.stringify({
-            status: false,
-            message: "Gagal, anda belum dapat melakukan absensi masuk",
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      }
-
-      let late = 0;
-      if (differenceInMinutes > 0) late = differenceInMinutes;
-
-      const libur = await prisma.tanggal_merah_list.findFirst({
-        select: {
-          id: true,
-        },
-        where: {
-          tanggal_merah: {
-            department_id: dataDepartment.id,
-          },
-          tanggal: ConvertDateZeroHours2(DateNowFormat()),
-        },
-      });
-
-      if (libur) late = 0;
-
-      const createAbsen = await prisma.absen.create({
-        data: {
-          pegawai_id: session[1].pegawaiId,
-          tanggal: ConvertDateZeroHours2(DateNowFormat()),
-          absen_masuk: DateNowFormat(),
-          shift_id: dataDepartment.pegawai[0]?.shift?.id
-            ? dataDepartment.pegawai[0]?.shift?.id
-            : 0,
-          bulan: new Date(DateNowFormat()).getMonth() + 1,
-          tahun: new Date(DateNowFormat()).getFullYear(),
-          latitude: latitude,
-          longitude: longitude,
-          late: late,
-        },
-      });
-
-      if (!createAbsen) {
-        return new NextResponse(
-          JSON.stringify({
-            status: false,
-            message: "Gagal melakukan absen",
-          }),
-          {
-            status: 500,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      }
-
-      return new NextResponse(
-        JSON.stringify({
-          status: true,
-          message: "Berhasil absen masuk",
-        }),
-        {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
+    if (dataDepartment.pegawai[0]?.shift) {
+      shiftPegawai = {
+        id: dataDepartment.pegawai[0].shift.id,
+        keterangan: dataDepartment.pegawai[0].shift.keterangan,
+        jam_masuk: dataDepartment.pegawai[0].shift.jam_masuk,
+        jam_pulang: dataDepartment.pegawai[0].shift.jam_pulang,
+      };
     } else {
-      // TODO: OTHER DEPT / FLEXIBLE SHIFT
-      const getAbsen = await prisma.absen.findFirst({
-        where: {
-          pegawai_id: session[1].pegawaiId,
-          tanggal: ConvertDateZeroHours2(DateNowFormat()),
-        },
-      });
-
-      if (getAbsen) {
-        return new NextResponse(
-          JSON.stringify({
-            status: false,
-            message: "Gagal, absen sudah dilakukan",
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      }
-
       const shiftQuery = `SELECT
-        id,
+          id,
           keterangan,
           jam_masuk,
           jam_pulang,
           ABS(
             TIMESTAMPDIFF(
               MINUTE,
-              CURRENT_TIME (),
-            STR_TO_DATE( jam_masuk, '%H:%i' ))) AS diff_minutes 
+              CURRENT_TIME(),
+            STR_TO_DATE(jam_masuk, '%H:%i'))) AS diff_minutes
         FROM
-          shift 
+          shift
         WHERE
-          department_id = ${dataDepartment.id} 
+          department_id = ${dataDepartment.id}
         ORDER BY
-          diff_minutes ASC 
+          diff_minutes ASC
           LIMIT 1`;
 
       const shiftData = (await prisma.$queryRawUnsafe(shiftQuery)) as {
@@ -308,101 +150,144 @@ export async function POST(req: Request) {
         );
       }
 
-      const shiftTime = new Date(shiftData[0].jam_masuk as any);
-      const hours = shiftTime.getUTCHours();
-      const minutes = shiftTime.getUTCMinutes();
-      const seconds = shiftTime.getUTCSeconds();
+      shiftPegawai = {
+        id: shiftData[0].id,
+        keterangan: shiftData[0].keterangan,
+        jam_masuk: shiftData[0].jam_masuk,
+        jam_pulang: shiftData[0].jam_pulang,
+      };
+    }
 
-      let jam_masuk_department = new Date();
-      jam_masuk_department.setHours(hours, minutes, seconds, 0);
-      jam_masuk_department = DatePlus7Format(jam_masuk_department);
+    // Check for duplicate absen
+    const getAbsen = await prisma.absen.findFirst({
+      where: {
+        pegawai_id: session[1].pegawaiId,
+        tanggal: ConvertDateZeroHours2(DateNowFormat()),
+      },
+    });
 
-      const absenMasukWithoutSecond = new Date(DateNowFormat());
-      absenMasukWithoutSecond.setSeconds(0);
-      absenMasukWithoutSecond.setMilliseconds(0);
-
-      const difference =
-        (absenMasukWithoutSecond as any) - (jam_masuk_department as any);
-
-      const differenceInMinutes = Math.round(difference / 60000);
-
-      if (differenceInMinutes >= 300) {
-        return new NextResponse(
-          JSON.stringify({
-            status: false,
-            message: "Gagal, anda melewati batas jam absensi masuk",
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      }
-
-      if (differenceInMinutes < -270) {
-        return new NextResponse(
-          JSON.stringify({
-            status: false,
-            message: "Gagal, anda belum dapat melakukan absensi masuk",
-          }),
-          {
-            status: 400,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      }
-
-      let late = 0;
-      if (differenceInMinutes > 0) late = differenceInMinutes;
-
-      const createAbsen = await prisma.absen.create({
-        data: {
-          pegawai_id: session[1].pegawaiId,
-          tanggal: ConvertDateZeroHours2(DateNowFormat()),
-          absen_masuk: DateNowFormat(),
-          shift_id: shiftData[0].id,
-          bulan: new Date(DateNowFormat()).getMonth() + 1,
-          tahun: new Date(DateNowFormat()).getFullYear(),
-          latitude: latitude,
-          longitude: longitude,
-          late: late,
-        },
-      });
-
-      if (!createAbsen) {
-        return new NextResponse(
-          JSON.stringify({
-            status: false,
-            message: "Gagal melakukan absen",
-          }),
-          {
-            status: 500,
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-      }
-
+    if (getAbsen) {
       return new NextResponse(
         JSON.stringify({
-          status: true,
-          message: "Berhasil absen masuk",
+          status: false,
+          message: "Gagal, absen sudah dilakukan",
         }),
         {
-          status: 200,
+          status: 400,
           headers: {
             "Content-Type": "application/json",
           },
         }
       );
     }
+
+    // Calculate lateness
+    const shiftTime = new Date(shiftPegawai.jam_masuk as any);
+    const hours = shiftTime.getUTCHours();
+    const minutes = shiftTime.getUTCMinutes();
+    const seconds = shiftTime.getUTCSeconds();
+
+    let jam_masuk_department = new Date();
+    jam_masuk_department.setHours(hours, minutes, seconds, 0);
+    jam_masuk_department = DatePlus7Format(jam_masuk_department);
+
+    const absenMasukWithoutSecond = new Date(DateNowFormat());
+    absenMasukWithoutSecond.setSeconds(0);
+    absenMasukWithoutSecond.setMilliseconds(0);
+
+    const difference =
+      (absenMasukWithoutSecond as any) - (jam_masuk_department as any);
+
+    const differenceInMinutes = Math.round(difference / 60000);
+
+    if (differenceInMinutes >= 300) {
+      return new NextResponse(
+        JSON.stringify({
+          status: false,
+          message: "Gagal, anda melewati batas jam absensi masuk",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    if (differenceInMinutes < -270) {
+      return new NextResponse(
+        JSON.stringify({
+          status: false,
+          message: "Gagal, anda belum dapat melakukan absensi masuk",
+        }),
+        {
+          status: 400,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    let late = 0;
+    if (differenceInMinutes > 0) late = differenceInMinutes;
+
+    // Check holiday — if holiday, late = 0
+    const libur = await prisma.tanggal_merah_list.findFirst({
+      select: { id: true },
+      where: {
+        tanggal_merah: {
+          department_id: dataDepartment.id,
+        },
+        tanggal: ConvertDateZeroHours2(DateNowFormat()),
+      },
+    });
+
+    if (libur) late = 0;
+
+    const createAbsen = await prisma.absen.create({
+      data: {
+        pegawai_id: session[1].pegawaiId,
+        tanggal: ConvertDateZeroHours2(DateNowFormat()),
+        absen_masuk: DateNowFormat(),
+        shift_id: shiftPegawai.id ? shiftPegawai.id : 0,
+        bulan: new Date(DateNowFormat()).getMonth() + 1,
+        tahun: new Date(DateNowFormat()).getFullYear(),
+        latitude: latitude,
+        longitude: longitude,
+        late: late,
+      },
+    });
+
+    if (!createAbsen) {
+      return new NextResponse(
+        JSON.stringify({
+          status: false,
+          message: "Gagal melakukan absen",
+        }),
+        {
+          status: 500,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+    }
+
+    return new NextResponse(
+      JSON.stringify({
+        status: true,
+        message: "Berhasil absen masuk",
+      }),
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
   } catch (error) {
     return HandleErrorMobile(error);
   }
 }
-
