@@ -5,6 +5,7 @@ import {
   isLoadingProps,
   RiwayatIzinProps,
 } from "@/types";
+import FilterSection from "@/components/FilterSection";
 import React, { useEffect, useState } from "react";
 import { deleteRiwayatIzin, getRiwayatIzin } from "../_libs/action";
 import Alert from "@/components/Alert";
@@ -176,21 +177,14 @@ export default function IzinRiwayatView(props: Props) {
 
         <div className="col-auto flex-grow-1 overflow-auto">
           <div className="btn-group position-static">
-            <select
-              className="form-select me-2"
-              onChange={(e) => {
-                setFilter({ ...filter, department: e.target.value });
-              }}
+            <FilterSection
+              options={accessDepartment?.map((item) => ({
+                value: item.department.id,
+                label: item.department.nama_department,
+              }))}
               value={filter.department}
-            >
-              <option value="">-- DEPT --</option>
-              {accessDepartment?.map((item, index: number) => (
-                <option value={item.department.id} key={index}>
-                  {item.department.nama_department}
-                </option>
-              ))}
-            </select>
-
+              onChange={(val) => setFilter({ ...filter, department: val })}
+            />
             <select
               className="form-select me-2"
               value={filter.bulan}

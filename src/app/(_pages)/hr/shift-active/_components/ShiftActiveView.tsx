@@ -2,6 +2,7 @@
 
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
+import FilterSection from "@/components/FilterSection";
 import {
   AccessDepartmentProps,
   AccessProps,
@@ -85,7 +86,7 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
     }
   };
 
-  const toggleShiftActive = (pegawaiId: number, shiftId: number) => {
+  const toggleShiftActive = (pegawaiId: number, shiftId: number | null) => {
     setPegawaiShiftData(
       pegawaiShiftData.map((item: PegawaiShiftProps) =>
         item.id === pegawaiId ? { ...item, shift_id: shiftId } : item
@@ -93,7 +94,7 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
     );
   };
 
-  const toogleSelectAll = (shiftId: number) => {
+  const toogleSelectAll = (shiftId: number | null) => {
     setPegawaiShiftData(
       pegawaiShiftData.map((item: PegawaiShiftProps) => ({
         ...item,
@@ -136,18 +137,14 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
         <div className="col-auto"></div>
         <div className="col-auto flex-grow-1 overflow-auto">
           <div className="btn-group position-static">
-            <select
-              className="form-select"
-              onChange={(e) =>
-                setFilter({ ...filter, department: e.target.value })
-              }
-            >
-              {accessDepartment?.map((item, index: number) => (
-                <option value={item.department.id} key={index}>
-                  {item.department.nama_department}
-                </option>
-              ))}
-            </select>
+            <FilterSection
+              options={accessDepartment?.map((item) => ({
+                value: item.department.id,
+                label: item.department.nama_department,
+              }))}
+              value={filter.department}
+              onChange={(val) => setFilter({ ...filter, department: val })}
+            />
           </div>
         </div>
         <div className="col-auto flex-grow-1 overflow-auto"></div>
@@ -200,12 +197,19 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
                         </a>
                       </th>
                     ))}
+                    <th style={{ textAlign: "center", whiteSpace: "nowrap", width: "10%" }}>
+                      FLEXIBLE
+                      <br />
+                      <a href="#!" onClick={() => toogleSelectAll(null)}>
+                        CHECK ALL
+                      </a>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingPage ? (
                     <tr>
-                      <td colSpan={2 + shiftMasterData.length} align="center">
+                      <td colSpan={3 + shiftMasterData.length} align="center">
                         <div
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
@@ -228,17 +232,23 @@ export default function ShiftActiveView(props: ShiftActiveViewProps) {
                               onChange={() =>
                                 toggleShiftActive(item.id, item2.id)
                               }
-                              checked={
-                                item.shift_id === item2.id ? true : false
-                              }
+                              checked={item.shift_id === item2.id}
                             />
                           </td>
                         ))}
+                        <td align="center">
+                          <input
+                            type="radio"
+                            name={item.id.toString()}
+                            onChange={() => toggleShiftActive(item.id, null)}
+                            checked={item.shift_id === null}
+                          />
+                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={2 + shiftMasterData.length} align="center">
+                      <td colSpan={3 + shiftMasterData.length} align="center">
                         No data available
                       </td>
                     </tr>

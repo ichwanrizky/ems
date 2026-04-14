@@ -4,6 +4,8 @@ import {
   AccessDepartmentProps,
   AccessSubDepartmentProps,
 } from "@/types";
+import FilterSection from "@/components/FilterSection";
+import FilterDept from "@/components/FilterDept";
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -151,45 +153,37 @@ export default function AbsensiView(props: AbsensiViewProps) {
               }}
             />
 
-            <select
+            <FilterSection
               className="form-select me-2 ms-2"
-              onChange={(e) => {
-                setFilter({ ...filter, department: e.target.value });
-
+              options={accessDepartment?.map((item) => ({
+                value: item.department.id,
+                label: item.department.nama_department,
+              }))}
+              value={filter.department}
+              onChange={(val) => {
+                setFilter({ ...filter, department: val });
                 setSelectedSubDepartment([]);
-                if (e.target.value) {
+                if (val) {
                   const subDepartments = accessSubDepartment.filter(
                     (item) =>
-                      item.sub_department.department_id ===
-                      Number(e.target.value)
+                      item.sub_department.department_id === Number(val)
                   );
-
                   setSelectedSubDepartment(
                     subDepartments as AccessSubDepartmentProps
                   );
                 }
               }}
-            >
-              {accessDepartment?.map((item, index: number) => (
-                <option value={item.department.id} key={index}>
-                  {item.department.nama_department}
-                </option>
-              ))}
-            </select>
+            />
 
-            <select
+            <FilterDept
               className="form-select me-2"
-              onChange={(e) => {
-                setFilter({ ...filter, sub_department: e.target.value });
-              }}
-            >
-              <option value="">-- DEPT --</option>
-              {selectedSubDepartment?.map((item, index: number) => (
-                <option value={item.sub_department.id} key={index}>
-                  {item.sub_department.nama_sub_department}
-                </option>
-              ))}
-            </select>
+              options={selectedSubDepartment?.map((item) => ({
+                value: item.sub_department.id,
+                label: item.sub_department.nama_sub_department,
+              }))}
+              value={filter.sub_department}
+              onChange={(val) => setFilter({ ...filter, sub_department: val })}
+            />
 
             <select
               className="form-select me-2"

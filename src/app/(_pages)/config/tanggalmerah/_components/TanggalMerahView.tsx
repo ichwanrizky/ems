@@ -1,5 +1,6 @@
 "use client";
 import Button from "@/components/Button";
+import FilterSection from "@/components/FilterSection";
 import { AccessDepartmentProps, AccessProps, isLoadingProps } from "@/types";
 import React, { useEffect, useState } from "react";
 import {
@@ -198,20 +199,14 @@ export default function TanggalMerahView(props: Props) {
       <div className="row g-3">
         <div className="col-auto flex-grow-1 overflow-auto">
           <div className="btn-group position-static">
-            <select
-              className="form-select me-2"
-              onChange={(e) =>
-                setFilter({ ...filter, department: e.target.value })
-              }
+            <FilterSection
+              options={accessDepartment?.map((item) => ({
+                value: item.department.id,
+                label: item.department.nama_department,
+              }))}
               value={filter.department}
-            >
-              <option value="">--DEPT--</option>
-              {accessDepartment?.map((item, index: number) => (
-                <option value={item.department.id} key={index}>
-                  {item.department.nama_department?.toUpperCase()}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setFilter({ ...filter, department: val })}
+            />
 
             <select
               className="form-select me-2"

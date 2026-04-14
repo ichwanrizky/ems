@@ -57,7 +57,7 @@ export const SavePegawaiShift = async (
       data.map((item) =>
         prisma.pegawai.update({
           data: {
-            shift_id: item.shift_id,
+            shift_id: item.shift_id ?? null,
           },
           where: {
             id: item.id,

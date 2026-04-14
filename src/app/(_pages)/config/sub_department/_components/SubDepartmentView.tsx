@@ -1,6 +1,7 @@
 "use client";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
+import FilterSection from "@/components/FilterSection";
 import {
   AccessDepartmentProps,
   DepartmentProps,
@@ -191,20 +192,14 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
         </div>
         <div className="col-auto flex-grow-1 overflow-auto">
           <div className="btn-group position-static">
-            <select
-              className="form-select"
-              onChange={(e) =>
-                setFilter({ ...filter, department: e.target.value })
-              }
+            <FilterSection
+              options={departmentData?.map((item) => ({
+                value: item.id,
+                label: item.nama_department,
+              }))}
               value={filter.department}
-            >
-              <option value="">--DEPT--</option>
-              {departmentData?.map((item, index: number) => (
-                <option value={item.id} key={index}>
-                  {item.nama_department?.toUpperCase()}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setFilter({ ...filter, department: val })}
+            />
           </div>
         </div>
 

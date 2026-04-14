@@ -246,12 +246,13 @@ export type PegawaiCreateProps = {
   bpjs_kes: string;
   is_active: boolean;
   is_overtime: boolean;
+  shift_id: number | null;
 };
 
 export type PegawaiShiftProps = {
   id: number;
   nama: string;
-  shift_id: number;
+  shift_id: number | null;
 };
 
 export type AtasanProps = {

@@ -4,8 +4,9 @@ import React, { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import styles from "@/styles/styles.module.css";
-import { AccessDepartmentProps, AccessSubDepartmentProps } from "@/types";
+import { AccessDepartmentProps, AccessSubDepartmentProps, ShiftMasterProps } from "@/types";
 import { createDataKaryawan } from "../_libs/action";
+import { getShiftMaster } from "../../shift-master/_libs/action";
 import { useRouter } from "next/navigation";
 
 export default function DataKaryawanCreate({
@@ -28,10 +29,17 @@ export default function DataKaryawanCreate({
   const [selectedSubDepartment, setSelectedSubDepartment] = useState(
     [] as AccessSubDepartmentProps
   );
+  const [shiftData, setShiftData] = useState([] as ShiftMasterProps[]);
+
+  const handleFetchShifts = async (department_id: number) => {
+    const result = await getShiftMaster("", department_id);
+    if (result.status) setShiftData(result.data as ShiftMasterProps[]);
+  };
 
   const [formData, setFormData] = useState({
     department_id: null as number | null,
     sub_department_id: null as number | null,
+    shift_id: null as number | null,
     panji_id: "",
     nama: "",
     nik_ktp: "" as string | number,
@@ -151,10 +159,13 @@ export default function DataKaryawanCreate({
                               ...formData,
                               department_id: Number(e.target.value),
                               sub_department_id: null,
+                              shift_id: null,
                             });
                             setSelectedSubDepartment([]);
+                            setShiftData([]);
                             if (e.target.value) {
                               handleSelectSubDepartment(Number(e.target.value));
+                              handleFetchShifts(Number(e.target.value));
                             }
                           }}
                         >
@@ -191,6 +202,61 @@ export default function DataKaryawanCreate({
                           ))}
                         </select>
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="form-group mb-3">
+                    <div className="row">
+                      <div className="col-sm-6">
+                        <label htmlFor="tipe_shift" className="form-label">
+                          TIPE SHIFT
+                        </label>
+                        <select
+                          autoComplete="off"
+                          className="form-select"
+                          id="tipe_shift"
+                          value={formData.shift_id === null ? "FLEXIBLE" : "FIX"}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              shift_id: e.target.value === "FIX" ? (shiftData[0]?.id ?? null) : null,
+                            })
+                          }
+                        >
+                          <option value="FLEXIBLE">FLEXIBLE</option>
+                          <option value="FIX">FIX</option>
+                        </select>
+                      </div>
+
+                      {formData.shift_id !== null && (
+                        <div className="col-sm-6">
+                          <label htmlFor="shift" className="form-label">
+                            SHIFT
+                          </label>
+                          <select
+                            autoComplete="off"
+                            className="form-select"
+                            id="shift"
+                            value={formData.shift_id ?? ""}
+                            onChange={(e) =>
+                              setFormData({
+                                ...formData,
+                                shift_id: Number(e.target.value),
+                              })
+                            }
+                          >
+                            <option value="">- SELECT -</option>
+                            {shiftData.map((item, index) => (
+                              <option value={item.id} key={index}>
+                                {new Date(item.jam_masuk).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
+                                {" - "}
+                                {new Date(item.jam_pulang).toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", timeZone: "UTC" })}
+                                {item.keterangan ? ` (${item.keterangan})` : ""}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <hr />

@@ -7,6 +7,7 @@ import {
 import React, { useEffect, useState } from "react";
 // import { getReportAttdBulan } from "../_libs/action";
 import Alert from "@/components/Alert";
+import FilterSection from "@/components/FilterSection";
 import Pagination from "@/components/Pagination";
 import * as XLSX from "xlsx";
 import DatePicker from "react-datepicker";
@@ -208,20 +209,14 @@ export default function ReportAttdTanggalView(props: Props) {
 
         <div className="col-auto flex-grow-1 overflow-auto">
           <div className="btn-group position-static">
-            <select
-              className="form-select me-2"
-              onChange={(e) => {
-                setFilter({ ...filter, department: e.target.value });
-              }}
+            <FilterSection
+              options={accessDepartment?.map((item) => ({
+                value: item.department.id,
+                label: item.department.nama_department,
+              }))}
               value={filter.department}
-            >
-              <option value="">-- DEPT --</option>
-              {accessDepartment?.map((item, index: number) => (
-                <option value={item.department.id} key={index}>
-                  {item.department.nama_department}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setFilter({ ...filter, department: val })}
+            />
 
             <DatePicker
               autoComplete="off"

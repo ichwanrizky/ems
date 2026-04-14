@@ -152,6 +152,7 @@ export const getPegawaiId = async (
         bpjs_tk: true,
         is_active: true,
         is_overtime: true,
+        shift_id: true,
         department: {
           select: {
             id: true,
@@ -301,6 +302,7 @@ export const editDataKaryawan = async (
         sub_department_id: data.sub_department_id,
         is_active: data.is_active,
         is_overtime: data.is_overtime,
+        shift_id: data.shift_id,
       },
       where: {
         id: data.id,

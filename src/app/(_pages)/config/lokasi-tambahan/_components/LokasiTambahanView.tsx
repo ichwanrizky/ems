@@ -1,6 +1,7 @@
 "use client";
 import Alert from "@/components/Alert";
 import Button from "@/components/Button";
+import FilterSection from "@/components/FilterSection";
 import {
   AccessDepartmentProps,
   isLoadingProps,
@@ -119,18 +120,14 @@ export default function LokasiTambahanView({ accessDepartment, defaultDepartment
     <>
       <div className="row g-3">
         <div className="col-sm-3">
-          <select
-            className="form-select"
-            value={selectedDept}
-            onChange={(e) => setSelectedDept(Number(e.target.value))}
-          >
-            <option value={0}>- DEPT -</option>
-            {accessDepartment.map((item) => (
-              <option key={item.department.id} value={item.department.id}>
-                {item.department.nama_department}
-              </option>
-            ))}
-          </select>
+          <FilterSection
+            options={accessDepartment.map((item) => ({
+              value: item.department.id,
+              label: item.department.nama_department,
+            }))}
+            value={selectedDept || ""}
+            onChange={(val) => setSelectedDept(val ? Number(val) : 0)}
+          />
         </div>
 
         <div className="col-sm-3">
