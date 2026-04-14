@@ -261,7 +261,7 @@ export default function TanggalMerahView(props: Props) {
                   <tr>
                     <th style={{ width: "1%" }}></th>
                     <th style={{ width: "1%" }}>NO</th>
-                    <th>DEPT.</th>
+                    <th>SECTION</th>
                     <th style={{ width: "10%" }}>TAHUN</th>
                     <th style={{ width: "10%" }}>BULAN</th>
                     <th style={{ width: "30%" }}>TANGGAL</th>

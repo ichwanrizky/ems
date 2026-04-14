@@ -294,7 +294,7 @@ export default function AccessEdit({
                     <hr />
                     <div className="form-group mb-4">
                       <label htmlFor="urut" className="form-label">
-                        ACCESS DEPARTMENT
+                        ACCESS SECTION
                       </label>
                       <Select
                         instanceId={"access-department"}
@@ -330,11 +330,11 @@ export default function AccessEdit({
                     <hr />
                     <div className="form-group mb-4">
                       <label htmlFor="urut" className="form-label">
-                        ACCESS SUB DEPARTMENT
+                        ACCESS DEPARTMENT
                       </label>
                       <Select
                         instanceId={"access-sub-department"}
-                        placeholder="Select Sub Department"
+                        placeholder="Select Department"
                         styles={{
                           option: (styles) => ({ ...styles, color: "black" }),
                           multiValueRemove: (styles) => ({

@@ -222,7 +222,7 @@ export default function IzinRiwayatCreate(props: Props) {
     >
       <div className="form-group mb-3">
         <label htmlFor="dept" className="form-label">
-          DEPT.
+          SECTION
         </label>
         <select
           id="dept"

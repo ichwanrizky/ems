@@ -183,7 +183,7 @@ export default function AbsensiView(props: AbsensiViewProps) {
                 setFilter({ ...filter, sub_department: e.target.value });
               }}
             >
-              <option value="">-- SUB DEPT --</option>
+              <option value="">-- DEPT --</option>
               {selectedSubDepartment?.map((item, index: number) => (
                 <option value={item.sub_department.id} key={index}>
                   {item.sub_department.nama_sub_department}

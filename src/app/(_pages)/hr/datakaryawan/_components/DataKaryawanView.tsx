@@ -254,7 +254,7 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                 setCurrentPage(1);
               }}
             >
-              <option value="">-- SUB DEPT --</option>
+              <option value="">-- DEPT --</option>
               {selectedSubDepartment?.map((item, index: number) => (
                 <option value={item.sub_department.id} key={index}>
                   {item.sub_department.nama_sub_department}
@@ -309,8 +309,8 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                     <th style={{ width: "1%" }}>NO</th>
                     <th style={{ width: "5%" }}>ID</th>
                     <th>NAMA</th>
+                    <th style={{ width: "10%" }}>SECTION</th>
                     <th style={{ width: "10%" }}>DEPT.</th>
-                    <th style={{ width: "10%" }}>SUB DEPT.</th>
                     <th style={{ width: "5%" }}>POSISI</th>
                     <th style={{ width: "5%" }}>ACTIVE</th>
                     <th style={{ width: "5%" }}>AKUN</th>

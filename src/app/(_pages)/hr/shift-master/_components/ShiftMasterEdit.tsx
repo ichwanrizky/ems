@@ -91,7 +91,7 @@ export default function ShiftMasterEdit(props: Props) {
     >
       <div className="form-group mb-3">
         <label htmlFor="department" className="form-label">
-          DEPARTMENT
+          SECTION
         </label>
         <select
           id="department"

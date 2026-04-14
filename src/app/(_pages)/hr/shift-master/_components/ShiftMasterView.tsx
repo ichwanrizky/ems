@@ -233,7 +233,7 @@ export default function ShiftMasterView(props: ShiftMasterViewProps) {
                   <tr>
                     <th style={{ width: "1%" }}></th>
                     <th style={{ width: "1%" }}>NO</th>
-                    <th style={{ width: "20%" }}>DEPARTMENT</th>
+                    <th style={{ width: "20%" }}>SECTION</th>
                     <th>KETERANGAN</th>
                     <th style={{ width: "20%" }}>JAM MASUK</th>
                     <th style={{ width: "20%" }}>JAM PULANG</th>

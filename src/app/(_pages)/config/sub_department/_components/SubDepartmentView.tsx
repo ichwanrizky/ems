@@ -232,8 +232,8 @@ export default function SubDepartmentView(props: SubDepartmentViewProps) {
                   <tr>
                     <th style={{ width: "1%" }}></th>
                     <th style={{ width: "1%" }}>NO</th>
+                    <th>SECTION</th>
                     <th>DEPT.</th>
-                    <th>SUB DEPT.</th>
                     <th style={{ width: "10%" }}>LEADER</th>
                     <th style={{ width: "10%" }}>SUPERVISOR</th>
                     <th style={{ width: "10%" }}>MANAGER</th>

@@ -182,7 +182,7 @@ export default function TanggalMerahCreate(props: Props) {
     >
       <div className="form-group mb-3">
         <label htmlFor="department" className="form-label">
-          DEPT.
+          SECTION
         </label>
         <select
           id="department"

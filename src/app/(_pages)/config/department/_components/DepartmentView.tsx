@@ -193,7 +193,7 @@ export default function DepartmentView() {
                   <tr>
                     <th style={{ width: "1%" }}></th>
                     <th style={{ width: "1%" }}>NO</th>
-                    <th>DEPARTMENT</th>
+                    <th>SECTION</th>
                     <th style={{ width: "30%" }}>COORDINATE (PRIMARY)</th>
                     <th style={{ width: "15%" }}>RADIUS</th>
                     <th style={{ width: "10%" }}>LOKASI</th>

@@ -162,7 +162,7 @@ export default function SubDepartmentEdit(props: Props) {
     >
       <div className="form-group mb-3">
         <label htmlFor="department" className="form-label">
-          DEPT.
+          SECTION
         </label>
         <select
           id="department"
@@ -184,7 +184,7 @@ export default function SubDepartmentEdit(props: Props) {
 
       <div className="form-group mb-3">
         <label htmlFor="department" className="form-label">
-          NAMA SUB DEPT.
+          NAMA DEPT.
         </label>
         <input
           type="text"

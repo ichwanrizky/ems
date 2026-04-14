@@ -153,7 +153,7 @@ export default function DataKaryawanEdit(props: DataKaryawanEditProps) {
                     <div className="row">
                       <div className="col-sm-6">
                         <label htmlFor="department" className="form-label">
-                          DEPT.
+                          SECTION
                         </label>
                         <select
                           autoComplete="off"
@@ -184,7 +184,7 @@ export default function DataKaryawanEdit(props: DataKaryawanEditProps) {
 
                       <div className="col-sm-6">
                         <label htmlFor="sub_department" className="form-label">
-                          SUB DEPT.
+                          DEPT.
                         </label>
                         <select
                           autoComplete="off"

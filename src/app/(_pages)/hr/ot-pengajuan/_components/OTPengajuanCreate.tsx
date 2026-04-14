@@ -174,7 +174,7 @@ export default function OTPengajuanCreate(props: Props) {
     >
       <div className="form-group mb-3">
         <label htmlFor="dept" className="form-label">
-          DEPT.
+          SECTION
         </label>
         <select
           id="dept"
@@ -214,7 +214,7 @@ export default function OTPengajuanCreate(props: Props) {
 
       <div className="form-group mb-3">
         <label htmlFor="dept" className="form-label">
-          SUB DEPT.
+          DEPT.
         </label>
         <select
           id="sub_dept"

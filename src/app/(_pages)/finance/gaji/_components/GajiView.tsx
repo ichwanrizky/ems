@@ -169,8 +169,8 @@ export default function GajiView(props: GajiViewProps) {
             "NO",
             "NAMA",
             "POSITION",
+            "SECTION",
             "DEPARTMENT",
-            "SUB DEPARTMENT",
             "STATUS NIKAH",
             "REKENING",
             ...headers.map((item) => item.komponen),
@@ -198,8 +198,8 @@ export default function GajiView(props: GajiViewProps) {
               NO: index + 1,
               NAMA: item.nama?.toUpperCase(),
               POSITION: item.position?.toUpperCase(),
-              DEPARTMENT: item.department.nama_department?.toUpperCase(),
-              "SUB DEPARTMENT":
+              SECTION: item.department.nama_department?.toUpperCase(),
+              DEPARTMENT:
                 item.sub_department.nama_sub_department?.toUpperCase(),
               "STATUS NIKAH": item.status_nikah?.toUpperCase(),
               REKENING: item.no_rek?.toUpperCase(),

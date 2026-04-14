@@ -95,7 +95,7 @@ export default function DepartmentEdit(props: Props) {
     >
       <div className="form-group mb-3">
         <label htmlFor="department" className="form-label">
-          DEPARTMENT
+          SECTION
         </label>
         <input
           id="department"

@@ -11,7 +11,7 @@ export default async function DepartmentPage() {
   return (
     <div className="main-content" style={{ height: "90vh", overflowY: "auto" }}>
       <div className="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-        <div className="breadcrumb-title pe-3">Department</div>
+        <div className="breadcrumb-title pe-3">Section</div>
       </div>
 
       {session.user.role_id === 1 ? (

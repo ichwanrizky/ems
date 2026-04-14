@@ -216,7 +216,7 @@ export default function OTRiwayatView(props: Props) {
               }}
               value={filter.sub_department}
             >
-              <option value="">-- SUB DEPT. --</option>
+              <option value="">-- DEPT. --</option>
               {selectedSubDepartment?.map((item, index: number) => (
                 <option value={item.sub_department.id} key={index}>
                   {item.sub_department.nama_sub_department}
@@ -264,7 +264,7 @@ export default function OTRiwayatView(props: Props) {
                   <tr>
                     <th style={{ width: "1%" }}></th>
                     <th style={{ width: "1%" }}>NO</th>
-                    <th style={{ width: "10%" }}>SUB DEPT.</th>
+                    <th style={{ width: "10%" }}>DEPT.</th>
                     <th>NAMA</th>
                     <th style={{ width: "15%" }}>TANGGAL</th>
                     <th style={{ width: "5%" }}>JAM</th>
