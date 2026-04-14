@@ -78,13 +78,42 @@ export async function GET(req: Request) {
       );
     }
 
+    const thrData = await prisma.thr.findMany({
+      select: {
+        uuid: true,
+        bulan: true,
+        tahun: true,
+        thr: true,
+        pph21: true,
+        net_thr: true,
+      },
+      where: {
+        pegawai_id: session[1].pegawaiId,
+        OR: result.map((item) => ({
+          bulan: item.bulan,
+          tahun: item.tahun,
+        })),
+      },
+    });
+
+    const thrMap = new Map(
+      thrData.map((item) => [`${item.bulan}-${item.tahun}`, item])
+    );
+
     const newData = result.map((item) => {
+      const thr = thrMap.get(`${item.bulan}-${item.tahun}`);
+
       return {
         bulan: monthNames(item.bulan),
         tahun: item.tahun,
         gaji: item.nominal,
         slipStatus: item.publish,
         url: `${process.env.NEXTAUTH_URL}/slipgaji/${item.uuid}`,
+        thr: thr?.thr || 0,
+        thrPph21: thr?.pph21 || 0,
+        netThr: thr?.net_thr || 0,
+        slipThrStatus: Boolean(thr),
+        thrUrl: thr ? `${process.env.NEXTAUTH_URL}/slipthr/${thr.uuid}` : null,
       };
     });
 

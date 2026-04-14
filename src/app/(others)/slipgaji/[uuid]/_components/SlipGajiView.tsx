@@ -3,8 +3,13 @@ import React, { useEffect, useState } from "react";
 import { getSlipGaji } from "../_libs/action";
 import { SlipGajiDataProps } from "@/types";
 import Alert from "@/components/Alert";
-import { PDFDownloadLink } from "@react-pdf/renderer";
+import dynamic from "next/dynamic";
 import SlipGajiPdf from "@/libs/SlipGaji";
+
+const PDFDownloadLink = dynamic(
+  () => import("@react-pdf/renderer").then((mod) => mod.PDFDownloadLink),
+  { ssr: false }
+);
 
 export default function SlipGajiView({ uuid }: { uuid: string }) {
   const [loadingPage, setLoadingPage] = useState(true);

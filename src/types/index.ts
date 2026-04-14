@@ -431,6 +431,24 @@ export type AdjustmentProps = {
   tahun: number;
 };
 
+export type ThrProps = {
+  id: number;
+  uuid: string;
+  bulan: number;
+  tahun: number;
+  department_id: number;
+  pegawai_id: number;
+  thr: number;
+  pph21: number;
+  net_thr: number;
+  pegawai: {
+    nama: string;
+  };
+  department: {
+    nama_department: string;
+  };
+};
+
 export type GajiProps = {
   id: number;
   uuid: string;

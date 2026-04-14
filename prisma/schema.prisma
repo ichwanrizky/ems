@@ -500,6 +500,7 @@ model pph21 {
 
 model thr {
   id            Int        @id @default(autoincrement())
+  uuid          String     @unique @default(uuid())
   bulan         Int
   tahun         Int
   department_id Int

@@ -1,6 +1,6 @@
 import Script from "next/script";
 
-export default function SlipGajiLayout({
+export default function SlipThrLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
