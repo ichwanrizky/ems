@@ -100,21 +100,28 @@ export async function GET(req: Request) {
       thrData.map((item) => [`${item.bulan}-${item.tahun}`, item])
     );
 
-    const newData = result.map((item) => {
-      const thr = thrMap.get(`${item.bulan}-${item.tahun}`);
-
-      return {
+    const newData = result.flatMap((item) => {
+      const gajiItem = {
         bulan: monthNames(item.bulan),
         tahun: item.tahun,
         gaji: item.nominal,
         slipStatus: item.publish,
         url: `${process.env.NEXTAUTH_URL}/slipgaji/${item.uuid}`,
-        thr: thr?.thr || 0,
-        thrPph21: thr?.pph21 || 0,
-        netThr: thr?.net_thr || 0,
-        slipThrStatus: Boolean(thr),
-        thrUrl: thr ? `${process.env.NEXTAUTH_URL}/slipthr/${thr.uuid}` : null,
       };
+
+      const thr = thrMap.get(`${item.bulan}-${item.tahun}`);
+      if (!thr) return [gajiItem];
+
+      return [
+        gajiItem,
+        {
+          bulan: `THR ${monthNames(item.bulan)}`,
+          tahun: item.tahun,
+          gaji: thr.net_thr,
+          slipStatus: true,
+          url: `${process.env.NEXTAUTH_URL}/slipthr/${thr.uuid}`,
+        },
+      ];
     });
 
     return new NextResponse(
