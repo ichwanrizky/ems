@@ -122,7 +122,7 @@ export async function GET(req: Request) {
         const pulang = new Date(s.jam_pulang as any)
           .toLocaleString("id-ID", optionsDate)
           .replaceAll(".", ":");
-        return `${s.keterangan}: ${masuk} - ${pulang}`;
+        return `${masuk} - ${pulang}`;
       })
       .join("\n");
 
