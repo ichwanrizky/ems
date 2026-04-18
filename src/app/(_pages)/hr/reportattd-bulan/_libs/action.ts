@@ -106,7 +106,7 @@ export const getReportAttdBulan = async (
       AND (p.sub_department_id IS NULL OR p.sub_department_id IN (${session.user.access_sub_department.map(
         (item: any) => item.sub_department.id
       )}))
-    ${search ? `AND (p.nama LIKE '%${search}%')` : ""}
+    ${search ? `AND (p.nama LIKE '%${search.replace(/[\\%_'"]/g, "\\$&")}%')` : ""}
     ORDER BY
       p.nama,
       d.tanggal

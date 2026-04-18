@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(grep -l \"prisma\\\\.\\\\w*\\\\.count\" \"/c/Users/IchwanRizky/Documents/_CODES PERSONAL/ems/src/app/\\(_pages\\)\"/**/_libs/action.ts)",
-      "Bash(npx prisma:*)"
+      "Bash(npx prisma:*)",
+      "Bash(grep -rn '$queryRaw' /Users/ichwanrizky/Desktop/ems/src '--include=*.ts' '--include=*.tsx' -l)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

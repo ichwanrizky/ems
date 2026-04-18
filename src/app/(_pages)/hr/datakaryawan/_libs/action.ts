@@ -367,6 +367,11 @@ export const createUserPegawai = async (
 }> => {
   try {
     const getPegawai = await prisma.pegawai.findFirst({
+      select: {
+        id: true,
+        nama: true,
+        telp: true,
+      },
       where: {
         id: pegawaiId,
       },

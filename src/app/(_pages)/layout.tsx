@@ -22,7 +22,7 @@ export default async function DashboardLayout({
       <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
       <link rel="manifest" href="/site.webmanifest" />
       <link href="/assets/css/pace.min.css" rel="stylesheet" />
-      <Script src="/assets/js/pace.min.js" />
+      <Script src="/assets/js/pace.min.js" strategy="beforeInteractive" />
       <link
         href="/assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css"
         rel="stylesheet"
@@ -43,6 +43,12 @@ export default async function DashboardLayout({
         href="/assets/plugins/simplebar/css/simplebar.css"
       />
       <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossOrigin="anonymous"
+      />
       <link
         href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600&display=swap"
         rel="stylesheet"
