@@ -20,6 +20,16 @@ export const getDepartment = async (
         latitude: true,
         longitude: true,
         radius: true,
+        akses_izin_department: {
+          select: {
+            jenis_izin: {
+              select: {
+                kode: true,
+                jenis: true,
+              },
+            },
+          },
+        },
       },
       where: {
         is_deleted: false,
@@ -64,6 +74,16 @@ export const getDepartmentId = async (
         latitude: true,
         longitude: true,
         radius: true,
+        akses_izin_department: {
+          select: {
+            jenis_izin: {
+              select: {
+                kode: true,
+                jenis: true,
+              },
+            },
+          },
+        },
       },
       where: {
         is_deleted: false,
@@ -89,6 +109,32 @@ export const getDepartmentId = async (
   }
 };
 
+export const getJenisIzin = async (): Promise<{
+  status: boolean;
+  message: string;
+  data: { kode: string; jenis: string }[] | [];
+}> => {
+  try {
+    const result = await prisma.jenis_izin.findMany({
+      select: {
+        kode: true,
+        jenis: true,
+      },
+      orderBy: {
+        jenis: "asc",
+      },
+    });
+
+    return {
+      status: true,
+      message: "Data fetched successfully",
+      data: result,
+    };
+  } catch (error) {
+    return HandleError(error) as any;
+  }
+};
+
 export const createDepartment = async (
   data: DepartmentProps
 ): Promise<{
@@ -96,14 +142,27 @@ export const createDepartment = async (
   message: string;
 }> => {
   try {
-    const result = await prisma.department.create({
-      data: {
-        nama_department: data.nama_department?.toUpperCase(),
-        latitude: data.latitude || null,
-        longitude: data.longitude || null,
-        radius: data.radius || null,
-        created_at: DateNowFormat(),
-      },
+    const result = await prisma.$transaction(async (prisma) => {
+      const jenisIzin = await prisma.jenis_izin.findMany({
+        select: {
+          kode: true,
+        },
+      });
+
+      return prisma.department.create({
+        data: {
+          nama_department: data.nama_department?.toUpperCase(),
+          latitude: data.latitude || null,
+          longitude: data.longitude || null,
+          radius: data.radius || null,
+          created_at: DateNowFormat(),
+          akses_izin_department: {
+            create: jenisIzin.map((item) => ({
+              jenis_izin_kode: item.kode,
+            })),
+          },
+        },
+      });
     });
 
     if (!result) {
@@ -139,6 +198,12 @@ export const editDepartment = async (
         latitude: data.latitude || null,
         longitude: data.longitude || null,
         radius: data.radius || null,
+        akses_izin_department: {
+          deleteMany: {},
+          create: data.akses_izin_department?.map((item: any) => ({
+            jenis_izin_kode: item.jenis_izin?.kode || item.value,
+          })),
+        },
       },
     });
 

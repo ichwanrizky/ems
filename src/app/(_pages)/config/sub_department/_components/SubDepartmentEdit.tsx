@@ -1,5 +1,6 @@
 "use client";
 import Modal from "@/components/Modal";
+import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 import { editSubDepartment, getAtasan, getJenisIzin } from "../_libs/action";
 import {
@@ -8,7 +9,8 @@ import {
   DepartmentProps,
   SubDepartmentProps,
 } from "@/types";
-import Select from "react-select";
+
+const Select = dynamic(() => import("react-select"), { ssr: false });
 
 type Props = {
   isOpen: boolean;
@@ -60,7 +62,7 @@ export default function SubDepartmentEdit(props: Props) {
     setIsLoadingPage(true);
     try {
       const result = await getAtasan();
-      const result2 = await getJenisIzin();
+      const result2 = await getJenisIzin(formData.department);
       if (result.status && result2.status) {
         setAtasanData(result.data as AtasanProps[]);
         setJenisIzinData(
@@ -169,9 +171,24 @@ export default function SubDepartmentEdit(props: Props) {
           className="form-select"
           required
           value={formData.department || ""}
-          onChange={(e) =>
-            setFormData({ ...formData, department: Number(e.target.value) })
-          }
+          onChange={(e) => {
+            const departmentId = e.target.value ? Number(e.target.value) : null;
+            setFormData({
+              ...formData,
+              department: departmentId,
+              akses_izin: [],
+            });
+            getJenisIzin(departmentId).then((result) => {
+              if (result.status) {
+                setJenisIzinData(
+                  result.data as [] as {
+                    kode: string;
+                    jenis: string;
+                  }[]
+                );
+              }
+            });
+          }}
         >
           <option value="">--SELECT--</option>
           {departmentData?.map((item, index) => (
@@ -314,6 +331,7 @@ export default function SubDepartmentEdit(props: Props) {
             value: e.kode?.toUpperCase(),
             label: e.jenis?.toUpperCase(),
           }))}
+          isDisabled={!formData.department}
           isMulti
           onChange={(e: any) => {
             setFormData({
@@ -325,6 +343,32 @@ export default function SubDepartmentEdit(props: Props) {
           isClearable
           closeMenuOnSelect={false}
         />
+        <div className="form-check mt-2">
+          <input
+            id="check_all_akses_izin"
+            type="checkbox"
+            className="form-check-input"
+            disabled={!formData.department}
+            checked={
+              jenisIzinData.length > 0 &&
+              formData.akses_izin.length === jenisIzinData.length
+            }
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                akses_izin: e.target.checked
+                  ? jenisIzinData?.map((item) => ({
+                      value: item.kode?.toUpperCase(),
+                      label: item.jenis?.toUpperCase(),
+                    }))
+                  : [],
+              })
+            }
+          />
+          <label htmlFor="check_all_akses_izin" className="form-check-label">
+            PILIH SEMUA
+          </label>
+        </div>
       </div>
     </Modal>
   );

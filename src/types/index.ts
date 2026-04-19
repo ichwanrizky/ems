@@ -39,6 +39,12 @@ export type DepartmentProps = {
   longitude: string;
   radius: string;
   department_location?: DepartmentLocationProps[];
+  akses_izin_department?: {
+    jenis_izin: {
+      kode: string;
+      jenis: string;
+    };
+  }[];
 };
 
 export type DepartmentLocationProps = {

@@ -196,13 +196,14 @@ export default function DepartmentView() {
                     <th>SECTION</th>
                     <th style={{ width: "30%" }}>COORDINATE (PRIMARY)</th>
                     <th style={{ width: "15%" }}>RADIUS</th>
+                    <th style={{ width: "15%" }}>AKSES IZIN</th>
                     <th style={{ width: "10%" }}>LOKASI</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingPage ? (
                     <tr>
-                      <td colSpan={6} align="center">
+                      <td colSpan={7} align="center">
                         <div
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
@@ -235,6 +236,11 @@ export default function DepartmentView() {
                         </td>
                         <td align="center">{item.radius}</td>
                         <td align="center">
+                          {item.akses_izin_department
+                            ?.map((e) => e.jenis_izin.kode)
+                            .join(", ")}
+                        </td>
+                        <td align="center">
                           <a
                             href={`/config/department/lokasi?department_id=${item.id}`}
                             className="btn btn-sm btn-outline-primary"
@@ -247,7 +253,7 @@ export default function DepartmentView() {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={6} align="center">
+                      <td colSpan={7} align="center">
                         No data available
                       </td>
                     </tr>

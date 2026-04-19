@@ -1,9 +1,11 @@
 "use client";
 import Modal from "@/components/Modal";
+import dynamic from "next/dynamic";
 import React, { useEffect, useState } from "react";
 import { createSubDepartment, getAtasan, getJenisIzin } from "../_libs/action";
 import { AccessDepartmentProps, AtasanProps, DepartmentProps } from "@/types";
-import Select from "react-select";
+
+const Select = dynamic(() => import("react-select"), { ssr: false });
 
 type Props = {
   isOpen: boolean;
@@ -50,21 +52,14 @@ export default function SubDepartmentCreate(props: Props) {
     setIsLoadingPage(true);
     try {
       const result = await getAtasan();
-      const result2 = await getJenisIzin();
-      if (result.status && result2.status) {
+      if (result.status) {
         setAtasanData(result.data as AtasanProps[]);
-        setJenisIzinData(
-          result2.data as [] as {
-            kode: string;
-            jenis: string;
-          }[]
-        );
       } else {
         setAlertModal({
           status: true,
           color: "danger",
           message: "Failed",
-          subMessage: !result.status ? result.message : result2.message,
+          subMessage: result.message,
         });
       }
     } catch (error) {
@@ -76,6 +71,34 @@ export default function SubDepartmentCreate(props: Props) {
       });
     } finally {
       setIsLoadingPage(false);
+    }
+  };
+
+  const fetchJenisIzin = async (departmentId: number | null) => {
+    try {
+      const result = await getJenisIzin(departmentId);
+      if (result.status) {
+        setJenisIzinData(
+          result.data as [] as {
+            kode: string;
+            jenis: string;
+          }[]
+        );
+      } else {
+        setAlertModal({
+          status: true,
+          color: "danger",
+          message: "Failed",
+          subMessage: result.message,
+        });
+      }
+    } catch (error) {
+      setAlertModal({
+        status: true,
+        color: "danger",
+        message: "Error",
+        subMessage: "Something went wrong, please refresh and try again",
+      });
     }
   };
 
@@ -159,9 +182,15 @@ export default function SubDepartmentCreate(props: Props) {
           className="form-select"
           required
           value={formData.department || ""}
-          onChange={(e) =>
-            setFormData({ ...formData, department: Number(e.target.value) })
-          }
+          onChange={(e) => {
+            const departmentId = e.target.value ? Number(e.target.value) : null;
+            setFormData({
+              ...formData,
+              department: departmentId,
+              akses_izin: [],
+            });
+            fetchJenisIzin(departmentId);
+          }}
         >
           <option value="">--SELECT--</option>
           {departmentData?.map((item, index) => (
@@ -304,6 +333,7 @@ export default function SubDepartmentCreate(props: Props) {
             value: e.kode?.toUpperCase(),
             label: e.jenis?.toUpperCase(),
           }))}
+          isDisabled={!formData.department}
           isMulti
           onChange={(e: any) => {
             setFormData({
@@ -315,6 +345,32 @@ export default function SubDepartmentCreate(props: Props) {
           isClearable
           closeMenuOnSelect={false}
         />
+        <div className="form-check mt-2">
+          <input
+            id="check_all_akses_izin"
+            type="checkbox"
+            className="form-check-input"
+            disabled={!formData.department}
+            checked={
+              jenisIzinData.length > 0 &&
+              formData.akses_izin.length === jenisIzinData.length
+            }
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                akses_izin: e.target.checked
+                  ? jenisIzinData?.map((item) => ({
+                      value: item.kode?.toUpperCase(),
+                      label: item.jenis?.toUpperCase(),
+                    }))
+                  : [],
+              })
+            }
+          />
+          <label htmlFor="check_all_akses_izin" className="form-check-label">
+            PILIH SEMUA
+          </label>
+        </div>
       </div>
     </Modal>
   );

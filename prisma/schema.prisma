@@ -47,28 +47,29 @@ model roles {
 }
 
 model department {
-  id                 Int                  @id @default(autoincrement())
-  nama_department    String               @unique
-  latitude           String?
-  longitude          String?
-  radius             String?
-  created_at         DateTime?            @db.DateTime(0)
-  is_deleted         Boolean              @default(false)
-  sub_department     sub_department[]
-  access_department  access_department[]
-  department_location department_location[]
-  shift              shift[]
-  pegawai            pegawai[]
-  pengajuan_izin     pengajuan_izin[]
-  izin               izin[]
-  tanggal_merah      tanggal_merah[]
-  pengajuan_overtime pengajuan_overtime[]
-  overtime           overtime[]
-  komponen_gaji      komponen_gaji[]
-  adjustment         adjustment[]
-  gaji_pegawai       gaji_pegawai[]
-  pph21              pph21[]
-  thr                thr[]
+  id                    Int                     @id @default(autoincrement())
+  nama_department       String                  @unique
+  latitude              String?
+  longitude             String?
+  radius                String?
+  created_at            DateTime?               @db.DateTime(0)
+  is_deleted            Boolean                 @default(false)
+  sub_department        sub_department[]
+  access_department     access_department[]
+  akses_izin_department akses_izin_department[]
+  department_location   department_location[]
+  shift                 shift[]
+  pegawai               pegawai[]
+  pengajuan_izin        pengajuan_izin[]
+  izin                  izin[]
+  tanggal_merah         tanggal_merah[]
+  pengajuan_overtime    pengajuan_overtime[]
+  overtime              overtime[]
+  komponen_gaji         komponen_gaji[]
+  adjustment            adjustment[]
+  gaji_pegawai          gaji_pegawai[]
+  pph21                 pph21[]
+  thr                   thr[]
 }
 
 model department_location {
@@ -103,12 +104,13 @@ model sub_department {
 }
 
 model jenis_izin {
-  kode           String           @id @unique
-  jenis          String
-  is_jam         Boolean          @default(false)
-  akses_izin     akses_izin[]
-  pengajuan_izin pengajuan_izin[]
-  izin           izin[]
+  kode                  String                  @id @unique
+  jenis                 String
+  is_jam                Boolean                 @default(false)
+  akses_izin            akses_izin[]
+  akses_izin_department akses_izin_department[]
+  pengajuan_izin        pengajuan_izin[]
+  izin                  izin[]
 }
 
 model akses_izin {
@@ -117,6 +119,16 @@ model akses_izin {
   sub_department    sub_department @relation(fields: [sub_department_id], references: [id])
   jenis_izin_kode   String
   jenis_izin        jenis_izin     @relation(fields: [jenis_izin_kode], references: [kode])
+}
+
+model akses_izin_department {
+  id              Int        @id @default(autoincrement())
+  department_id   Int
+  department      department @relation(fields: [department_id], references: [id])
+  jenis_izin_kode String
+  jenis_izin      jenis_izin @relation(fields: [jenis_izin_kode], references: [kode])
+
+  @@unique([department_id, jenis_izin_kode])
 }
 
 model access_department {

@@ -69,6 +69,7 @@ export const getRequestPengajuanIzin = async (
             select: {
               id: true,
               nama_department: true,
+              akses_izin_department: true,
             },
           },
           sub_department: {
@@ -84,19 +85,36 @@ export const getRequestPengajuanIzin = async (
         },
       });
 
-      if (!pegawai?.sub_department?.id || !pegawai?.department?.id) {
+      if (!pegawai?.department?.id) {
         return false;
       }
 
       const jenisIzin = await prisma.jenis_izin.findMany({
         where: {
-          akses_izin: {
-            some: {
-              sub_department_id: pegawai.sub_department.id,
-            },
-          },
+          ...(pegawai.sub_department?.id
+            ? {
+                akses_izin: {
+                  some: {
+                    sub_department_id: pegawai.sub_department.id,
+                  },
+                },
+              }
+            : {
+                akses_izin_department: {
+                  some: {
+                    department_id: pegawai.department.id,
+                  },
+                },
+              }),
+        },
+        orderBy: {
+          jenis: "asc",
         },
       });
+
+      if (jenisIzin.length === 0) {
+        return false;
+      }
 
       const tglMerah = await prisma.tanggal_merah_list.findMany({
         select: {

@@ -85,11 +85,22 @@ async function main() {
     });
 
     // department
+    await prisma.akses_izin_department.deleteMany();
     await prisma.department.deleteMany();
+    const jenisIzin = await prisma.jenis_izin.findMany({
+      select: {
+        kode: true,
+      },
+    });
     await prisma.department.create({
       data: {
         id: 1,
         nama_department: "panji jaya".toUpperCase(),
+        akses_izin_department: {
+          create: jenisIzin.map((item) => ({
+            jenis_izin_kode: item.kode,
+          })),
+        },
       },
     });
 

@@ -88,13 +88,30 @@ export const getAtasan = async (): Promise<{
   }
 };
 
-export const getJenisIzin = async (): Promise<{
+export const getJenisIzin = async (
+  department_id?: number | null
+): Promise<{
   status: boolean;
   message: string;
   data: any[] | [];
 }> => {
   try {
+    if (!department_id) {
+      return {
+        status: true,
+        message: "Data fetched successfully",
+        data: [],
+      };
+    }
+
     const result = await prisma.jenis_izin.findMany({
+      where: {
+        akses_izin_department: {
+          some: {
+            department_id,
+          },
+        },
+      },
       orderBy: {
         jenis: "asc",
       },
@@ -299,6 +316,17 @@ export const createSubDepartment = async (data: {
   message: string;
 }> => {
   try {
+    const departmentAksesIzin = await prisma.akses_izin_department.findMany({
+      select: {
+        jenis_izin_kode: true,
+      },
+      where: {
+        department_id: data.department,
+      },
+    });
+    const allowedJenisIzin = new Set(
+      departmentAksesIzin.map((item) => item.jenis_izin_kode)
+    );
     const result = await prisma.sub_department.create({
       data: {
         department_id: data.department,
@@ -307,9 +335,11 @@ export const createSubDepartment = async (data: {
         supervisor: data.supervisor,
         manager: data.manager,
         akses_izin: {
-          create: data.akses_izin?.map((item) => ({
-            jenis_izin_kode: item.value,
-          })),
+          create: data.akses_izin
+            ?.filter((item) => allowedJenisIzin.has(item.value))
+            .map((item) => ({
+              jenis_izin_kode: item.value,
+            })),
         },
       },
     });
@@ -343,6 +373,17 @@ export const editSubDepartment = async (data: {
   message: string;
 }> => {
   try {
+    const departmentAksesIzin = await prisma.akses_izin_department.findMany({
+      select: {
+        jenis_izin_kode: true,
+      },
+      where: {
+        department_id: data.department,
+      },
+    });
+    const allowedJenisIzin = new Set(
+      departmentAksesIzin.map((item) => item.jenis_izin_kode)
+    );
     const result = await prisma.sub_department.update({
       where: {
         id: data.id,
@@ -356,9 +397,11 @@ export const editSubDepartment = async (data: {
         manager: data.manager,
         akses_izin: {
           deleteMany: {},
-          create: data.akses_izin?.map((item) => ({
-            jenis_izin_kode: item.value,
-          })),
+          create: data.akses_izin
+            ?.filter((item) => allowedJenisIzin.has(item.value))
+            .map((item) => ({
+              jenis_izin_kode: item.value,
+            })),
         },
       },
     });
@@ -419,6 +462,13 @@ export const getDepartment = async (): Promise<{
 }> => {
   try {
     const result = await prisma.department.findMany({
+      include: {
+        akses_izin_department: {
+          include: {
+            jenis_izin: true,
+          },
+        },
+      },
       where: {
         is_deleted: false,
       },

@@ -1,3 +1,5 @@
+"use client";
+
 import { AlertProps } from "@/types";
 import React, { useEffect, useState } from "react";
 import Alert from "./Alert";

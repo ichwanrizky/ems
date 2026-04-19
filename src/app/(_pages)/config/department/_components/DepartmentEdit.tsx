@@ -1,8 +1,11 @@
 "use client";
 import Modal from "@/components/Modal";
-import React, { useState } from "react";
-import { editDepartment } from "../_libs/action";
+import dynamic from "next/dynamic";
+import React, { useEffect, useState } from "react";
+import { editDepartment, getJenisIzin } from "../_libs/action";
 import { DepartmentProps } from "@/types";
+
+const Select = dynamic(() => import("react-select"), { ssr: false });
 
 type Props = {
   isOpen: boolean;
@@ -19,6 +22,13 @@ export default function DepartmentEdit(props: Props) {
     subMessage: "",
   });
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
+  const [isLoadingPage, setIsLoadingPage] = useState(true);
+  const [jenisIzinData, setJenisIzinData] = useState(
+    [] as {
+      kode: string;
+      jenis: string;
+    }[]
+  );
   const [coordinate, setCoordinate] = useState(
     departmentEdit.latitude && departmentEdit.longitude
       ? `${departmentEdit.latitude}, ${departmentEdit.longitude}`
@@ -31,9 +41,44 @@ export default function DepartmentEdit(props: Props) {
     latitude: departmentEdit.latitude || "",
     longitude: departmentEdit.longitude || "",
     radius: departmentEdit.radius || "",
+    akses_izin_department:
+      departmentEdit.akses_izin_department?.map((e) => ({
+        value: e.jenis_izin.kode,
+        label: e.jenis_izin.jenis,
+      })) || ([] as { value: string; label: string }[]),
   });
 
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   if (!isOpen) return null;
+
+  const fetchData = async () => {
+    setIsLoadingPage(true);
+    try {
+      const result = await getJenisIzin();
+      if (result.status) {
+        setJenisIzinData(result.data);
+      } else {
+        setAlertModal({
+          status: true,
+          color: "danger",
+          message: "Failed",
+          subMessage: result.message,
+        });
+      }
+    } catch (error) {
+      setAlertModal({
+        status: true,
+        color: "danger",
+        message: "Error",
+        subMessage: "Something went wrong, please refresh and try again",
+      });
+    } finally {
+      setIsLoadingPage(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -93,6 +138,17 @@ export default function DepartmentEdit(props: Props) {
       isLoadingSubmit={isLoadingSubmit}
       onSubmit={handleSubmit}
     >
+      {isLoadingPage ? (
+        <div className="d-flex justify-content-center">
+          <span
+            className="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          LOADING ...
+        </div>
+      ) : (
+        <>
       <div className="form-group mb-3">
         <label htmlFor="department" className="form-label">
           SECTION
@@ -136,6 +192,63 @@ export default function DepartmentEdit(props: Props) {
           value={formData.radius || ""}
         />
       </div>
+
+      <div className="form-group mb-3">
+        <label htmlFor="akses_izin_department" className="form-label">
+          AKSES IZIN
+        </label>
+        <Select
+          instanceId={"akses_izin_department"}
+          placeholder="Select Akses Izin"
+          styles={{
+            option: (styles) => ({ ...styles, color: "black" }),
+          }}
+          options={jenisIzinData?.map((e) => ({
+            value: e.kode?.toUpperCase(),
+            label: e.jenis?.toUpperCase(),
+          }))}
+          isMulti
+          onChange={(e: any) => {
+            setFormData({
+              ...formData,
+              akses_izin_department: e,
+            });
+          }}
+          value={formData.akses_izin_department}
+          isClearable
+          closeMenuOnSelect={false}
+        />
+        <div className="form-check mt-2">
+          <input
+            id="check_all_akses_izin_department"
+            type="checkbox"
+            className="form-check-input"
+            checked={
+              jenisIzinData.length > 0 &&
+              formData.akses_izin_department.length === jenisIzinData.length
+            }
+            onChange={(e) =>
+              setFormData({
+                ...formData,
+                akses_izin_department: e.target.checked
+                  ? jenisIzinData?.map((item) => ({
+                      value: item.kode?.toUpperCase(),
+                      label: item.jenis?.toUpperCase(),
+                    }))
+                  : [],
+              })
+            }
+          />
+          <label
+            htmlFor="check_all_akses_izin_department"
+            className="form-check-label"
+          >
+            PILIH SEMUA
+          </label>
+        </div>
+      </div>
+        </>
+      )}
     </Modal>
   );
 }

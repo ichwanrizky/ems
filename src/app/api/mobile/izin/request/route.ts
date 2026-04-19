@@ -23,25 +23,29 @@ export async function GET(req: Request) {
       );
     }
 
-    const checkAksesIzin = await prisma.pegawai.findFirst({
+    const pegawai = await prisma.pegawai.findFirst({
       select: {
         sub_department: {
           include: {
             akses_izin: true,
           },
         },
-      },
-      where: {
-        id: session[1].pegawaiId,
-        sub_department: {
-          akses_izin: {
-            some: {},
+        department: {
+          include: {
+            akses_izin_department: true,
           },
         },
       },
+      where: {
+        id: session[1].pegawaiId,
+      },
     });
 
-    if (!checkAksesIzin) {
+    const hasAksesIzin = pegawai?.sub_department
+      ? pegawai.sub_department.akses_izin.length > 0
+      : (pegawai?.department?.akses_izin_department.length || 0) > 0;
+
+    if (!hasAksesIzin) {
       return new NextResponse(
         JSON.stringify({
           status: false,
