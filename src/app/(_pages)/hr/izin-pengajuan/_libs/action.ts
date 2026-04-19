@@ -19,6 +19,9 @@ export const getPengajuanIzin = async (
 }> => {
   try {
     const session: any = await getServerSession(authOptions);
+    const accessSubDepartmentIds = session.user.access_sub_department.map(
+      (item: any) => item.sub_department.id
+    );
 
     const result = (await prisma.pengajuan_izin.findMany({
       select: {
@@ -53,20 +56,33 @@ export const getPengajuanIzin = async (
       where: {
         status: 0,
         department_id: Number(filter?.department),
-        pegawai: {
-          sub_department_id: {
-            in: session.user.access_sub_department.map(
-              (item: any) => item.sub_department.id
-            ),
-          },
-        },
-        ...(search && {
-          pegawai: {
-            nama: {
-              contains: search,
+        AND: [
+          {
+            pegawai: {
+              OR: [
+                {
+                  sub_department_id: null,
+                },
+                {
+                  sub_department_id: {
+                    in: accessSubDepartmentIds,
+                  },
+                },
+              ],
             },
           },
-        }),
+          ...(search
+            ? [
+                {
+                  pegawai: {
+                    nama: {
+                      contains: search,
+                    },
+                  },
+                },
+              ]
+            : []),
+        ],
       },
       orderBy: [
         {
@@ -91,8 +107,9 @@ export const getPengajuanIzin = async (
     const newData = result.map((item) => ({
       ...item,
       approval:
-        Number(session.user.id) === item.pegawai.sub_department.manager ||
-        Number(session.user.id) === item.pegawai.sub_department.supervisor
+        item.pegawai.sub_department &&
+        (Number(session.user.id) === item.pegawai.sub_department.manager ||
+          Number(session.user.id) === item.pegawai.sub_department.supervisor)
           ? true
           : false,
     }));
