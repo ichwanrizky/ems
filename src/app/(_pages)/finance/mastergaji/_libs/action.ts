@@ -8,6 +8,7 @@ type MasterGajiProps = {
   nama: string;
   status_nikah: string;
   type_gaji: string;
+  is_tax: boolean;
   master_gaji_pegawai: {
     id: number;
     nominal: number;
@@ -41,6 +42,7 @@ export const getMasterGaji = async (
         nama: true,
         status_nikah: true,
         type_gaji: true,
+        is_tax: true,
         master_gaji_pegawai: {
           select: {
             id: true,
@@ -133,6 +135,7 @@ export const updateMasterGaji = async (
           prisma.pegawai.update({
             data: {
               type_gaji: item.type_gaji,
+              is_tax: item.is_tax,
               master_gaji_pegawai: {
                 deleteMany: {},
                 create: item.master_gaji_pegawai.map((e) => ({

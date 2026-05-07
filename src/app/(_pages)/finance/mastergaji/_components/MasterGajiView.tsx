@@ -44,6 +44,7 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
       nama: string;
       status_nikah: string;
       type_gaji: string;
+      is_tax: boolean;
       master_gaji_pegawai: {
         id: number;
         nominal: number;
@@ -157,6 +158,14 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
     setMasterGajiData(
       masterGajiData.map((e) =>
         e.id === pegawaiId ? { ...e, type_gaji: typeGaji } : e
+      )
+    );
+  };
+
+  const handleChangeIsTax = (pegawaiId: number, isTax: boolean) => {
+    setMasterGajiData(
+      masterGajiData.map((e) =>
+        e.id === pegawaiId ? { ...e, is_tax: isTax } : e
       )
     );
   };
@@ -383,6 +392,9 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                     <th className="sticky-header" style={{ width: "10%" }}>
                       TIPE
                     </th>
+                    <th className="sticky-header" style={{ width: "10%" }}>
+                      IS TAX
+                    </th>
                     {komponenGaji?.map((e, index) => (
                       <th
                         className="sticky-header"
@@ -397,7 +409,7 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                 <tbody>
                   {loadingPage ? (
                     <tr>
-                      <td colSpan={5 + komponenGaji?.length} align="center">
+                      <td colSpan={6 + komponenGaji?.length} align="center">
                         <div
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
@@ -441,6 +453,15 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                             <option value="nonfixed">NONFIXED</option>
                           </select>
                         </td>
+                        <td align="center">
+                          <input
+                            type="checkbox"
+                            checked={item.is_tax}
+                            onChange={(e) =>
+                              handleChangeIsTax(item.id, e.target.checked)
+                            }
+                          />
+                        </td>
                         {item.master_gaji_pegawai.map((item2, index2) => (
                           <td key={index2}>
                             <NumericFormat
@@ -468,7 +489,7 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={5 + komponenGaji?.length} align="center">
+                      <td colSpan={6 + komponenGaji?.length} align="center">
                         No data available
                       </td>
                     </tr>

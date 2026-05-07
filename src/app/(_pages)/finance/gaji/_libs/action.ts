@@ -13,6 +13,7 @@ type ReportData = {
   sub_department_id: number;
   nama_sub_department: string;
   type_gaji: string;
+  is_tax: boolean;
   workdate_count: number;
   attend_count: number;
   attend_weekend_count: number;
@@ -168,6 +169,7 @@ export const createGaji = async (data: {
       p.sub_department_id,
       sd.nama_sub_department,
       p.type_gaji,
+      p.is_tax,
       d.tanggal,
       tml.tanggal as tanggal_libur,
       a.tanggal AS tanggal_absen,
@@ -261,6 +263,7 @@ export const createGaji = async (data: {
           sub_department_id: item.sub_department_id,
           nama_sub_department: item.nama_sub_department,
           type_gaji: item.type_gaji,
+          is_tax: item.is_tax,
           workdate_count: tanggalKerja.length,
           attend_count: totalAttend,
           attend_weekend_count: totalAttendWeekend,
@@ -694,7 +697,9 @@ export const createGaji = async (data: {
       }
 
       // new pph21
-      const nominalPph21 = Math.floor(newPph(ter, gajiBruto + nominalThr));
+      const nominalPph21 = item.is_tax
+        ? Math.floor(newPph(ter, gajiBruto + nominalThr))
+        : 0;
       if (nominalPph21 > 0) {
         gajiData = gajiData.map((i: any) => {
           if (i.komponen_id === 13) {
