@@ -20,6 +20,19 @@ export const getReportAttdTanggal = async (
   try {
     const session: any = await getServerSession(authOptions);
 
+    const accessSubDepartmentIds = session.user.access_sub_department
+      .filter(
+        (item: any) =>
+          Number(item.sub_department.department_id) ===
+          Number(filter?.department)
+      )
+      .map((item: any) => item.sub_department.id);
+
+    const subDepartmentFilter =
+      accessSubDepartmentIds.length > 0
+        ? `AND (p.sub_department_id IS NULL OR p.sub_department_id IN (${accessSubDepartmentIds.join(",")}))`
+        : "";
+
     const listDates = getDatesInRange(filter?.startDate, filter?.endDate);
     const { months, years } = getUniqueMonthsAndYears(listDates);
 
@@ -87,7 +100,7 @@ export const getReportAttdTanggal = async (
       AND d.tanggal = i.tanggal
     JOIN department dp
       ON p.department_id = dp.id
-    JOIN sub_department sd
+    LEFT JOIN sub_department sd
       ON p.sub_department_id = sd.id
       LEFT JOIN tanggal_merah tm ON dp.id = tm.department_id 
       AND tm.bulan IN (${months.map((m) => `'${m}'`).join(", ")})
@@ -111,9 +124,7 @@ export const getReportAttdTanggal = async (
     p.department_id = ${filter?.department}
     AND p.is_active = true
     AND p.is_deleted = false
-    AND (p.sub_department_id IS NULL OR p.sub_department_id IN (${session.user.access_sub_department.map(
-      (item: any) => item.sub_department.id
-    )}))
+    ${subDepartmentFilter}
   ${search ? `AND (p.nama LIKE '%${search}%')` : ""}
   ORDER BY
     p.nama,
