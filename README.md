@@ -1,36 +1,118 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# EMS — Employee Management System
 
-## Getting Started
+An internal web application for managing employees, attendance, leave, overtime, and payroll, built with **Next.js 15** and **Prisma**. The UI and domain language are in Indonesian.
 
-First, run the development server:
+> Looking to contribute or have an AI agent work in this repo? Read **[AGENTS.md](AGENTS.md)** for architecture and conventions.
+
+## Features
+
+- **HR**
+  - Employee master data (`datakaryawan`)
+  - Attendance: daily, per-employee, and monthly/by-date reports (`absensi`, `absensiperpegawai`, `reportattd-*`)
+  - Leave requests & history (`izin-pengajuan`, `izin-riwayat`)
+  - Overtime requests & history (`ot-pengajuan`, `ot-riwayat`, `ot-perpegawai`)
+  - Work shifts (`shift-master`, `shift-active`)
+- **Finance / Payroll**
+  - Salary processing and slips (`gaji`)
+  - Salary component master (`mastergaji`)
+  - PPH21 income tax (`pph`)
+  - THR / 13th-month pay (`thr`)
+  - Salary adjustments (`adjustmengaji`)
+- **Configuration**
+  - Departments & sub-departments, users, roles & access control (RBAC)
+  - Public holidays (`tanggalmerah`), locations, mobile tokens
+- **Public slips** — tokenized, no-login views for salary slips, THR slips, and leave approvals
+- **Mobile API** — endpoints under `/api/mobile/*` for the companion mobile app (location-based check-in, leave/overtime requests, payslips)
+
+## Tech stack
+
+| Layer | Technology |
+|-------|------------|
+| Framework | Next.js 15 (App Router, Turbopack), React 18, TypeScript |
+| Auth | NextAuth v4 (Credentials provider, JWT sessions) |
+| Database | MySQL via Prisma 5 |
+| PDF / slips | `@react-pdf/renderer` |
+| Spreadsheets | `xlsx` |
+| UI | Bootstrap 5 + custom SCSS themes, `react-select`, `react-datepicker` |
+
+## Getting started
+
+### Prerequisites
+
+- Node.js 20+
+- MySQL database
+
+### Setup
 
 ```bash
+# 1. Install dependencies
+npm install
+
+# 2. Create .env in the project root (see below)
+
+# 3. Generate the Prisma client
+npx prisma generate
+
+# 4. (optional) Seed menus / roles / access
+npx prisma db seed
+
+# 5. Run the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+App runs at http://localhost:3000.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment variables (`.env`)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+DATABASE_URL="mysql://user:password@localhost:3306/db_ems"
+DATABASE_URL_V1="mysql://user:password@localhost:3306/db_ems_v1"
+JWT="your-nextauth-secret"
+NEXTAUTH_URL="http://localhost:3000"
+```
 
-## Learn More
+`.env` is git-ignored — never commit secrets.
 
-To learn more about Next.js, take a look at the following resources:
+## Scripts
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the dev server (Turbopack) |
+| `npm run build` | Production build (use this to verify changes compile) |
+| `npm run start` | Start the production server |
+| `npm run lint` | Run ESLint |
+| `npx prisma generate` | Regenerate the Prisma client after editing `schema.prisma` |
+| `npx prisma db seed` | Seed menu / roles / access data |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Project structure
 
-## Deploy on Vercel
+```
+src/
+├── app/
+│   ├── (_pages)/        # Authenticated dashboard (hr / finance / config)
+│   ├── (others)/        # Public tokenized slip views
+│   ├── auth/            # Login / logout
+│   └── api/             # NextAuth + mobile + v2 APIs
+├── components/          # Shared UI components
+├── libs/                # Prisma client, auth, date utils, tax, attendance
+├── middlewares/         # Auth gate
+└── types/               # Shared TypeScript types
+prisma/
+├── schema.prisma        # Data model (MySQL)
+└── seed.ts              # Seed script
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Each feature folder follows a consistent layout (`page.tsx` server entry → `_components/*View|Create|Edit` clients → `_libs/action.ts` server actions). See **[AGENTS.md](AGENTS.md)** for the full convention.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Access control
+
+Authentication is username/password via NextAuth. Authorization is role-based: each role grants per-menu CRUD permissions (`view` / `insert` / `update` / `delete`) plus department and sub-department scoping, all carried in the JWT session. Routes under `/hr`, `/finance`, and `/config` are gated by middleware.
+
+## Notes
+
+- Dates are stored in UTC and presented in WIB (UTC+7); use the helpers in `src/libs/ConvertDate.tsx` and `src/libs/DisplayDate.tsx`.
+- The codebase uses Indonesian domain terms (pegawai = employee, izin = leave, gaji = salary, absen = attendance, lembur = overtime, THR, PPH = tax, tanggal merah = public holiday). A full glossary is in [AGENTS.md](AGENTS.md).
+
+---
+
+*Internal project — all rights reserved.*
