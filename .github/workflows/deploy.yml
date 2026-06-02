@@ -1,35 +1,54 @@
 name: Deploy to VPS
 
+# Berjalan di self-hosted runner yang terpasang langsung di VPS Ubuntu.
+# Tidak perlu SSH/secrets — runner sudah ada di dalam server.
+
 on:
   push:
     branches:
-      - master # sesuaikan jika branch deploy kamu bukan 'main'
+      - master
+  workflow_dispatch: # bisa di-trigger manual dari tab Actions
+
+# Hindari dua deploy berjalan bersamaan (deploy terbaru menang)
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: false
 
 jobs:
   deploy:
-    name: Deploy App to VPS
-    runs-on: ubuntu-latest
+    name: Build & Reload (PM2)
+    runs-on: [self-hosted, linux]
 
     steps:
-      - name: Setup SSH Access
+      - name: Deploy
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+          set -e
 
-      - name: SSH into VPS and Deploy
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USERNAME }}@${{ secrets.VPS_HOST }} << EOF
-            export NVM_DIR="\$HOME/.nvm"
-            [ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
+          # Load runtime (runner berjalan sebagai service tanpa login shell,
+          # jadi nvm & bun perlu di-load manual)
+          export NVM_DIR="$HOME/.nvm"
+          [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+          export PATH="$HOME/.bun/bin:$PATH"
 
-            export PATH="\$HOME/.bun/bin:\$PATH"
+          cd ~/ems
 
-            cd ${{ secrets.PROJECT_DIR }}
-            git pull origin master
-            npx prisma db push || true
-            pm2 kill
-            npm run build
-            pm2 start bun --name ems -- run start -p 8081
-          EOF
+          echo "==> Pull kode terbaru"
+          git fetch origin master
+          git reset --hard origin/master
+
+          echo "==> Install dependencies (pakai npm, lockfile = package-lock.json)"
+          npm ci
+
+          echo "==> Prisma (generate client + sync schema)"
+          npx prisma generate
+          npx prisma db push || true
+
+          echo "==> Build Next.js"
+          npm run build
+
+          echo "==> Reload PM2 (start jika belum ada)"
+          pm2 restart ems --update-env || pm2 start bun --name ems -- run start -p 8081
+          pm2 save
+
+          echo "==> Selesai"
+          pm2 list
