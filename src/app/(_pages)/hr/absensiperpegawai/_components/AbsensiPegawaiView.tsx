@@ -290,7 +290,9 @@ export default function AbsensiPegawaiView(props: AbsensiPegawaiViewProps) {
                   color: "black",
                 }),
               }}
-              menuPortalTarget={document.body}
+              menuPortalTarget={
+                typeof document !== "undefined" ? document.body : undefined
+              }
               options={pegawaiData?.map((e) => ({
                 value: e.id,
                 label: e.nama?.toUpperCase(),

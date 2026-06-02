@@ -22,7 +22,7 @@ export default async function DashboardLayout({
       <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
       <link rel="manifest" href="/site.webmanifest" />
       <link href="/assets/css/pace.min.css" rel="stylesheet" />
-      <Script src="/assets/js/pace.min.js" strategy="beforeInteractive" />
+      <Script src="/assets/js/pace.min.js" strategy="afterInteractive" />
       <link
         href="/assets/plugins/perfect-scrollbar/css/perfect-scrollbar.css"
         rel="stylesheet"
