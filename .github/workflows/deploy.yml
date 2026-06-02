@@ -17,7 +17,7 @@ concurrency:
 jobs:
   deploy:
     name: Build & Reload (PM2)
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted
 
     steps:
       - name: Deploy
