@@ -361,7 +361,9 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                             <i className="bi bi-three-dots" />
                           </Button>
                         </td>
-                        <td align="center">{item.id}</td>
+                        <td align="center">
+                          {(currentPage - 1) * itemPerPage + index + 1}
+                        </td>
                         <td align="center" style={{ whiteSpace: "nowrap" }}>
                           {item.panji_id}
                         </td>
