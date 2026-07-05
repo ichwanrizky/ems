@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import Select from "react-select";
 import { FilterBulan } from "@/libs/FilterBulan";
 import { FilterTahun } from "@/libs/FilterTahun";
-import { createGaji, getPegawaiGaji } from "../_libs/action";
+import { createGaji, getDepartmentGaji, getPegawaiGaji } from "../_libs/action";
 
 type Props = {
   isOpen: boolean;
@@ -32,6 +32,7 @@ export default function GajiCreate(props: Props) {
       nama: string;
     }[]
   );
+  const [departmentKomponen, setDepartmentKomponen] = useState([] as number[]);
   const [formData, setFormData] = useState({
     department_id: "" as number | string,
     bulan: "" as number | string,
@@ -45,8 +46,28 @@ export default function GajiCreate(props: Props) {
   if (!isOpen) return null;
 
   useEffect(() => {
+    handleGetDepartment();
+  }, []);
+
+  useEffect(() => {
     handleGetPegawai();
   }, [formData.department_id, formData.bulan, formData.tahun]);
+
+  const handleGetDepartment = async () => {
+    try {
+      const result = await getDepartmentGaji();
+      if (result.status) {
+        setDepartmentKomponen(result.data);
+      }
+    } catch (error) {
+      setAlertModal({
+        status: true,
+        color: "danger",
+        message: "Error",
+        subMessage: "Something went wrong, please refresh and try again",
+      });
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -197,11 +218,15 @@ export default function GajiCreate(props: Props) {
           required
         >
           <option value="">--SELECT--</option>
-          {departmentData?.map((item, index: number) => (
-            <option value={item.department.id} key={index}>
-              {item.department.nama_department}
-            </option>
-          ))}
+          {departmentData
+            ?.filter((item) =>
+              departmentKomponen.includes(item.department.id)
+            )
+            .map((item, index: number) => (
+              <option value={item.department.id} key={index}>
+                {item.department.nama_department}
+              </option>
+            ))}
         </select>
       </div>
 

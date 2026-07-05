@@ -201,7 +201,7 @@ export default function GajiView(props: GajiViewProps) {
               POSITION: item.position?.toUpperCase(),
               SECTION: item.department.nama_department?.toUpperCase(),
               DEPARTMENT:
-                item.sub_department.nama_sub_department?.toUpperCase(),
+                item.sub_department?.nama_sub_department?.toUpperCase() || "-",
               "STATUS NIKAH": item.status_nikah?.toUpperCase(),
               REKENING: item.no_rek?.toUpperCase(),
               ...komponenValues,

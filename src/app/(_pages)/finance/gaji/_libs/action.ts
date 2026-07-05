@@ -113,6 +113,26 @@ export const getPegawaiGaji = async (
   }
 };
 
+export const getDepartmentGaji = async (): Promise<{
+  status: boolean;
+  message: string;
+  data: number[];
+}> => {
+  try {
+    const result = await prisma.komponen_gaji.groupBy({
+      by: ["department_id"],
+    });
+
+    return {
+      status: true,
+      message: "Data fetched successfully",
+      data: result.map((item) => item.department_id),
+    };
+  } catch (error) {
+    return HandleError(error) as any;
+  }
+};
+
 export const createGaji = async (data: {
   department_id: number | string;
   bulan: number | string;
@@ -137,7 +157,7 @@ export const createGaji = async (data: {
       },
       where: {
         tanggal_merah: {
-          department_id: 1,
+          department_id: Number(data.department_id),
           bulan: Number(data.bulan),
           tahun: Number(data.tahun),
         },
@@ -191,7 +211,7 @@ export const createGaji = async (data: {
       LEFT JOIN izin i ON p.id = i.pegawai_id 
       AND d.tanggal = i.tanggal 
       JOIN department dp ON p.department_id = dp.id
-      JOIN sub_department sd ON p.sub_department_id = sd.id
+      LEFT JOIN sub_department sd ON p.sub_department_id = sd.id
       LEFT JOIN tanggal_merah tm ON dp.id = tm.department_id AND tm.bulan = ${
         data.bulan
       } AND tm.tahun = ${data.tahun}
@@ -408,7 +428,7 @@ export const createGaji = async (data: {
           },
         },
         where: {
-          department_id: 1,
+          department_id: Number(data.department_id),
         },
         orderBy: {
           urut: "asc",
@@ -474,6 +494,95 @@ export const createGaji = async (data: {
 
       masterGaji.map((i: any) => {
         let nominal: number = 0;
+
+        // KOMPONEN DEPARTMENT SELAIN PANJI JAYA (BERDASARKAN NAMA KOMPONEN)
+        if (Number(data.department_id) !== 1) {
+          // basic only
+          if (i.komponen === "BASIC SALARY") {
+            basic_salary +=
+              i.master_gaji_pegawai.length > 0
+                ? i.master_gaji_pegawai[0].nominal
+                : 0;
+          }
+
+          // basic fix
+          if (i.tipe === "penambahan" && i.metode === "tetap" && i.is_master) {
+            basic_fix +=
+              i.master_gaji_pegawai.length > 0
+                ? i.master_gaji_pegawai[0].nominal
+                : 0;
+          }
+
+          // FIX DLL
+          if (i.metode === "tetap" && i.is_master) {
+            nominal =
+              i.master_gaji_pegawai.length > 0
+                ? i.master_gaji_pegawai[0].nominal
+                : 0;
+          }
+
+          // ABSENT
+          if (
+            (i.komponen === "JUMLAH ABSENT" || i.komponen === "ABSENT") &&
+            item.type_gaji === "nonfixed"
+          ) {
+            if (i.tipe === "informasi") nominal = item.notattend_count;
+            else if (i.tipe === "pengurangan")
+              nominal = Math.round((basic_fix / 22) * item.notattend_count);
+          }
+
+          // UL
+          if (
+            (i.komponen === "JUMLAH UL" || i.komponen === "UNPAID LEAVE") &&
+            item.type_gaji === "nonfixed"
+          ) {
+            if (i.tipe === "informasi")
+              nominal = item.izin_count + item.izin_s_count;
+            else if (i.tipe === "pengurangan")
+              nominal = Math.round(
+                (basic_fix / 22) * (item.izin_count + item.izin_s_count),
+              );
+          }
+
+          // CUTI
+          if (i.komponen === "JUMLAH AL" && i.tipe === "informasi") {
+            nominal = item.cuti_count + item.cuti_s_count;
+          }
+
+          // SAKIT
+          if (i.komponen === "JUMLAH MC" && i.tipe === "informasi") {
+            nominal = item.sakit_count;
+          }
+
+          // JUMLAH HARI KERJA
+          if (i.komponen === "JUMLAH HARI KERJA") {
+            nominal = item.attend_count + item.attend_weekend_count;
+          }
+
+          // ADJUSTMENT PLUS
+          if (i.komponen === "ADJUSTMENT PLUS") {
+            nominal = nominalAdjustmentPlus;
+          }
+
+          // ADJUSTMENT MINUS
+          if (i.komponen === "ADJUSTMENT MINUS") {
+            nominal = nominalAdjustmentMinus;
+          }
+
+          gajiData.push({
+            pegawai_id: item.pegawai_id,
+            nama: item.nama,
+            status_nikah: item.status_nikah,
+            department_id: item.department_id,
+            tipe: i.tipe,
+            komponen_id: i.id,
+            komponen_name: i.komponen,
+            nominal: nominal,
+            urut_tampil: i.urut_tampil,
+          });
+
+          return;
+        }
 
         // BPJS KES
         if (i.id === 26) {
@@ -697,12 +806,16 @@ export const createGaji = async (data: {
       }
 
       // new pph21
-      const nominalPph21 = item.is_tax
-        ? Math.floor(newPph(ter, gajiBruto + nominalThr))
-        : 0;
+      const pphKomponenId = masterGaji.find(
+        (i: any) => i.komponen === "PPH21",
+      )?.id;
+      const nominalPph21 =
+        item.is_tax && pphKomponenId
+          ? Math.floor(newPph(ter, gajiBruto + nominalThr))
+          : 0;
       if (nominalPph21 > 0) {
         gajiData = gajiData.map((i: any) => {
-          if (i.komponen_id === 13) {
+          if (i.komponen_id === pphKomponenId) {
             return { ...i, nominal: nominalPph21 - pajakThr };
           }
           return i;
