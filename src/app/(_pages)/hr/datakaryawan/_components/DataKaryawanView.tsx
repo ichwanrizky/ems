@@ -15,6 +15,7 @@ import {
   createUserPegawai,
   deleteDataKaryawan,
   getPegawai,
+  setActiveDataKaryawan,
 } from "../_libs/action";
 import { useRouter } from "next/navigation";
 import Pagination from "@/components/Pagination";
@@ -137,6 +138,48 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
             subMessage: result.message,
           });
           fetchData("", filter, 1);
+        } else {
+          setAlertPage({
+            status: true,
+            color: "danger",
+            message: "Failed",
+            subMessage: result.message,
+          });
+        }
+      } catch (error) {
+        setAlertPage({
+          status: true,
+          color: "danger",
+          message: "Error",
+          subMessage: "Something went wrong, please refresh and try again",
+        });
+      } finally {
+        setIsLoadingAction({ ...isLoadingAction, [id]: false });
+      }
+    }
+
+    return;
+  };
+
+  const handleSetActive = async (id: number, is_active: boolean) => {
+    if (
+      confirm(
+        is_active
+          ? "Set this karyawan to ACTIVE?"
+          : "Set this karyawan to INACTIVE?"
+      )
+    ) {
+      setIsLoadingAction({ ...isLoadingAction, [id]: true });
+      try {
+        const result = await setActiveDataKaryawan(id, is_active);
+        if (result.status) {
+          setAlertPage({
+            status: true,
+            color: "success",
+            message: "Success",
+            subMessage: result.message,
+          });
+          fetchData(debouncedSearchTerm, filter, currentPage);
         } else {
           setAlertPage({
             status: true,
@@ -353,6 +396,19 @@ export default function DataKaryawanView(props: DataKaryawanViewProps) {
                                   status: true,
                                   color: "danger",
                                   message: "You don't have access to delete",
+                                  subMessage: "",
+                                });
+                              }
+                            }}
+                            isActive={item.is_active}
+                            onSetActive={() => {
+                              if (accessMenu.update) {
+                                handleSetActive(item.id, !item.is_active);
+                              } else {
+                                setAlertPage({
+                                  status: true,
+                                  color: "danger",
+                                  message: "You don't have access to update",
                                   subMessage: "",
                                 });
                               }

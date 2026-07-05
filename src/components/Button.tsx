@@ -9,6 +9,8 @@ type ButtonProps = {
   onClick?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
+  onSetActive?: () => void;
+  isActive?: boolean;
 };
 
 export default function Button(props: ButtonProps) {
@@ -21,6 +23,8 @@ export default function Button(props: ButtonProps) {
     onClick,
     onEdit,
     onDelete,
+    onSetActive,
+    isActive,
   } = props;
   switch (type) {
     case "actionTable":
@@ -64,6 +68,24 @@ export default function Button(props: ButtonProps) {
                 EDIT
               </button>
             </li>
+            {onSetActive && (
+              <li>
+                <button
+                  type="button"
+                  className={`dropdown-item ${
+                    isActive ? "text-warning" : "text-success"
+                  }`}
+                  onClick={onSetActive}
+                >
+                  <i
+                    className={`bi ${
+                      isActive ? "bi-person-dash" : "bi-person-check"
+                    } me-2`}
+                  ></i>
+                  {isActive ? "SET INACTIVE" : "SET ACTIVE"}
+                </button>
+              </li>
+            )}
             <li>
               <button
                 type="button"

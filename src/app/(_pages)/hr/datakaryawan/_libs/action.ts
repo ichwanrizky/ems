@@ -359,6 +359,44 @@ export const deleteDataKaryawan = async (
   }
 };
 
+export const setActiveDataKaryawan = async (
+  id: number,
+  is_active: boolean
+): Promise<{
+  status: boolean;
+  message: string;
+}> => {
+  try {
+    const result = await prisma.pegawai.update({
+      data: {
+        is_active: is_active,
+      },
+      where: {
+        id: id,
+        is_deleted: false,
+      },
+    });
+
+    if (!result) {
+      return {
+        status: false,
+        message: is_active
+          ? "Set active data failed"
+          : "Set inactive data failed",
+      };
+    }
+
+    return {
+      status: true,
+      message: is_active
+        ? "Set active data successfully"
+        : "Set inactive data successfully",
+    };
+  } catch (error) {
+    return HandleError(error);
+  }
+};
+
 export const createUserPegawai = async (
   pegawaiId: number
 ): Promise<{
