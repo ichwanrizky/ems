@@ -335,7 +335,7 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                 EXPORT EXCEL
               </button>
             )}
-            {accessMenu.insert && (
+            {accessMenu.insert && komponenGaji.length > 0 && (
               <Button type="saveTable" onClick={handleSubmit} />
             )}
           </div>
@@ -361,13 +361,13 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                 <thead className="table-light">
                   <tr>
                     <th
-                      className="sticky-col sticky-header"
+                      className="sticky-col sticky-header text-center"
                       style={{ width: "50px" }}
                     >
                       NO
                     </th>
                     <th
-                      className="sticky-col sticky-header"
+                      className="sticky-col sticky-header text-center"
                       style={{ width: "50px" }}
                     >
                       <input
@@ -386,13 +386,19 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                     >
                       NAMA
                     </th>
-                    <th className="sticky-header" style={{ width: "10%" }}>
+                    <th
+                      className="sticky-header text-center"
+                      style={{ width: "10%" }}
+                    >
                       PTKP
                     </th>
                     <th className="sticky-header" style={{ width: "10%" }}>
                       TIPE
                     </th>
-                    <th className="sticky-header" style={{ width: "10%" }}>
+                    <th
+                      className="sticky-header text-center"
+                      style={{ width: "10%" }}
+                    >
                       IS TAX
                     </th>
                     {komponenGaji?.map((e, index) => (
@@ -417,6 +423,15 @@ export default function MasterGajiView(props: MasterGajiViewProps) {
                           <span className="visually-hidden">Loading...</span>
                         </div>
                         Loading...
+                      </td>
+                    </tr>
+                  ) : komponenGaji.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} align="center">
+                        <span className="text-danger fst-italic">
+                          Komponen gaji untuk department ini belum di-setting,
+                          silahkan hubungi administrator.
+                        </span>
                       </td>
                     </tr>
                   ) : masterGajiData.length > 0 ? (
