@@ -1,8 +1,9 @@
 "use server";
 
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiList, apiPut } from "@/libs/ApiClient";
 import { PegawaiShiftProps } from "@/types";
+
+/** HR > Shift Active — memanggil `ems-backend`, tanda tangan tidak berubah. */
 
 export const getPegawaiShift = async (
   department_id?: number | string
@@ -11,39 +12,11 @@ export const getPegawaiShift = async (
   message: string;
   data: PegawaiShiftProps[] | [];
 }> => {
-  try {
-    const result = (await prisma.pegawai.findMany({
-      select: {
-        id: true,
-        nama: true,
-        shift_id: true,
-      },
-      where: {
-        is_active: true,
-        is_deleted: false,
-        department_id: Number(department_id),
-      },
-      orderBy: {
-        nama: "asc",
-      },
-    })) as PegawaiShiftProps[];
+  const hasil = await apiList<PegawaiShiftProps>("/api/hr/shift-active", {
+    department_id,
+  });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data };
 };
 
 export const SavePegawaiShift = async (
@@ -52,33 +25,9 @@ export const SavePegawaiShift = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.$transaction(
-      data.map((item) =>
-        prisma.pegawai.update({
-          data: {
-            shift_id: item.shift_id ?? null,
-          },
-          where: {
-            id: item.id,
-            is_deleted: false,
-            is_active: true,
-          },
-        })
-      )
-    );
-    if (!result) {
-      return {
-        status: false,
-        message: "Save data failed",
-      };
-    }
+  // Backend menyimpan seluruh daftar dalam satu transaksi: satu pegawai gagal
+  // berarti tidak ada yang tersimpan.
+  const hasil = await apiPut("/api/hr/shift-active", { data });
 
-    return {
-      status: true,
-      message: "Save data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };

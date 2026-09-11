@@ -1,9 +1,20 @@
 "use server";
 
-import { DateNowFormat } from "@/libs/DateFormat";
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
-const bcrypt = require("bcrypt");
+import { apiDelete, apiGet, apiList, apiPatch, apiPost, apiPut } from "@/libs/ApiClient";
+
+/** Config > User Luar — memanggil `ems-backend`, tanda tangan tidak berubah. */
+
+type UserLuarProps = {
+  number: number;
+  id: number;
+  username: string;
+  name: string;
+  telp: string;
+  roles: {
+    id: number;
+    role_name: string;
+  };
+};
 
 export const getUserLuar = async (
   search?: string,
@@ -11,107 +22,13 @@ export const getUserLuar = async (
 ): Promise<{
   status: boolean;
   message: string;
-  data:
-    | {
-        number: number;
-        id: number;
-        username: string;
-        name: string;
-        telp: string;
-        roles: {
-          id: number;
-          role_name: string;
-        };
-      }[]
-    | [];
+  data: UserLuarProps[] | [];
   total_data: number;
 }> => {
-  try {
-    const condition = {
-      where: {
-        is_deleted: false,
-        is_userluar: true,
-        ...(search && {
-          OR: [
-            {
-              name: {
-                contains: search,
-              },
-            },
-            {
-              username: {
-                contains: search,
-              },
-            },
-            {
-              telp: {
-                contains: search,
-              },
-            },
-          ],
-        }),
-      },
-    };
-
-    const [totalData, result] = await Promise.all([
-      prisma.user.count({ ...condition }),
-      prisma.user.findMany({
-      select: {
-        id: true,
-        username: true,
-        name: true,
-        telp: true,
-        roles: {
-          select: {
-            id: true,
-            role_name: true,
-          },
-        },
-      },
-      ...condition,
-      orderBy: {
-        name: "asc",
-      },
-      skip: currentPage ? (currentPage - 1) * 10 : 0,
-      take: currentPage ? 10 : undefined,
-    }),
-    ]);
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-        total_data: 0,
-      };
-    }
-
-    const newData = result.map((item, index) => ({
-      number: currentPage
-        ? (Number(currentPage) - 1) * 10 + index + 1
-        : index + 1,
-      ...item,
-    }));
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: newData as {
-        number: number;
-        id: number;
-        username: string;
-        name: string;
-        telp: string;
-        roles: {
-          id: number;
-          role_name: string;
-        };
-      }[],
-      total_data: totalData,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return await apiList<UserLuarProps>("/api/config/user-luar", {
+    search,
+    page: currentPage,
+  });
 };
 
 export const getUserLuarId = async (
@@ -130,57 +47,9 @@ export const getUserLuarId = async (
     };
   } | null;
 }> => {
-  try {
-    const result = await prisma.user.findFirst({
-      select: {
-        id: true,
-        username: true,
-        name: true,
-        telp: true,
-        roles: {
-          select: {
-            id: true,
-            role_name: true,
-          },
-        },
-      },
-      where: {
-        id: id,
-        is_deleted: false,
-        is_userluar: true,
-      },
-      orderBy: {
-        pegawai: {
-          nama: "asc",
-        },
-      },
-    });
+  const hasil = await apiGet<any>(`/api/config/user-luar/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: null,
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result as {
-        id: number;
-        username: string;
-        name: string;
-        telp: string;
-        roles: {
-          id: number;
-          role_name: string;
-        };
-      },
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? null };
 };
 
 export const createUserLuar = async (data: {
@@ -194,65 +63,9 @@ export const createUserLuar = async (data: {
   status: boolean;
   message: string;
 }> => {
-  try {
-    const username = await prisma.user.findFirst({
-      where: {
-        username: data.username,
-      },
-    });
+  const hasil = await apiPost("/api/config/user-luar", data);
 
-    if (username) {
-      return {
-        status: false,
-        message: "Username already exist",
-      };
-    }
-
-    let password = "";
-    if (data.new_password && data.re_new_password) {
-      if (data.new_password !== data.re_new_password) {
-        return {
-          status: false,
-          message: "Password not match",
-        };
-      }
-
-      password = await bcrypt.hash(data.new_password, 10);
-
-      if (!password) {
-        return {
-          status: false,
-          message: "Edit data failed",
-        };
-      }
-    }
-
-    const result = await prisma.user.create({
-      data: {
-        name: data.name?.toUpperCase(),
-        telp: data.telp || "",
-        role_id: data.role_id,
-        username: data.username,
-        password: password,
-        is_userluar: true,
-        created_at: DateNowFormat(),
-      },
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Create data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Create data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const editUserLuar = async (data: {
@@ -267,70 +80,10 @@ export const editUserLuar = async (data: {
   status: boolean;
   message: string;
 }> => {
-  try {
-    const username = await prisma.user.findFirst({
-      where: {
-        username: data.username,
-        id: {
-          not: data.id,
-        },
-      },
-    });
+  const { id, ...body } = data;
+  const hasil = await apiPut(`/api/config/user-luar/${id}`, body);
 
-    if (username) {
-      return {
-        status: false,
-        message: "Username already exist",
-      };
-    }
-
-    let password = "";
-    if (data.new_password && data.re_new_password) {
-      if (data.new_password !== data.re_new_password) {
-        return {
-          status: false,
-          message: "Password not match",
-        };
-      }
-
-      password = await bcrypt.hash(data.new_password, 10);
-
-      if (!password) {
-        return {
-          status: false,
-          message: "Edit data failed",
-        };
-      }
-    }
-
-    const result = await prisma.user.update({
-      where: {
-        id: data.id,
-      },
-      data: {
-        name: data.name?.toUpperCase(),
-        telp: data.telp || "",
-        role_id: data.role_id,
-        username: data.username,
-        created_at: DateNowFormat(),
-        ...(data.new_password && { password: password }),
-      },
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Edit data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Edit data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const deleteUserLuar = async (
@@ -339,32 +92,9 @@ export const deleteUserLuar = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.user.update({
-      where: {
-        id,
-        is_deleted: false,
-        is_userluar: true,
-      },
-      data: {
-        is_deleted: true,
-      },
-    });
+  const hasil = await apiDelete(`/api/config/user-luar/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Delete data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Delete data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const resetPasswordUserLuar = async (
@@ -373,52 +103,7 @@ export const resetPasswordUserLuar = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const user = await prisma.user.findFirst({
-      select: {
-        id: true,
-        telp: true,
-        username: true,
-      },
-      where: {
-        id,
-        is_deleted: false,
-        is_userluar: true,
-      },
-    });
+  const hasil = await apiPatch(`/api/config/user-luar/${id}/reset-password`);
 
-    if (!user) {
-      return {
-        status: false,
-        message: "User not found",
-      };
-    }
-
-    const password = await bcrypt.hash(user.username, 10);
-
-    const result = await prisma.user.update({
-      where: {
-        id,
-        is_deleted: false,
-        is_userluar: true,
-      },
-      data: {
-        password: password,
-      },
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Reset password data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Reset password data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };

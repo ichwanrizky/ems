@@ -1,7 +1,8 @@
 "use server";
 
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiGet, apiPut } from "@/libs/ApiClient";
+
+/** Finance > Master Gaji — memanggil `ems-backend`, tanda tangan tidak berubah. */
 
 type MasterGajiProps = {
   id: number;
@@ -35,91 +36,27 @@ export const getMasterGaji = async (
   data: MasterGajiProps[] | [];
   komponen: KomponenProps[] | [];
 }> => {
-  try {
-    const result = await prisma.pegawai.findMany({
-      select: {
-        id: true,
-        nama: true,
-        status_nikah: true,
-        type_gaji: true,
-        is_tax: true,
-        master_gaji_pegawai: {
-          select: {
-            id: true,
-            nominal: true,
-            komponen: {
-              select: {
-                id: true,
-                komponen: true,
-              },
-            },
-          },
-          orderBy: {
-            komponen: {
-              urut_tampil: "asc",
-            },
-          },
-        },
-      },
-      where: {
-        is_active: true,
-        is_deleted: false,
-        department_id: Number(filter.department),
-        ...(search && {
-          nama: {
-            contains: search,
-          },
-        }),
-      },
-      orderBy: {
-        nama: "asc",
-      },
-    });
+  // Dua sumber: daftar pegawai beserta nominalnya, dan daftar komponen master
+  // untuk header tabel. Backend sudah mengisi baris kosong bagi pegawai yang
+  // belum punya master gaji.
+  const [pegawai, komponen] = await Promise.all([
+    apiGet<MasterGajiProps[]>("/api/finance/master-gaji", {
+      search,
+      department: filter.department,
+    }),
+    apiGet<KomponenProps[]>("/api/finance/master-gaji/komponen", {
+      department: filter.department,
+    }),
+  ]);
 
-    const komponenGaji = await prisma.komponen_gaji.findMany({
-      select: {
-        id: true,
-        komponen: true,
-      },
-      where: {
-        department_id: Number(filter.department),
-        is_master: true,
-      },
-      orderBy: {
-        urut_tampil: "asc",
-      },
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-        komponen: komponenGaji as KomponenProps[],
-      };
-    }
-
-    const newData = result.map((item) => ({
-      ...item,
-      master_gaji_pegawai:
-        item.master_gaji_pegawai.length > 0
-          ? item.master_gaji_pegawai
-          : komponenGaji.map((e) => ({
-              id: Date.now() + Math.floor(Math.random() * 1000),
-              nominal: 0,
-              komponen: e,
-            })),
-    }));
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: newData as MasterGajiProps[],
-      komponen: komponenGaji as KomponenProps[],
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return {
+    status: pegawai.status,
+    message: pegawai.message,
+    data: pegawai.data ?? [],
+    // Hanya komponen master yang boleh diisi nominalnya per pegawai; sisanya
+    // (informasi & hasil hitungan) tidak punya kolom input di tabel ini.
+    komponen: (komponen.data ?? []).filter((item: any) => item.is_master === true),
+  };
 };
 
 export const updateMasterGaji = async (
@@ -128,44 +65,7 @@ export const updateMasterGaji = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.$transaction(async (prisma) => {
-      await Promise.all(
-        data.map((item) =>
-          prisma.pegawai.update({
-            data: {
-              type_gaji: item.type_gaji,
-              is_tax: item.is_tax,
-              master_gaji_pegawai: {
-                deleteMany: {},
-                create: item.master_gaji_pegawai.map((e) => ({
-                  nominal: Number(e.nominal),
-                  komponen_id: e.komponen.id,
-                })),
-              },
-            },
-            where: {
-              id: item.id,
-            },
-          })
-        )
-      );
+  const hasil = await apiPut("/api/finance/master-gaji", { data });
 
-      return true;
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Edit data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Edit data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };

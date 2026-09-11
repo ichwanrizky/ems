@@ -1,8 +1,9 @@
 "use server";
 
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiDelete, apiGet, apiList, apiPost, apiPut } from "@/libs/ApiClient";
 import { RolesProps } from "@/types";
+
+/** Config > Roles — memanggil `ems-backend`, tanda tangan tidak berubah. */
 
 export const getRoles = async (
   search?: string
@@ -11,36 +12,9 @@ export const getRoles = async (
   message: string;
   data: RolesProps[] | [];
 }> => {
-  try {
-    const result = (await prisma.roles.findMany({
-      where: {
-        ...(search && {
-          role_name: {
-            contains: search,
-          },
-        }),
-      },
-      orderBy: {
-        role_name: "asc",
-      },
-    })) as RolesProps[];
+  const hasil = await apiList<RolesProps>("/api/config/roles", { search });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data };
 };
 
 export const getRolesId = async (
@@ -50,29 +24,9 @@ export const getRolesId = async (
   message: string;
   data: RolesProps | null;
 }> => {
-  try {
-    const result = (await prisma.roles.findFirst({
-      where: {
-        id,
-      },
-    })) as RolesProps;
+  const hasil = await apiGet<RolesProps>(`/api/config/roles/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: null,
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? null };
 };
 
 export const createRoles = async (
@@ -81,27 +35,9 @@ export const createRoles = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.roles.create({
-      data: {
-        role_name: data.role_name?.toUpperCase(),
-      },
-    });
+  const hasil = await apiPost("/api/config/roles", { role_name: data.role_name });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Add data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Add data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const editRoles = async (
@@ -110,30 +46,11 @@ export const editRoles = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.roles.update({
-      data: {
-        role_name: data.role_name?.toUpperCase(),
-      },
-      where: {
-        id: data.id,
-      },
-    });
+  const hasil = await apiPut(`/api/config/roles/${data.id}`, {
+    role_name: data.role_name,
+  });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Edit data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Edit data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const deleteRoles = async (
@@ -142,25 +59,7 @@ export const deleteRoles = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.roles.delete({
-      where: {
-        id,
-      },
-    });
+  const hasil = await apiDelete(`/api/config/roles/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Delete data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Delete data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };

@@ -1,8 +1,9 @@
 "use server";
 
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiDelete, apiGet, apiList, apiPost, apiPut } from "@/libs/ApiClient";
 import { AtasanProps, DepartmentProps, SubDepartmentProps } from "@/types";
+
+/** Config > Sub Department — memanggil `ems-backend`, tanda tangan tidak berubah. */
 
 export const getSubDepartmentMultipleDepartment = async (
   department_id: { value: number; label: string }[]
@@ -11,35 +12,12 @@ export const getSubDepartmentMultipleDepartment = async (
   message: string;
   data: SubDepartmentProps[] | [];
 }> => {
-  try {
-    const result = (await prisma.sub_department.findMany({
-      include: {
-        department: true,
-      },
-      where: {
-        is_deleted: false,
-        department_id: {
-          in: department_id.map((item) => item.value),
-        },
-      },
-    })) as SubDepartmentProps[];
+  const hasil = await apiList<SubDepartmentProps>(
+    "/api/config/sub-department/by-department",
+    { department_id: department_id?.map((item) => item.value) ?? [] }
+  );
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data };
 };
 
 export const getAtasan = async (): Promise<{
@@ -47,45 +25,9 @@ export const getAtasan = async (): Promise<{
   message: string;
   data: AtasanProps[] | [];
 }> => {
-  try {
-    const result = (await prisma.user.findMany({
-      select: {
-        id: true,
-        name: true,
-        pegawai: {
-          select: {
-            id: true,
-            nama: true,
-          },
-        },
-      },
-      where: {
-        is_deleted: false,
-        role_id: {
-          not: null,
-        },
-      },
-      orderBy: {
-        name: "asc",
-      },
-    })) as AtasanProps[];
+  const hasil = await apiGet<AtasanProps[]>("/api/config/sub-department/atasan");
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? [] };
 };
 
 export const getJenisIzin = async (
@@ -95,44 +37,15 @@ export const getJenisIzin = async (
   message: string;
   data: any[] | [];
 }> => {
-  try {
-    if (!department_id) {
-      return {
-        status: true,
-        message: "Data fetched successfully",
-        data: [],
-      };
-    }
-
-    const result = await prisma.jenis_izin.findMany({
-      where: {
-        akses_izin_department: {
-          some: {
-            department_id,
-          },
-        },
-      },
-      orderBy: {
-        jenis: "asc",
-      },
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
+  if (!department_id) {
+    return { status: true, message: "Data fetched successfully", data: [] };
   }
+
+  const hasil = await apiGet<any[]>("/api/config/sub-department/jenis-izin", {
+    department_id,
+  });
+
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? [] };
 };
 
 export const getSubDepartment = async (
@@ -145,92 +58,12 @@ export const getSubDepartment = async (
   message: string;
   data: SubDepartmentProps[] | [];
 }> => {
-  try {
-    const result = (await prisma.sub_department.findMany({
-      select: {
-        id: true,
-        nama_sub_department: true,
-        department: {
-          select: {
-            id: true,
-            nama_department: true,
-          },
-        },
-        leader_user: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        supervisor_user: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        manager_user: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        akses_izin: {
-          select: {
-            jenis_izin: {
-              select: {
-                kode: true,
-                jenis: true,
-              },
-            },
-          },
-        },
-      },
-      where: {
-        is_deleted: false,
-        ...(search && {
-          OR: [
-            {
-              nama_sub_department: {
-                contains: search,
-              },
-            },
-            {
-              department: {
-                nama_department: {
-                  contains: search,
-                },
-              },
-            },
-          ],
-        }),
-        department_id: Number(filter?.department),
-      },
-      orderBy: [
-        {
-          department_id: "asc",
-        },
-        {
-          nama_sub_department: "asc",
-        },
-      ],
-    })) as SubDepartmentProps[];
+  const hasil = await apiList<SubDepartmentProps>("/api/config/sub-department", {
+    search,
+    department: filter?.department,
+  });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data };
 };
 
 export const getSubDepartmentId = async (
@@ -240,68 +73,9 @@ export const getSubDepartmentId = async (
   message: string;
   data: SubDepartmentProps | null;
 }> => {
-  try {
-    const result = (await prisma.sub_department.findFirst({
-      select: {
-        id: true,
-        nama_sub_department: true,
-        department: {
-          select: {
-            id: true,
-            nama_department: true,
-          },
-        },
-        leader_user: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        supervisor_user: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        manager_user: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        akses_izin: {
-          select: {
-            jenis_izin: {
-              select: {
-                kode: true,
-                jenis: true,
-              },
-            },
-          },
-        },
-      },
-      where: {
-        is_deleted: false,
-        id,
-      },
-    })) as SubDepartmentProps;
+  const hasil = await apiGet<SubDepartmentProps>(`/api/config/sub-department/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: null,
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? null };
 };
 
 export const createSubDepartment = async (data: {
@@ -315,49 +89,9 @@ export const createSubDepartment = async (data: {
   status: boolean;
   message: string;
 }> => {
-  try {
-    const departmentAksesIzin = await prisma.akses_izin_department.findMany({
-      select: {
-        jenis_izin_kode: true,
-      },
-      where: {
-        department_id: data.department,
-      },
-    });
-    const allowedJenisIzin = new Set(
-      departmentAksesIzin.map((item) => item.jenis_izin_kode)
-    );
-    const result = await prisma.sub_department.create({
-      data: {
-        department_id: data.department,
-        nama_sub_department: data.nama_sub_department?.toUpperCase(),
-        leader: data.leader,
-        supervisor: data.supervisor,
-        manager: data.manager,
-        akses_izin: {
-          create: data.akses_izin
-            ?.filter((item) => allowedJenisIzin.has(item.value))
-            .map((item) => ({
-              jenis_izin_kode: item.value,
-            })),
-        },
-      },
-    });
+  const hasil = await apiPost("/api/config/sub-department", data);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Create data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Create data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const editSubDepartment = async (data: {
@@ -372,54 +106,10 @@ export const editSubDepartment = async (data: {
   status: boolean;
   message: string;
 }> => {
-  try {
-    const departmentAksesIzin = await prisma.akses_izin_department.findMany({
-      select: {
-        jenis_izin_kode: true,
-      },
-      where: {
-        department_id: data.department,
-      },
-    });
-    const allowedJenisIzin = new Set(
-      departmentAksesIzin.map((item) => item.jenis_izin_kode)
-    );
-    const result = await prisma.sub_department.update({
-      where: {
-        id: data.id,
-        is_deleted: false,
-      },
-      data: {
-        department_id: data.department,
-        nama_sub_department: data.nama_sub_department?.toUpperCase(),
-        leader: data.leader,
-        supervisor: data.supervisor,
-        manager: data.manager,
-        akses_izin: {
-          deleteMany: {},
-          create: data.akses_izin
-            ?.filter((item) => allowedJenisIzin.has(item.value))
-            .map((item) => ({
-              jenis_izin_kode: item.value,
-            })),
-        },
-      },
-    });
+  const { id, ...body } = data;
+  const hasil = await apiPut(`/api/config/sub-department/${id}`, body);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Edit data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Edit data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const deleteSubDepartment = async (
@@ -428,31 +118,9 @@ export const deleteSubDepartment = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.sub_department.update({
-      data: {
-        is_deleted: true,
-      },
-      where: {
-        id: id,
-        is_deleted: false,
-      },
-    });
+  const hasil = await apiDelete(`/api/config/sub-department/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Delete data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Delete data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const getDepartment = async (): Promise<{
@@ -460,37 +128,9 @@ export const getDepartment = async (): Promise<{
   message: string;
   data: DepartmentProps[] | [];
 }> => {
-  try {
-    const result = await prisma.department.findMany({
-      include: {
-        akses_izin_department: {
-          include: {
-            jenis_izin: true,
-          },
-        },
-      },
-      where: {
-        is_deleted: false,
-      },
-      orderBy: {
-        id: "asc",
-      },
-    });
+  const hasil = await apiGet<DepartmentProps[]>(
+    "/api/config/sub-department/department"
+  );
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result as DepartmentProps[],
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? [] };
 };

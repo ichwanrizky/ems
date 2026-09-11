@@ -1,11 +1,14 @@
 "use server";
 
-import { authOptions } from "@/libs/AuthOptions";
-import { ConvertDate, ConvertDateZeroHours } from "@/libs/ConvertDate";
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiList, tanggalLokal } from "@/libs/ApiClient";
 import { AbsenProps } from "@/types";
-import { getServerSession } from "next-auth";
+
+/**
+ * HR > Absensi harian — memanggil `ems-backend`, tanda tangan tidak berubah.
+ *
+ * Pembatasan sub department tidak lagi disusun di sini; backend membacanya dari
+ * token dan tetap menyertakan pegawai ber-`sub_department_id` NULL.
+ */
 
 export const getAbsensi = async (
   search: string,
@@ -20,99 +23,13 @@ export const getAbsensi = async (
   message: string;
   data: AbsenProps[] | [];
 }> => {
-  try {
-    const session: any = await getServerSession(authOptions);
+  const hasil = await apiList<AbsenProps>("/api/hr/absensi", {
+    search,
+    department: filter?.department,
+    sub_department: filter?.sub_department,
+    status_absen: filter?.status_absen,
+    date: await tanggalLokal(filter?.date),
+  });
 
-    const result = (await prisma.pegawai.findMany({
-      select: {
-        id: true,
-        nama: true,
-        absen: {
-          select: {
-            id: true,
-            tanggal: true,
-            absen_masuk: true,
-            absen_pulang: true,
-            late: true,
-          },
-          where: {
-            tanggal: ConvertDateZeroHours(filter?.date),
-          },
-        },
-        izin: {
-          select: {
-            jenis_izin: {
-              select: {
-                kode: true,
-                jenis: true,
-                is_jam: true,
-              },
-            },
-            jumlah_jam: true,
-            jumlah_hari: true,
-          },
-          where: {
-            tanggal: ConvertDateZeroHours(filter?.date),
-          },
-        },
-      },
-      where: {
-        is_active: true,
-        is_deleted: false,
-        department_id: Number(filter!.department),
-        ...(filter!.sub_department
-          ? { sub_department_id: Number(filter!.sub_department) }
-          : {
-              OR: [
-                { sub_department_id: null },
-                {
-                  sub_department_id: {
-                    in: session.user.access_sub_department.map(
-                      (item: any) => item.sub_department.id
-                    ),
-                  },
-                },
-              ],
-            }),
-        ...(filter!.status_absen && {
-          absen:
-            filter!.status_absen === "1"
-              ? {
-                  some: {
-                    tanggal: ConvertDateZeroHours(filter!.date),
-                  },
-                }
-              : {
-                  none: {
-                    tanggal: ConvertDateZeroHours(filter!.date),
-                  },
-                },
-        }),
-        ...(search && {
-          nama: {
-            contains: search,
-          },
-        }),
-      },
-      orderBy: {
-        nama: "asc",
-      },
-    })) as AbsenProps[];
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data };
 };

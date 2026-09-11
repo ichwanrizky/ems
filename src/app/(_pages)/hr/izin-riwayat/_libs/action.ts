@@ -1,12 +1,14 @@
 "use server";
 
-import { authOptions } from "@/libs/AuthOptions";
-import { ConvertDateZeroHours } from "@/libs/ConvertDate";
-import { DateNowFormat } from "@/libs/DateFormat";
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiDelete, apiGet, apiList, apiPost, tanggalLokal } from "@/libs/ApiClient";
 import { RiwayatIzinProps } from "@/types";
-import { getServerSession } from "next-auth";
+
+/**
+ * HR > Izin Riwayat — memanggil `ems-backend`, tanda tangan tidak berubah.
+ *
+ * Penjabaran pengajuan menjadi baris `izin` harian (termasuk melewati tanggal
+ * merah) sekarang di backend, dipakai bersama oleh approval dan input langsung.
+ */
 
 export const getRiwayatIzin = async (
   search?: string,
@@ -22,104 +24,13 @@ export const getRiwayatIzin = async (
   data: RiwayatIzinProps[] | [];
   total_data: number;
 }> => {
-  try {
-    const session: any = await getServerSession(authOptions);
-
-    const condition = {
-      where: {
-        status: {
-          not: 0,
-        },
-        department_id: Number(filter?.department),
-        pegawai: {
-          OR: [
-            { sub_department_id: null },
-            {
-              sub_department_id: {
-                in: session.user.access_sub_department.map(
-                  (item: any) => item.sub_department.id
-                ),
-              },
-            },
-          ],
-        },
-        bulan: Number(filter?.bulan),
-        tahun: Number(filter?.tahun),
-        ...(search && {
-          pegawai: {
-            nama: {
-              contains: search,
-            },
-          },
-        }),
-      },
-    };
-
-    const [totalData, result] = await Promise.all([
-      prisma.pengajuan_izin.count({ ...condition }),
-      prisma.pengajuan_izin.findMany({
-      select: {
-        id: true,
-        uuid: true,
-        tanggal: true,
-        tahun: true,
-        bulan: true,
-        keterangan: true,
-        jumlah_hari: true,
-        jumlah_jam: true,
-        jenis_izin: {
-          select: {
-            kode: true,
-            jenis: true,
-          },
-        },
-        pegawai: {
-          select: {
-            nama: true,
-          },
-        },
-        user_approved: {
-          select: {
-            name: true,
-          },
-        },
-        approve_date: true,
-        status: true,
-      },
-      ...condition,
-      orderBy: {
-        tanggal: "desc",
-      },
-      skip: currentPage ? (currentPage - 1) * 10 : 0,
-      take: currentPage ? 10 : undefined,
-    }),
-    ]);
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-        total_data: 0,
-      };
-    }
-
-    const newData = result.map((item, index) => ({
-      number: currentPage
-        ? (Number(currentPage) - 1) * 10 + index + 1
-        : index + 1,
-      ...item,
-    }));
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: newData as RiwayatIzinProps[],
-      total_data: totalData,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return (await apiList<RiwayatIzinProps>("/api/hr/izin-riwayat", {
+    search,
+    department: filter?.department,
+    bulan: filter?.bulan,
+    tahun: filter?.tahun,
+    page: currentPage,
+  })) as any;
 };
 
 export const deleteRiwayatIzin = async (
@@ -128,37 +39,9 @@ export const deleteRiwayatIzin = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.$transaction(async (prisma) => {
-      await prisma.izin.deleteMany({
-        where: {
-          pengajuan_izin_id: id,
-        },
-      });
+  const hasil = await apiDelete(`/api/hr/izin-riwayat/${id}`);
 
-      await prisma.pengajuan_izin.delete({
-        where: {
-          id,
-        },
-      });
-
-      return true;
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Delete data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Delete data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const getPegawaiIzin = async (
@@ -172,38 +55,12 @@ export const getPegawaiIzin = async (
         nama: string;
       }[];
 }> => {
-  try {
-    const result = await prisma.pegawai.findMany({
-      select: {
-        id: true,
-        nama: true,
-      },
-      where: {
-        is_active: true,
-        is_deleted: false,
-        department_id: department_id,
-      },
-      orderBy: {
-        nama: "asc",
-      },
-    });
+  const hasil = await apiGet<{ id: number; nama: string }[]>(
+    "/api/hr/izin-riwayat/pegawai",
+    { department_id }
+  );
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? [] };
 };
 
 export const getPegawaiIzinTglMerah = async (
@@ -223,69 +80,13 @@ export const getPegawaiIzinTglMerah = async (
     }[];
   };
 }> => {
-  try {
-    const result = await prisma.$transaction(async (prisma) => {
-      const pegawai = await prisma.pegawai.findFirst({
-        select: {
-          department_id: true,
-          sub_department_id: true,
-        },
-        where: {
-          id: pegawai_id,
-        },
-      });
+  const hasil = await apiGet<any>(`/api/hr/izin-riwayat/referensi/${pegawai_id}`);
 
-      if (!pegawai?.sub_department_id || !pegawai?.department_id) {
-        return false;
-      }
-
-      const jenisIzin = await prisma.jenis_izin.findMany({
-        where: {
-          akses_izin: {
-            some: {
-              sub_department_id: pegawai.sub_department_id,
-            },
-          },
-        },
-      });
-
-      const tglMerah = await prisma.tanggal_merah_list.findMany({
-        select: {
-          tanggal: true,
-          tanggal_nomor: true,
-        },
-        where: {
-          tanggal_merah: {
-            department_id: pegawai.department_id,
-            tahun: {
-              in: [new Date().getFullYear(), new Date().getFullYear() + 1],
-            },
-          },
-        },
-      });
-
-      return { jenisIzin, tglMerah };
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: null as any,
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: {
-        jenis_izin: result.jenisIzin,
-        tgl_merah: result.tglMerah,
-      },
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return {
+    status: hasil.status,
+    message: hasil.message,
+    data: hasil.data ?? (null as any),
+  };
 };
 
 export const createIizin = async (data: {
@@ -302,110 +103,10 @@ export const createIizin = async (data: {
   status: boolean;
   message: string;
 }> => {
-  try {
-    const session: any = await getServerSession(authOptions);
+  const hasil = await apiPost("/api/hr/izin-riwayat", {
+    ...data,
+    tgl_izin: await tanggalLokal(data.tgl_izin),
+  });
 
-    const result = await prisma.$transaction(async (prisma) => {
-      const create = await prisma.pengajuan_izin.create({
-        data: {
-          jenis_izin_kode: data.jenis_izin,
-          tanggal: ConvertDateZeroHours(data.tgl_izin as Date),
-          pegawai_id: Number(data.pegawai_id),
-          status: 1,
-          bulan: ConvertDateZeroHours(data.tgl_izin as Date).getMonth() + 1,
-          tahun: ConvertDateZeroHours(data.tgl_izin as Date).getFullYear(),
-          keterangan: data.keterangan,
-          jumlah_hari: data.is_hari ? data.jumlah_hari?.toString() : null,
-          jumlah_jam: data.is_jam ? data.jumlah_jam?.toString() : null,
-          department_id: Number(data.department_id),
-          approve_by: Number(session.user.id),
-          approve_date: DateNowFormat(),
-        },
-      });
-
-      if (create) {
-        const currentYear = new Date().getFullYear();
-        const nextYear = currentYear + 1;
-
-        const tanggalMerah = await prisma.tanggal_merah_list.findMany({
-          where: {
-            tanggal_merah: {
-              department_id: create.department_id,
-            },
-            OR: [
-              {
-                tanggal_merah: {
-                  tahun: currentYear,
-                },
-              },
-              {
-                tanggal_merah: {
-                  tahun: nextYear,
-                },
-              },
-            ],
-          },
-        });
-
-        const tanggalMerahList = new Set(
-          tanggalMerah.map((item) => item.tanggal?.toISOString().split("T")[0])
-        );
-
-        const jumlah_hari =
-          create.jumlah_hari === "" || create.jumlah_hari === null
-            ? 1
-            : Number(create.jumlah_hari);
-
-        const izinData = [];
-
-        let tanggalIzin = new Date(create.tanggal as Date);
-        let i = 0;
-
-        while (izinData.length < jumlah_hari) {
-          if (i > 0) {
-            tanggalIzin.setDate(tanggalIzin.getDate() + 1);
-          }
-
-          if (!tanggalMerahList.has(tanggalIzin.toISOString().split("T")[0])) {
-            const izinEntry = {
-              jenis_izin_kode: create.jenis_izin_kode,
-              tanggal: new Date(tanggalIzin as Date),
-              pegawai_id: create.pegawai_id,
-              bulan: create.bulan,
-              tahun: create.tahun,
-              keterangan: create.keterangan,
-              pengajuan_izin_id: create.id,
-              department_id: create.department_id,
-              jumlah_hari: create.jumlah_hari,
-              jumlah_jam: create.jumlah_jam,
-            };
-
-            izinData.push(izinEntry);
-          }
-
-          i++;
-        }
-
-        await prisma.izin.createMany({
-          data: izinData,
-        });
-      }
-
-      return true;
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Add data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Add data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };

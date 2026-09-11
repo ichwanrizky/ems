@@ -1,10 +1,18 @@
 "use server";
-import { ConvertDateZeroHours } from "@/libs/ConvertDate";
-import { DateNowFormat } from "@/libs/DateFormat";
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
-const path = require("path");
-const fs = require("fs");
+
+import { apiFetch, tanggalLokal } from "@/libs/ApiClient";
+
+/**
+ * Form pengajuan izin bersesi — memanggil `ems-backend` TANPA token.
+ *
+ * Yang menggantikan login adalah baris `request_session_izin`: aplikasi mobile
+ * memintanya lebih dulu, lalu membuka tautan berisi uuid-nya. Sesi berumur satu
+ * jam dan sekali pakai — backend menandainya `expired` begitu pengajuan masuk.
+ *
+ * Berkas surat keterangan sakit tidak lagi ditulis ke `public/izin/`: backend
+ * menyimpannya di luar document root dan menyajikannya lewat endpoint
+ * `/api/publik/pengajuan-izin/{uuid}/berkas`.
+ */
 
 export const getRequestPengajuanIzin = async (
   uuid: string
@@ -35,137 +43,16 @@ export const getRequestPengajuanIzin = async (
     }[];
   };
 }> => {
-  try {
-    const checkSession = await prisma.request_session_izin.findFirst({
-      where: {
-        uuid: uuid,
-        AND: [
-          {
-            expired_at: {
-              gte: DateNowFormat(),
-            },
-          },
-          {
-            expired: false,
-          },
-        ],
-      },
-    });
+  const hasil = await apiFetch<any>(
+    `/api/publik/pengajuan-izin/${encodeURIComponent(uuid)}`,
+    { tanpaToken: true }
+  );
 
-    if (!checkSession) {
-      return {
-        status: false,
-        message: "Unauthorized request",
-        data: null as any,
-      };
-    }
-
-    const result = await prisma.$transaction(async (prisma) => {
-      const pegawai = await prisma.pegawai.findFirst({
-        select: {
-          id: true,
-          nama: true,
-          department: {
-            select: {
-              id: true,
-              nama_department: true,
-              akses_izin_department: true,
-            },
-          },
-          sub_department: {
-            select: {
-              id: true,
-              nama_sub_department: true,
-              akses_izin: true,
-            },
-          },
-        },
-        where: {
-          id: checkSession.pegawai_id,
-        },
-      });
-
-      if (!pegawai?.department?.id) {
-        return false;
-      }
-
-      const jenisIzin = await prisma.jenis_izin.findMany({
-        where: {
-          ...(pegawai.sub_department?.id
-            ? {
-                akses_izin: {
-                  some: {
-                    sub_department_id: pegawai.sub_department.id,
-                  },
-                },
-              }
-            : {
-                akses_izin_department: {
-                  some: {
-                    department_id: pegawai.department.id,
-                  },
-                },
-              }),
-        },
-        orderBy: {
-          jenis: "asc",
-        },
-      });
-
-      if (jenisIzin.length === 0) {
-        return false;
-      }
-
-      const tglMerah = await prisma.tanggal_merah_list.findMany({
-        select: {
-          tanggal: true,
-          tanggal_nomor: true,
-        },
-        where: {
-          tanggal_merah: {
-            department_id: pegawai.department.id,
-            tahun: {
-              in: [new Date().getFullYear(), new Date().getFullYear() + 1],
-            },
-          },
-        },
-      });
-
-      return { pegawai, jenisIzin, tglMerah };
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: null as any,
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: {
-        pegawai: {
-          id: result.pegawai.id,
-          nama: result.pegawai.nama,
-          department: {
-            id: result.pegawai.department.id,
-            nama_department: result.pegawai.department.nama_department,
-          },
-          sub_department: {
-            id: result.pegawai.sub_department?.id || null,
-            nama_sub_department:
-              result.pegawai.sub_department?.nama_sub_department || null,
-          },
-        },
-        jenis_izin: result.jenisIzin,
-        tgl_merah: result.tglMerah,
-      },
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return {
+    status: hasil.status,
+    message: hasil.message,
+    data: hasil.data ?? (null as any),
+  };
 };
 
 export const createPengajuanIzin = async (data: {
@@ -184,110 +71,26 @@ export const createPengajuanIzin = async (data: {
   status: boolean;
   message: string;
 }> => {
-  try {
-    const checkSession = await prisma.request_session_izin.findFirst({
-      where: {
-        uuid: data.uuid,
-        AND: [
-          {
-            expired_at: {
-              gte: DateNowFormat(),
-            },
-          },
-          {
-            expired: false,
-          },
-        ],
+  // `department_id` dan `pegawai_id` tidak ikut dikirim: backend mengambilnya
+  // dari sesi. Endpoint ini terbuka, jadi mempercayai body berarti siapa pun
+  // yang memegang satu tautan bisa mengajukan izin atas nama pegawai lain.
+  const hasil = await apiFetch(
+    `/api/publik/pengajuan-izin/${encodeURIComponent(data.uuid)}`,
+    {
+      method: "POST",
+      tanpaToken: true,
+      body: {
+        jenis_izin: data.jenis_izin,
+        tgl_izin: await tanggalLokal(data.tgl_izin),
+        is_jam: data.is_jam,
+        is_hari: data.is_hari,
+        jumlah_hari: data.jumlah_hari,
+        jumlah_jam: data.jumlah_jam,
+        keterangan: data.keterangan,
+        mc_base64: data.mc_base64,
       },
-    });
-
-    if (!checkSession) {
-      return {
-        status: false,
-        message: "Unauthorized request",
-      };
     }
+  );
 
-    const checkDoubleData = await prisma.pengajuan_izin.findFirst({
-      select: {
-        id: true,
-      },
-      where: {
-        pegawai_id: Number(data.pegawai_id),
-        jenis_izin_kode: data.jenis_izin,
-        tanggal: ConvertDateZeroHours(data.tgl_izin as Date),
-      },
-    });
-
-    if (checkDoubleData) {
-      return {
-        status: false,
-        message: "Data already submitted",
-      };
-    }
-
-    const result = await prisma.$transaction(async (prisma) => {
-      const jumlah_hari =
-        data.jenis_izin === "CS" || data.jenis_izin === "IS"
-          ? "0.5"
-          : data.jumlah_hari?.toString();
-
-      const createIzin = await prisma.pengajuan_izin.create({
-        data: {
-          jenis_izin_kode: data.jenis_izin,
-          tanggal: ConvertDateZeroHours(data.tgl_izin as Date),
-          pegawai_id: Number(data.pegawai_id),
-          bulan: ConvertDateZeroHours(data.tgl_izin as Date).getMonth() + 1,
-          tahun: ConvertDateZeroHours(data.tgl_izin as Date).getFullYear(),
-          keterangan: data.keterangan,
-          jumlah_hari: data.is_hari ? jumlah_hari : "1",
-          jumlah_jam: data.is_jam ? data.jumlah_jam?.toString() : null,
-          department_id: Number(data.department_id),
-        },
-      });
-
-      const updateSession = await prisma.request_session_izin.update({
-        where: {
-          id: checkSession.id,
-        },
-        data: {
-          expired: true,
-        },
-      });
-
-      if (!createIzin || !updateSession) {
-        return false;
-      }
-
-      if (data.jenis_izin === "S") {
-        const base64Data: any = data.mc_base64?.replace(
-          /^data:image\/\w+;base64,/,
-          ""
-        );
-        const buffer = Buffer.from(base64Data, "base64");
-        const imagePath = path.join(
-          process.cwd(),
-          "public/izin",
-          createIzin.uuid?.toString() + ".png"
-        );
-        fs.writeFileSync(imagePath, buffer);
-      }
-
-      return true;
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Add data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Add data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };

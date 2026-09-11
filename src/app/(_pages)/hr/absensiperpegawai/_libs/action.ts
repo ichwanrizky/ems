@@ -1,12 +1,14 @@
 "use server";
 
-import { AttendanceData } from "@/libs/AttendanceData";
-import { authOptions } from "@/libs/AuthOptions";
-import { ConvertDateZeroHours, DatePlus7Format } from "@/libs/ConvertDate";
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiDelete, apiGet, apiList, apiPost, apiPut, tanggalLokal } from "@/libs/ApiClient";
 import { AttendanceMonthlyProps } from "@/types";
-import { getServerSession } from "next-auth";
+
+/**
+ * HR > Absensi per Pegawai — memanggil `ems-backend`, tanda tangan tidak berubah.
+ *
+ * Perhitungan menit keterlambatan untuk absen manual sekarang di backend
+ * (selisih jam absen masuk terhadap jam masuk shift, tidak pernah negatif).
+ */
 
 type PegawaiAbsen = {
   id: number;
@@ -20,50 +22,12 @@ export const getPegawaiAbsen = async (
   message: string;
   data: PegawaiAbsen[] | [];
 }> => {
-  try {
-    const session: any = await getServerSession(authOptions);
+  const hasil = await apiGet<PegawaiAbsen[]>(
+    "/api/hr/absensi-per-pegawai/pegawai",
+    { department }
+  );
 
-    const result = (await prisma.pegawai.findMany({
-      select: {
-        id: true,
-        nama: true,
-      },
-      where: {
-        is_active: true,
-        is_deleted: false,
-        department_id: Number(department),
-        OR: [
-          { sub_department_id: null },
-          {
-            sub_department_id: {
-              in: session.user.access_sub_department.map(
-                (item: any) => item.sub_department.id
-              ),
-            },
-          },
-        ],
-      },
-      orderBy: {
-        nama: "asc",
-      },
-    })) as PegawaiAbsen[];
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? [] };
 };
 
 export const getAbsensiPerpegawai = async (filter: {
@@ -75,29 +39,13 @@ export const getAbsensiPerpegawai = async (filter: {
   message: string;
   data: AttendanceMonthlyProps[] | [];
 }> => {
-  try {
-    const result = await AttendanceData(
-      Number(filter.tahun),
-      Number(filter.bulan),
-      Number(filter.pegawai)
-    );
+  const hasil = await apiList<AttendanceMonthlyProps>("/api/hr/absensi-per-pegawai", {
+    bulan: filter.bulan,
+    tahun: filter.tahun,
+    pegawai: filter.pegawai,
+  });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result as AttendanceMonthlyProps[],
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data };
 };
 
 export const createAbsensiPerpegawai = async (data: {
@@ -109,103 +57,14 @@ export const createAbsensiPerpegawai = async (data: {
   status: boolean;
   message: string;
 }> => {
-  try {
-    const session: any = await getServerSession(authOptions);
+  const hasil = await apiPost("/api/hr/absensi-per-pegawai", {
+    date: await tanggalLokal(data.date),
+    pegawai_id: data.pegawai_id,
+    absen_masuk: data.absen_masuk,
+    absen_pulang: data.absen_pulang,
+  });
 
-    const [hours_masuk, minutes_masuk, seconds_masuk] = data.absen_masuk
-      .split(":")
-      .map(Number);
-
-    const [hours_pulang, minutes_pulang, seconds_pulang] = data.absen_pulang
-      .split(":")
-      .map(Number);
-
-    const absen_masuk = new Date(data.date as Date);
-    absen_masuk.setHours(hours_masuk, minutes_masuk, seconds_masuk);
-
-    const absen_pulang = new Date(data.date as Date);
-    absen_pulang.setHours(hours_pulang, minutes_pulang, seconds_pulang);
-
-    const result = await prisma.$transaction(async (prisma) => {
-      const shift = await prisma.pegawai.findFirst({
-        select: {
-          shift_id: true,
-          shift: {
-            select: {
-              jam_masuk: true,
-            },
-          },
-        },
-        where: {
-          id: data.pegawai_id,
-        },
-      });
-
-      if (!shift) {
-        return false;
-      }
-
-      let jam_masuk_department = new Date();
-
-      const shiftTime = new Date(shift.shift?.jam_masuk as any);
-
-      const hours = shiftTime.getUTCHours();
-      const minutes = shiftTime.getUTCMinutes();
-      const seconds = shiftTime.getUTCSeconds();
-
-      jam_masuk_department.setHours(hours, minutes, seconds, 0);
-      jam_masuk_department = DatePlus7Format(jam_masuk_department);
-
-      const absenMasukWithoutSecond = ConvertDateZeroHours(data.date as Date);
-      absenMasukWithoutSecond.setHours(
-        DatePlus7Format(absen_masuk as Date).getHours(),
-        DatePlus7Format(absen_masuk as Date).getMinutes()
-      );
-
-      const difference =
-        (absenMasukWithoutSecond as any) - (jam_masuk_department as any);
-
-      const differenceInMinutes = Math.round(difference / 60000);
-
-      let late = 0;
-      if (differenceInMinutes > 0) late = differenceInMinutes;
-
-      await prisma.absen.create({
-        data: {
-          pegawai_id: data.pegawai_id,
-          tanggal: ConvertDateZeroHours(data.date as Date),
-          shift_id: shift.shift_id,
-          bulan: ConvertDateZeroHours(data.date as Date).getMonth() + 1,
-          tahun: ConvertDateZeroHours(data.date as Date).getFullYear(),
-          ...(data.absen_masuk && {
-            absen_masuk: DatePlus7Format(absen_masuk as Date),
-            ket_masuk: `ABSEN MANUAL BY: ${session.user.username}`,
-          }),
-          ...(data.absen_pulang && {
-            absen_pulang: DatePlus7Format(absen_pulang as Date),
-            ket_pulang: `ABSEN MANUAL BY: ${session.user.username}`,
-          }),
-          late,
-        },
-      });
-
-      return true;
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Add data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Add data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const editAbsensiPerpegawai = async (data: {
@@ -218,116 +77,14 @@ export const editAbsensiPerpegawai = async (data: {
   status: boolean;
   message: string;
 }> => {
-  try {
-    const session: any = await getServerSession(authOptions);
+  const hasil = await apiPut(`/api/hr/absensi-per-pegawai/${data.absen_id}`, {
+    date: await tanggalLokal(data.date),
+    pegawai_id: data.pegawai_id,
+    absen_masuk: data.absen_masuk,
+    absen_pulang: data.absen_pulang,
+  });
 
-    const [hours_masuk, minutes_masuk, seconds_masuk] = data.absen_masuk
-      .split(":")
-      .map(Number);
-
-    const [hours_pulang, minutes_pulang, seconds_pulang] = data.absen_pulang
-      .split(":")
-      .map(Number);
-
-    const absen_masuk = new Date(data.date as Date);
-    absen_masuk.setHours(hours_masuk, minutes_masuk, seconds_masuk);
-
-    const absen_pulang = new Date(data.date as Date);
-    absen_pulang.setHours(hours_pulang, minutes_pulang, seconds_pulang);
-
-    const result = await prisma.$transaction(async (prisma) => {
-      const shift = await prisma.pegawai.findFirst({
-        select: {
-          shift_id: true,
-          shift: {
-            select: {
-              jam_masuk: true,
-            },
-          },
-        },
-        where: {
-          id: data.pegawai_id,
-        },
-      });
-
-      if (!shift) {
-        return false;
-      }
-
-      let jam_masuk_department = new Date();
-
-      const shiftTime = new Date(shift.shift?.jam_masuk as any);
-
-      const hours = shiftTime.getUTCHours();
-      const minutes = shiftTime.getUTCMinutes();
-      const seconds = shiftTime.getUTCSeconds();
-
-      jam_masuk_department.setHours(hours, minutes, seconds, 0);
-      jam_masuk_department = DatePlus7Format(jam_masuk_department);
-
-      const absenMasukWithoutSecond = ConvertDateZeroHours(data.date as Date);
-      absenMasukWithoutSecond.setHours(
-        DatePlus7Format(absen_masuk as Date).getHours(),
-        DatePlus7Format(absen_masuk as Date).getMinutes()
-      );
-
-      const difference =
-        (absenMasukWithoutSecond as any) - (jam_masuk_department as any);
-
-      const differenceInMinutes = Math.round(difference / 60000);
-
-      let late = 0;
-      if (differenceInMinutes > 0) late = differenceInMinutes;
-
-      await prisma.absen.update({
-        where: {
-          id: Number(data.absen_id),
-        },
-        data: {
-          pegawai_id: data.pegawai_id,
-          tanggal: ConvertDateZeroHours(data.date as Date),
-          shift_id: shift.shift_id,
-          bulan: ConvertDateZeroHours(data.date as Date).getMonth() + 1,
-          tahun: ConvertDateZeroHours(data.date as Date).getFullYear(),
-          ...(data.absen_masuk
-            ? {
-                absen_masuk: DatePlus7Format(absen_masuk as Date),
-                ket_masuk: `ABSEN MANUAL BY: ${session.user.username}`,
-              }
-            : {
-                absen_masuk: null,
-                ket_masuk: `ABSEN MANUAL BY: ${session.user.username}`,
-              }),
-          ...(data.absen_pulang
-            ? {
-                absen_pulang: DatePlus7Format(absen_pulang as Date),
-                ket_pulang: `ABSEN MANUAL BY: ${session.user.username}`,
-              }
-            : {
-                absen_pulang: null,
-                ket_pulang: `ABSEN MANUAL BY: ${session.user.username}`,
-              }),
-          late,
-        },
-      });
-
-      return true;
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Edit data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Edit data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const deleteAbsensiPerpegawai = async (
@@ -336,25 +93,7 @@ export const deleteAbsensiPerpegawai = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.absen.delete({
-      where: {
-        id,
-      },
-    });
+  const hasil = await apiDelete(`/api/hr/absensi-per-pegawai/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Delete data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Delete data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };

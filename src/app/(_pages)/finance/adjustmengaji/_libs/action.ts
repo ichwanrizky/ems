@@ -1,7 +1,9 @@
 "use server";
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+
+import { apiDelete, apiGet, apiList, apiPost, apiPut } from "@/libs/ApiClient";
 import { AdjustmentProps } from "@/types";
+
+/** Finance > Adjustment Gaji — memanggil `ems-backend`, tanda tangan tidak berubah. */
 
 export const getPegawaiAdjustment = async (
   department_id: number
@@ -14,38 +16,12 @@ export const getPegawaiAdjustment = async (
         nama: string;
       }[];
 }> => {
-  try {
-    const result = await prisma.pegawai.findMany({
-      select: {
-        id: true,
-        nama: true,
-      },
-      where: {
-        is_active: true,
-        is_deleted: false,
-        department_id: department_id,
-      },
-      orderBy: {
-        nama: "asc",
-      },
-    });
+  const hasil = await apiGet<{ id: number; nama: string }[]>(
+    "/api/finance/adjustment/pegawai",
+    { department_id }
+  );
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? [] };
 };
 
 export const createAdjustment = async (data: {
@@ -60,33 +36,9 @@ export const createAdjustment = async (data: {
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.adjustment.create({
-      data: {
-        pegawai_id: Number(data.pegawai_id),
-        department_id: Number(data.department_id),
-        jenis: data.jenis,
-        nominal: Number(data.nominal),
-        keterangan: data.keterangan,
-        bulan: Number(data.bulan),
-        tahun: Number(data.tahun),
-      },
-    });
+  const hasil = await apiPost("/api/finance/adjustment", data);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Add data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Add data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const getAdjustment = async (
@@ -101,53 +53,14 @@ export const getAdjustment = async (
   message: string;
   data: AdjustmentProps[] | [];
 }> => {
-  try {
-    const result = await prisma.adjustment.findMany({
-      select: {
-        id: true,
-        jenis: true,
-        nominal: true,
-        keterangan: true,
-        pegawai: {
-          select: {
-            id: true,
-            nama: true,
-          },
-        },
-        department_id: true,
-        bulan: true,
-        tahun: true,
-      },
-      where: {
-        department_id: Number(filter?.department),
-        bulan: Number(filter?.bulan),
-        tahun: Number(filter?.tahun),
-        ...(search && {
-          pegawai: {
-            nama: {
-              contains: search,
-            },
-          },
-        }),
-      },
-    });
+  const hasil = await apiList<AdjustmentProps>("/api/finance/adjustment", {
+    search,
+    department: filter?.department,
+    bulan: filter?.bulan,
+    tahun: filter?.tahun,
+  });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result as AdjustmentProps[],
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data };
 };
 
 export const getAdjustmentId = async (
@@ -157,44 +70,9 @@ export const getAdjustmentId = async (
   message: string;
   data: AdjustmentProps | null;
 }> => {
-  try {
-    const result = await prisma.adjustment.findFirst({
-      select: {
-        id: true,
-        jenis: true,
-        nominal: true,
-        keterangan: true,
-        pegawai: {
-          select: {
-            id: true,
-            nama: true,
-          },
-        },
-        department_id: true,
-        bulan: true,
-        tahun: true,
-      },
-      where: {
-        id: id,
-      },
-    });
+  const hasil = await apiGet<AdjustmentProps>(`/api/finance/adjustment/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: null,
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result as AdjustmentProps,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? null };
 };
 
 export const editAdjustment = async (data: {
@@ -210,36 +88,10 @@ export const editAdjustment = async (data: {
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.adjustment.update({
-      data: {
-        pegawai_id: Number(data.pegawai_id),
-        department_id: Number(data.department_id),
-        jenis: data.jenis,
-        nominal: Number(data.nominal),
-        keterangan: data.keterangan,
-        bulan: Number(data.bulan),
-        tahun: Number(data.tahun),
-      },
-      where: {
-        id: Number(data.id),
-      },
-    });
+  const { id, ...body } = data;
+  const hasil = await apiPut(`/api/finance/adjustment/${id}`, body);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Edit data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Edit data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const deleteAdjustment = async (
@@ -248,40 +100,7 @@ export const deleteAdjustment = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.adjustment.delete({
-      select: {
-        id: true,
-        jenis: true,
-        nominal: true,
-        keterangan: true,
-        pegawai: {
-          select: {
-            id: true,
-            nama: true,
-          },
-        },
-        department_id: true,
-        bulan: true,
-        tahun: true,
-      },
-      where: {
-        id: id,
-      },
-    });
+  const hasil = await apiDelete(`/api/finance/adjustment/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Delete data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Delete data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };

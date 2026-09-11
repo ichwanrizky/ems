@@ -1,10 +1,15 @@
 "use server";
 
-import { authOptions } from "@/libs/AuthOptions";
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiDelete, apiList } from "@/libs/ApiClient";
 import { ThrProps } from "@/types";
-import { getServerSession } from "next-auth";
+
+/**
+ * Finance > THR — memanggil `ems-backend`, tanda tangan tidak berubah.
+ *
+ * Seperti sebelumnya, THR tidak dibuat dari aplikasi: barisnya diisi dari luar,
+ * lalu dibaca di sini dan ikut diperhitungkan sebagai dasar PPH21 saat gaji
+ * bulan yang sama digenerate.
+ */
 
 export const getThr = async (
   search: string,
@@ -18,56 +23,14 @@ export const getThr = async (
   message: string;
   data: ThrProps[] | [];
 }> => {
-  try {
-    const result = (await prisma.thr.findMany({
-      select: {
-        id: true,
-        uuid: true,
-        bulan: true,
-        tahun: true,
-        department_id: true,
-        pegawai_id: true,
-        thr: true,
-        pph21: true,
-        net_thr: true,
-        pegawai: {
-          select: {
-            nama: true,
-          },
-        },
-        department: {
-          select: {
-            nama_department: true,
-          },
-        },
-      },
-      where: {
-        department_id: Number(filter.department),
-        tahun: Number(filter.tahun),
-        bulan: Number(filter.bulan),
-        ...(search && {
-          pegawai: {
-            nama: {
-              contains: search,
-            },
-          },
-        }),
-      },
-      orderBy: {
-        pegawai: {
-          nama: "asc",
-        },
-      },
-    })) as ThrProps[];
+  const hasil = await apiList<ThrProps>("/api/finance/thr", {
+    search,
+    department: filter.department,
+    bulan: filter.bulan,
+    tahun: filter.tahun,
+  });
 
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data };
 };
 
 export const deleteThr = async (
@@ -76,20 +39,9 @@ export const deleteThr = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const session: any = await getServerSession(authOptions);
+  const hasil = await apiDelete(`/api/finance/thr/${id}`);
 
-    await prisma.thr.delete({
-      where: { id },
-    });
-
-    return {
-      status: true,
-      message: "Data deleted successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const exportExcelThr = async (

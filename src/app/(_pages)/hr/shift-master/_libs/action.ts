@@ -1,9 +1,9 @@
 "use server";
 
-import { ConvertDate } from "@/libs/ConvertDate";
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiDelete, apiGet, apiList, apiPost, apiPut } from "@/libs/ApiClient";
 import { ShiftMasterProps } from "@/types";
+
+/** HR > Shift Master — memanggil `ems-backend`, tanda tangan tidak berubah. */
 
 export const getShiftMaster = async (
   search?: string,
@@ -13,47 +13,12 @@ export const getShiftMaster = async (
   message: string;
   data: ShiftMasterProps[] | [];
 }> => {
-  try {
-    const result = (await prisma.shift.findMany({
-      include: {
-        department: {
-          select: {
-            id: true,
-            nama_department: true,
-          },
-        },
-      },
-      where: {
-        ...(search && {
-          keterangan: {
-            contains: search,
-          },
-        }),
-        ...(department_id && {
-          department_id: Number(department_id),
-        }),
-      },
-      orderBy: {
-        id: "asc",
-      },
-    })) as ShiftMasterProps[];
+  const hasil = await apiList<ShiftMasterProps>("/api/hr/shift-master", {
+    search,
+    department_id,
+  });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data };
 };
 
 export const getShiftMasterId = async (
@@ -63,37 +28,9 @@ export const getShiftMasterId = async (
   message: string;
   data: ShiftMasterProps | null;
 }> => {
-  try {
-    const result = (await prisma.shift.findFirst({
-      include: {
-        department: {
-          select: {
-            id: true,
-            nama_department: true,
-          },
-        },
-      },
-      where: {
-        id,
-      },
-    })) as ShiftMasterProps;
+  const hasil = await apiGet<ShiftMasterProps>(`/api/hr/shift-master/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: null,
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? null };
 };
 
 export const createShiftMaster = async (
@@ -102,31 +39,15 @@ export const createShiftMaster = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.shift.create({
-      data: {
-        department_id: data.department_id,
-        jam_masuk: ConvertDate(data.jam_masuk),
-        jam_pulang: ConvertDate(data.jam_pulang),
-        keterangan: data.keterangan.toUpperCase(),
-        cond_friday: data.cond_friday,
-      },
-    });
+  const hasil = await apiPost("/api/hr/shift-master", {
+    department_id: data.department_id,
+    jam_masuk: data.jam_masuk,
+    jam_pulang: data.jam_pulang,
+    keterangan: data.keterangan,
+    cond_friday: data.cond_friday,
+  });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Add data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Add data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const editShiftMaster = async (
@@ -135,34 +56,15 @@ export const editShiftMaster = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.shift.update({
-      data: {
-        department_id: data.department_id,
-        jam_masuk: ConvertDate(data.jam_masuk),
-        jam_pulang: ConvertDate(data.jam_pulang),
-        keterangan: data.keterangan.toUpperCase(),
-        cond_friday: data.cond_friday,
-      },
-      where: {
-        id: data.id,
-      },
-    });
+  const hasil = await apiPut(`/api/hr/shift-master/${data.id}`, {
+    department_id: data.department_id,
+    jam_masuk: data.jam_masuk,
+    jam_pulang: data.jam_pulang,
+    keterangan: data.keterangan,
+    cond_friday: data.cond_friday,
+  });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Edit data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Edit data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const deleteShiftMaster = async (
@@ -171,25 +73,7 @@ export const deleteShiftMaster = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.shift.delete({
-      where: {
-        id,
-      },
-    });
+  const hasil = await apiDelete(`/api/hr/shift-master/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Delete data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Delete data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };

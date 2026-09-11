@@ -1,7 +1,11 @@
 "use server";
 
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiFetch } from "@/libs/ApiClient";
+
+/**
+ * Slip THR publik — memanggil `ems-backend` TANPA token; kuncinya uuid acak di
+ * URL, sama seperti slip gaji.
+ */
 
 export type SlipThrDataProps = {
   id: number;
@@ -27,41 +31,10 @@ export const getSlipThr = async (
   message: string;
   data: SlipThrDataProps | null;
 }> => {
-  try {
-    const result = await prisma.thr.findFirst({
-      select: {
-        id: true,
-        uuid: true,
-        bulan: true,
-        tahun: true,
-        thr: true,
-        pph21: true,
-        net_thr: true,
-        pegawai: {
-          select: {
-            nama: true,
-            position: true,
-          },
-        },
-        department: {
-          select: {
-            nama_department: true,
-          },
-        },
-      },
-      where: { uuid },
-    });
+  const hasil = await apiFetch<SlipThrDataProps>(
+    `/api/publik/slip-thr/${encodeURIComponent(uuid)}`,
+    { tanpaToken: true }
+  );
 
-    if (!result) {
-      return { status: false, message: "Data not found", data: null };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result as SlipThrDataProps,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? null };
 };

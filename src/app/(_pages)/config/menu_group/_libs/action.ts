@@ -1,8 +1,14 @@
 "use server";
 
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiDelete, apiGet, apiList, apiPost, apiPut } from "@/libs/ApiClient";
 import { MenuGroupProps } from "@/types";
+
+/**
+ * Config > Menu Group — memanggil `ems-backend`, tanda tangan tidak berubah.
+ *
+ * `parent_id` tidak lagi disusun di sini: backend yang menurunkannya dari nama
+ * grup, supaya aturannya cuma ada di satu tempat.
+ */
 
 export const getMenuGroup = async (
   search?: string
@@ -11,36 +17,9 @@ export const getMenuGroup = async (
   message: string;
   data: MenuGroupProps[] | [];
 }> => {
-  try {
-    const result = (await prisma.menu_group.findMany({
-      where: {
-        ...(search && {
-          menu_group: {
-            contains: search,
-          },
-        }),
-      },
-      orderBy: {
-        urut: "asc",
-      },
-    })) as MenuGroupProps[];
+  const hasil = await apiList<MenuGroupProps>("/api/config/menu-group", { search });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data };
 };
 
 export const getMenuGroupId = async (
@@ -50,29 +29,9 @@ export const getMenuGroupId = async (
   message: string;
   data: MenuGroupProps | null;
 }> => {
-  try {
-    const result = (await prisma.menu_group.findFirst({
-      where: {
-        id,
-      },
-    })) as MenuGroupProps;
+  const hasil = await apiGet<MenuGroupProps>(`/api/config/menu-group/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: null,
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? null };
 };
 
 export const createMenuGroup = async (
@@ -81,30 +40,13 @@ export const createMenuGroup = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.menu_group.create({
-      data: {
-        menu_group: data.menu_group?.toUpperCase(),
-        urut: data.urut,
-        group: data.group,
-        parent_id: data.menu_group.replace(/\s/g, "").toLowerCase(),
-      },
-    });
+  const hasil = await apiPost("/api/config/menu-group", {
+    menu_group: data.menu_group,
+    urut: data.urut,
+    group: data.group,
+  });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Add data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Add data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const editMenuGroup = async (
@@ -113,33 +55,13 @@ export const editMenuGroup = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.menu_group.update({
-      data: {
-        menu_group: data.menu_group?.toUpperCase(),
-        urut: data.urut,
-        group: data.group,
-        parent_id: data.menu_group.replace(/\s/g, "").toLowerCase(),
-      },
-      where: {
-        id: data.id,
-      },
-    });
+  const hasil = await apiPut(`/api/config/menu-group/${data.id}`, {
+    menu_group: data.menu_group,
+    urut: data.urut,
+    group: data.group,
+  });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Edit data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Edit data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const deleteMenuGroup = async (
@@ -148,25 +70,7 @@ export const deleteMenuGroup = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.menu_group.delete({
-      where: {
-        id,
-      },
-    });
+  const hasil = await apiDelete(`/api/config/menu-group/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Delete data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Delete data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };

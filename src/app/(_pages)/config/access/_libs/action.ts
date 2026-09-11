@@ -1,8 +1,9 @@
 "use server";
 
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiDelete, apiGet, apiList, apiPost, apiPut } from "@/libs/ApiClient";
 import { RolesProps } from "@/types";
+
+/** Config > Access — memanggil `ems-backend`, tanda tangan tidak berubah. */
 
 export type MenuAccessProps = {
   id: number;
@@ -33,53 +34,9 @@ export const getRolesAccess = async (
   message: string;
   data: RolesProps[] | [];
 }> => {
-  try {
-    const result = (await prisma.roles.findMany({
-      select: {
-        id: true,
-        role_name: true,
-      },
-      where: {
-        ...(role_id
-          ? {
-              OR: [
-                {
-                  id: role_id,
-                },
-                {
-                  access: {
-                    none: {},
-                  },
-                },
-              ],
-            }
-          : {
-              access: {
-                none: {},
-              },
-            }),
-      },
-      orderBy: {
-        role_name: "asc",
-      },
-    })) as RolesProps[];
+  const hasil = await apiGet<RolesProps[]>("/api/config/access/roles", { role_id });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? [] };
 };
 
 export const getMenuAccess = async (): Promise<{
@@ -87,47 +44,9 @@ export const getMenuAccess = async (): Promise<{
   message: string;
   data: MenuAccessProps[] | [];
 }> => {
-  try {
-    const result = (await prisma.menu_group.findMany({
-      select: {
-        id: true,
-        menu_group: true,
-        menu: {
-          select: {
-            id: true,
-            menu: true,
-          },
-          orderBy: {
-            urut: "asc",
-          },
-        },
-      },
-      where: {
-        menu: {
-          some: {},
-        },
-      },
-      orderBy: {
-        urut: "asc",
-      },
-    })) as MenuAccessProps[];
+  const hasil = await apiGet<MenuAccessProps[]>("/api/config/access/menu");
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? [] };
 };
 
 export const getAccess = async (
@@ -137,38 +56,9 @@ export const getAccess = async (
   message: string;
   data: RolesProps[] | [];
 }> => {
-  try {
-    const result = (await prisma.roles.findMany({
-      select: {
-        id: true,
-        role_name: true,
-      },
-      where: {
-        access: {
-          some: {},
-        },
-      },
-      orderBy: {
-        role_name: "asc",
-      },
-    })) as RolesProps[];
+  const hasil = await apiList<RolesProps>("/api/config/access", { search });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data };
 };
 
 export const getAccessByRoles = async (
@@ -178,100 +68,9 @@ export const getAccessByRoles = async (
   message: string;
   data: CreateAccessProps | null;
 }> => {
-  try {
-    const result = await prisma.$transaction(async (prisma) => {
-      const accessDepartment = await prisma.access_department.findMany({
-        select: {
-          department: {
-            select: {
-              id: true,
-              nama_department: true,
-            },
-          },
-        },
-        where: {
-          role_id,
-        },
-      });
+  const hasil = await apiGet<CreateAccessProps>(`/api/config/access/${role_id}`);
 
-      const accessSubDepartment = await prisma.access_sub_department.findMany({
-        select: {
-          sub_department: {
-            select: {
-              id: true,
-              nama_sub_department: true,
-              department: {
-                select: {
-                  nama_department: true,
-                },
-              },
-            },
-          },
-        },
-        where: {
-          role_id,
-        },
-      });
-
-      const access = await prisma.access.findMany({
-        select: {
-          menu_id: true,
-          view: true,
-          insert: true,
-          update: true,
-          delete: true,
-        },
-        where: {
-          role_id,
-        },
-      });
-
-      return {
-        accessDepartment,
-        accessSubDepartment,
-        access,
-      };
-    });
-
-    if (
-      result.access.length === 0 ||
-      result.accessDepartment.length === 0 ||
-      result.accessSubDepartment.length === 0
-    ) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: null,
-      };
-    }
-
-    const data = {
-      role_id: role_id,
-      department_id: result.accessDepartment.map((item) => ({
-        value: item.department.id,
-        label: item.department.nama_department,
-      })),
-      sub_department_id: result.accessSubDepartment.map((item) => ({
-        value: item.sub_department.id,
-        label: `${item.sub_department.department.nama_department} - (${item.sub_department.nama_sub_department})`,
-      })),
-      access: result.access.map((item) => ({
-        menu_id: item.menu_id,
-        view: item.view,
-        insert: item.insert,
-        update: item.update,
-        delete: item.delete,
-      })),
-    };
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: data,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? null };
 };
 
 export const createAccess = async (
@@ -280,53 +79,9 @@ export const createAccess = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.$transaction(async (prisma) => {
-      await prisma.access_department.createMany({
-        data: data.department_id.map((item) => ({
-          role_id: data.role_id,
-          department_id: item.value,
-        })),
-      });
+  const hasil = await apiPost("/api/config/access", data);
 
-      await prisma.access_sub_department.createMany({
-        data: data.sub_department_id.map((item) => ({
-          role_id: data.role_id,
-          sub_department_id: item.value,
-        })),
-      });
-
-      await prisma.access.createMany({
-        data: data.access.map((item) => ({
-          role_id: data.role_id,
-          menu_id: item.menu_id,
-          view:
-            item.view || item.insert || item.update || item.delete
-              ? true
-              : false,
-          insert: item?.insert,
-          update: item?.update,
-          delete: item?.delete,
-        })),
-      });
-
-      return true;
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Add data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Add data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const editAccess = async (
@@ -335,69 +90,10 @@ export const editAccess = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.$transaction(async (prisma) => {
-      await prisma.access_department.deleteMany({
-        where: {
-          role_id: data.role_id,
-        },
-      });
-      await prisma.access_sub_department.deleteMany({
-        where: {
-          role_id: data.role_id,
-        },
-      });
-      await prisma.access.deleteMany({
-        where: {
-          role_id: data.role_id,
-        },
-      });
+  const { role_id, ...body } = data;
+  const hasil = await apiPut(`/api/config/access/${role_id}`, body);
 
-      await prisma.access_department.createMany({
-        data: data.department_id.map((item) => ({
-          role_id: data.role_id,
-          department_id: item.value,
-        })),
-      });
-
-      await prisma.access_sub_department.createMany({
-        data: data.sub_department_id.map((item) => ({
-          role_id: data.role_id,
-          sub_department_id: item.value,
-        })),
-      });
-
-      await prisma.access.createMany({
-        data: data.access.map((item) => ({
-          role_id: data.role_id,
-          menu_id: item.menu_id,
-          view:
-            item.view || item.insert || item.update || item.delete
-              ? true
-              : false,
-          insert: item?.insert,
-          update: item?.update,
-          delete: item?.delete,
-        })),
-      });
-
-      return true;
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Edit data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Edit data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const deleteAccess = async (
@@ -406,41 +102,8 @@ export const deleteAccess = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.$transaction(async (prisma) => {
-      await prisma.access.deleteMany({
-        where: {
-          role_id: id,
-        },
-      });
+  // `id` di sini adalah role_id — akses memang disimpan per role, bukan per baris.
+  const hasil = await apiDelete(`/api/config/access/${id}`);
 
-      await prisma.access_department.deleteMany({
-        where: {
-          role_id: id,
-        },
-      });
-
-      await prisma.access_sub_department.deleteMany({
-        where: {
-          role_id: id,
-        },
-      });
-
-      return true;
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Delete data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Delete data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };

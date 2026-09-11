@@ -1,9 +1,15 @@
 "use server";
 
-import { DateNowFormat } from "@/libs/DateFormat";
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiDelete, apiGet, apiList, apiPost, apiPut } from "@/libs/ApiClient";
 import { DepartmentLocationProps, DepartmentProps } from "@/types";
+
+/**
+ * Config > Department.
+ *
+ * Sejak migrasi, berkas ini tidak lagi menyentuh Prisma — isinya pemanggilan
+ * `ems-backend`. Tanda tangan tiap fungsi sengaja dipertahankan persis seperti
+ * sebelumnya supaya komponen di `_components/` tidak perlu diubah.
+ */
 
 export const getDepartment = async (
   search?: string
@@ -12,51 +18,13 @@ export const getDepartment = async (
   message: string;
   data: DepartmentProps[] | [];
 }> => {
-  try {
-    const result = (await prisma.department.findMany({
-      select: {
-        id: true,
-        nama_department: true,
-        latitude: true,
-        longitude: true,
-        radius: true,
-        akses_izin_department: {
-          select: {
-            jenis_izin: {
-              select: {
-                kode: true,
-                jenis: true,
-              },
-            },
-          },
-        },
-      },
-      where: {
-        is_deleted: false,
-        ...(search && {
-          nama_department: {
-            contains: search,
-          },
-        }),
-      },
-    })) as DepartmentProps[];
+  const hasil = await apiList<DepartmentProps>("/api/config/department", { search });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return {
+    status: hasil.status,
+    message: hasil.message,
+    data: hasil.data,
+  };
 };
 
 export const getDepartmentId = async (
@@ -66,47 +34,13 @@ export const getDepartmentId = async (
   message: string;
   data: DepartmentProps | null;
 }> => {
-  try {
-    const result = (await prisma.department.findFirst({
-      select: {
-        id: true,
-        nama_department: true,
-        latitude: true,
-        longitude: true,
-        radius: true,
-        akses_izin_department: {
-          select: {
-            jenis_izin: {
-              select: {
-                kode: true,
-                jenis: true,
-              },
-            },
-          },
-        },
-      },
-      where: {
-        is_deleted: false,
-        id: id,
-      },
-    })) as DepartmentProps;
+  const hasil = await apiGet<DepartmentProps>(`/api/config/department/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: null,
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return {
+    status: hasil.status,
+    message: hasil.message,
+    data: hasil.data ?? null,
+  };
 };
 
 export const getJenisIzin = async (): Promise<{
@@ -114,25 +48,15 @@ export const getJenisIzin = async (): Promise<{
   message: string;
   data: { kode: string; jenis: string }[] | [];
 }> => {
-  try {
-    const result = await prisma.jenis_izin.findMany({
-      select: {
-        kode: true,
-        jenis: true,
-      },
-      orderBy: {
-        jenis: "asc",
-      },
-    });
+  const hasil = await apiGet<{ kode: string; jenis: string }[]>(
+    "/api/config/department/jenis-izin"
+  );
 
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return {
+    status: hasil.status,
+    message: hasil.message,
+    data: hasil.data ?? [],
+  };
 };
 
 export const createDepartment = async (
@@ -141,44 +65,14 @@ export const createDepartment = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.$transaction(async (prisma) => {
-      const jenisIzin = await prisma.jenis_izin.findMany({
-        select: {
-          kode: true,
-        },
-      });
+  const hasil = await apiPost("/api/config/department", {
+    nama_department: data.nama_department,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    radius: data.radius,
+  });
 
-      return prisma.department.create({
-        data: {
-          nama_department: data.nama_department?.toUpperCase(),
-          latitude: data.latitude || null,
-          longitude: data.longitude || null,
-          radius: data.radius || null,
-          created_at: DateNowFormat(),
-          akses_izin_department: {
-            create: jenisIzin.map((item) => ({
-              jenis_izin_kode: item.kode,
-            })),
-          },
-        },
-      });
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Add data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Add data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const editDepartment = async (
@@ -187,40 +81,16 @@ export const editDepartment = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.department.update({
-      where: {
-        id: data.id,
-        is_deleted: false,
-      },
-      data: {
-        nama_department: data.nama_department?.toUpperCase(),
-        latitude: data.latitude || null,
-        longitude: data.longitude || null,
-        radius: data.radius || null,
-        akses_izin_department: {
-          deleteMany: {},
-          create: data.akses_izin_department?.map((item: any) => ({
-            jenis_izin_kode: item.jenis_izin?.kode || item.value,
-          })),
-        },
-      },
-    });
+  const hasil = await apiPut(`/api/config/department/${data.id}`, {
+    nama_department: data.nama_department,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    radius: data.radius,
+    // Backend menerima array kode maupun array objek react-select apa adanya.
+    akses_izin_department: data.akses_izin_department ?? [],
+  });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Edit data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Edit data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const deleteDepartment = async (
@@ -229,31 +99,9 @@ export const deleteDepartment = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.department.update({
-      where: {
-        id,
-        is_deleted: false,
-      },
-      data: {
-        is_deleted: true,
-      },
-    });
+  const hasil = await apiDelete(`/api/config/department/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Delete data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Delete data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 // ── Department Location CRUD ──────────────────────────────────────────────────
@@ -265,28 +113,15 @@ export const getDepartmentLocation = async (
   message: string;
   data: DepartmentLocationProps[];
 }> => {
-  try {
-    const result = await prisma.department_location.findMany({
-      select: {
-        id: true,
-        nama_lokasi: true,
-        latitude: true,
-        longitude: true,
-        radius: true,
-        department_id: true,
-      },
-      where: { department_id },
-      orderBy: { id: "asc" },
-    });
+  const hasil = await apiList<DepartmentLocationProps>(
+    `/api/config/department/${department_id}/lokasi`
+  );
 
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result as DepartmentLocationProps[],
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return {
+    status: hasil.status,
+    message: hasil.message,
+    data: hasil.data,
+  };
 };
 
 export const getDepartmentLocationId = async (
@@ -296,78 +131,47 @@ export const getDepartmentLocationId = async (
   message: string;
   data: DepartmentLocationProps | null;
 }> => {
-  try {
-    const result = await prisma.department_location.findFirst({
-      select: {
-        id: true,
-        nama_lokasi: true,
-        latitude: true,
-        longitude: true,
-        radius: true,
-        department_id: true,
-      },
-      where: { id },
-    });
+  const hasil = await apiGet<DepartmentLocationProps>(
+    `/api/config/department/lokasi/${id}`
+  );
 
-    if (!result) return { status: false, message: "Data not found", data: null };
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result as DepartmentLocationProps,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return {
+    status: hasil.status,
+    message: hasil.message,
+    data: hasil.data ?? null,
+  };
 };
 
 export const createDepartmentLocation = async (
   data: DepartmentLocationProps
 ): Promise<{ status: boolean; message: string }> => {
-  try {
-    await prisma.department_location.create({
-      data: {
-        nama_lokasi: data.nama_lokasi || null,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        radius: data.radius,
-        department_id: Number(data.department_id),
-      },
-    });
+  const hasil = await apiPost(`/api/config/department/${data.department_id}/lokasi`, {
+    nama_lokasi: data.nama_lokasi,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    radius: data.radius,
+  });
 
-    return { status: true, message: "Add data successfully" };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const editDepartmentLocation = async (
   data: DepartmentLocationProps
 ): Promise<{ status: boolean; message: string }> => {
-  try {
-    await prisma.department_location.update({
-      where: { id: data.id },
-      data: {
-        nama_lokasi: data.nama_lokasi || null,
-        latitude: data.latitude,
-        longitude: data.longitude,
-        radius: data.radius,
-      },
-    });
+  const hasil = await apiPut(`/api/config/department/lokasi/${data.id}`, {
+    nama_lokasi: data.nama_lokasi,
+    latitude: data.latitude,
+    longitude: data.longitude,
+    radius: data.radius,
+  });
 
-    return { status: true, message: "Edit data successfully" };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const deleteDepartmentLocation = async (
   id: number
 ): Promise<{ status: boolean; message: string }> => {
-  try {
-    await prisma.department_location.delete({ where: { id } });
-    return { status: true, message: "Delete data successfully" };
-  } catch (error) {
-    return HandleError(error);
-  }
+  const hasil = await apiDelete(`/api/config/department/lokasi/${id}`);
+
+  return { status: hasil.status, message: hasil.message };
 };

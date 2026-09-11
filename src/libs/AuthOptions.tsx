@@ -1,12 +1,33 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import prisma from "@/libs/Prisma";
-const bcrypt = require("bcrypt");
+
+/**
+ * Autentikasi dashboard.
+ *
+ * Sejak migrasi ke `ems-backend`, verifikasi kredensial TIDAK lagi dilakukan di
+ * sini: `authorize()` meneruskannya ke `POST /api/auth/login` di backend, dan
+ * backend yang memeriksa password, menurunkan hak akses department/sub
+ * department, serta menyusun pohon menu.
+ *
+ * Yang dibawa pulang dan disimpan di session:
+ *
+ * - isi session seperti sebelumnya (id, username, name, role, akses, menu) —
+ *   bentuknya sengaja dipertahankan supaya `page.tsx` dan komponen yang sudah
+ *   ada tidak perlu diubah;
+ * - `accessToken`, JWT terbitan backend yang dipakai `ApiClient` untuk setiap
+ *   pemanggilan berikutnya.
+ *
+ * Session NextAuth tetap 8 jam, sama dengan masa berlaku token backend, supaya
+ * keduanya kedaluwarsa bersamaan — session yang masih hidup dengan token yang
+ * sudah mati hanya akan menghasilkan "Sesi berakhir" di setiap halaman.
+ */
+
+const BASE_URL = (process.env.BACKEND_URL || "").replace(/\/+$/, "");
 
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60 * 8, // 8 hours
+    maxAge: 60 * 60 * 8, // 8 jam
   },
   secret: process.env.JWT,
   providers: [
@@ -24,173 +45,56 @@ export const authOptions: NextAuthOptions = {
           password: string;
         };
 
-        const result = await prisma.$transaction(async (prisma) => {
-          const user = await prisma.user.findFirst({
-            select: {
-              id: true,
-              username: true,
-              name: true,
-              password: true,
-              roles: {
-                select: {
-                  id: true,
-                  role_name: true,
-                  access_department: {
-                    select: {
-                      department: {
-                        select: {
-                          id: true,
-                          nama_department: true,
-                        },
-                      },
-                    },
-                  },
-                  access_sub_department: {
-                    select: {
-                      sub_department: {
-                        select: {
-                          id: true,
-                          nama_sub_department: true,
-                          department_id: true,
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-              leader_user: {
-                select: {
-                  id: true,
-                  nama_sub_department: true,
-                  department_id: true,
-                },
-              },
-              supervisor_user: {
-                select: {
-                  id: true,
-                  nama_sub_department: true,
-                  department_id: true,
-                },
-              },
-            },
-            where: {
-              username,
-              is_deleted: false,
-            },
-          });
+        if (!username || !password) return null;
 
-          // check password
-          const checkPassword = await bcrypt.compare(password, user?.password);
-
-          if (user?.roles === null) return { user, menu: [], checkPassword };
-
-          const menu = await prisma.menu_group.findMany({
-            select: {
-              id: true,
-              menu_group: true,
-              group: true,
-              parent_id: true,
-              menu: {
-                select: {
-                  id: true,
-                  menu: true,
-                  path: true,
-                  access: {
-                    select: {
-                      view: true,
-                      insert: true,
-                      update: true,
-                      delete: true,
-                    },
-                    where: {
-                      role_id: user?.roles?.id,
-                    },
-                  },
-                },
-                where: {
-                  access: {
-                    some: {
-                      role_id: user?.roles?.id,
-                    },
-                  },
-                },
-                orderBy: {
-                  urut: "asc",
-                },
-              },
-            },
-            where: {
-              menu: {
-                some: {
-                  access: {
-                    some: {
-                      role_id: user?.roles?.id,
-                    },
-                  },
-                },
-              },
-            },
-            orderBy: [
-              {
-                urut: "asc",
-              },
-            ],
-          });
-
-          return { user, menu, checkPassword };
-        });
-
-        if (result.user && result.menu.length > 0 && result.checkPassword) {
-          let accessSubDepartments = [];
-
-          // Check if leader_user or supervisor_user exists
-          if (
-            result.user.leader_user.length > 0 ||
-            result.user.supervisor_user.length > 0
-          ) {
-            accessSubDepartments = [
-              ...result.user.leader_user.map((item) => ({
-                sub_department: item,
-              })),
-              ...result.user.supervisor_user.map((item) => ({
-                sub_department: item,
-              })),
-              ...(result.user.roles?.access_sub_department?.map((access) => ({
-                sub_department: access.sub_department,
-              })) || []),
-            ];
-          } else {
-            accessSubDepartments =
-              result.user.roles?.access_sub_department?.map((access) => ({
-                sub_department: access.sub_department,
-              })) || [];
-          }
-
-          // Remove duplicates based on sub_department.id
-          const uniqueAccessSubDepartments = Array.from(
-            new Map(
-              accessSubDepartments.map((item) => [item.sub_department.id, item])
-            ).values()
-          );
-
-          return {
-            id: result.user.id.toString(),
-            username: result.user.username,
-            name: result.user.name,
-            role_id: result.user.roles?.id,
-            role_name: result.user.roles?.role_name,
-            access_department: result.user.roles?.access_department,
-            access_sub_department: uniqueAccessSubDepartments,
-            menu: result.menu,
-          };
+        if (!BASE_URL) {
+          console.error("BACKEND_URL belum diset — login tidak bisa diproses.");
+          return null;
         }
 
-        return null;
+        try {
+          const response = await fetch(`${BASE_URL}/api/auth/login`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Accept: "application/json",
+            },
+            body: JSON.stringify({ username, password }),
+            cache: "no-store",
+          });
+
+          const hasil = await response.json();
+
+          // Backend membedakan kredensial salah (401) dari role tanpa menu
+          // (403), tapi NextAuth hanya mengenal "boleh" dan "tidak" —
+          // pesannya dicatat ke log server supaya tetap bisa ditelusuri.
+          if (!hasil?.status || !hasil?.data?.accessToken) {
+            console.warn(`Login ditolak untuk "${username}": ${hasil?.message ?? response.status}`);
+            return null;
+          }
+
+          const data = hasil.data;
+
+          return {
+            id: String(data.id),
+            username: data.username,
+            name: data.name,
+            role_id: data.role_id,
+            role_name: data.role_name,
+            access_department: data.access_department,
+            access_sub_department: data.access_sub_department,
+            menu: data.menu,
+            accessToken: data.accessToken,
+          } as any;
+        } catch (error) {
+          console.error("Gagal menghubungi backend saat login:", error);
+          return null;
+        }
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, account, profile, user }: any) {
+    async jwt({ token, account, user }: any) {
       if (account?.provider === "credentials") {
         token.id = user.id;
         token.username = user.username;
@@ -200,8 +104,7 @@ export const authOptions: NextAuthOptions = {
         token.access_department = user.access_department;
         token.access_sub_department = user.access_sub_department;
         token.menu = user.menu;
-
-        return token;
+        token.accessToken = user.accessToken;
       }
 
       return token;
@@ -212,37 +115,23 @@ export const authOptions: NextAuthOptions = {
       delete session.user.name;
       delete session.user.image;
 
-      if ("id" in token) {
-        session.user.id = token.id;
-      }
+      const bawa = [
+        "id",
+        "username",
+        "name",
+        "role_id",
+        "role_name",
+        "access_department",
+        "access_sub_department",
+        "menu",
+        "accessToken",
+      ];
 
-      if ("username" in token) {
-        session.user.username = token.username;
-      }
-
-      if ("name" in token) {
-        session.user.name = token.name;
-      }
-
-      if ("role_id" in token) {
-        session.user.role_id = token.role_id;
-      }
-
-      if ("role_name" in token) {
-        session.user.role_name = token.role_name;
-      }
-
-      if ("access_department" in token) {
-        session.user.access_department = token.access_department;
-      }
-
-      if ("access_sub_department" in token) {
-        session.user.access_sub_department = token.access_sub_department;
-      }
-
-      if ("menu" in token) {
-        session.user.menu = token.menu;
-      }
+      bawa.forEach((key) => {
+        if (key in token) {
+          session.user[key] = token[key];
+        }
+      });
 
       return session;
     },

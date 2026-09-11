@@ -1,11 +1,14 @@
 "use server";
 
-import { ConvertDate } from "@/libs/ConvertDate";
-import { DateNowFormat } from "@/libs/DateFormat";
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiDelete, apiGet, apiList, apiPatch, apiPost, apiPut } from "@/libs/ApiClient";
 import { PegawaiCreateProps, PegawaiProps } from "@/types";
-const bcrypt = require("bcrypt");
+
+/**
+ * HR > Data Karyawan — memanggil `ems-backend`, tanda tangan tidak berubah.
+ *
+ * Pembuatan user pegawai dan pencatatan riwayat JOIN sekarang terjadi di
+ * backend dalam satu transaksi bersama baris pegawainya.
+ */
 
 export const getPegawai = async (
   search?: string,
@@ -21,100 +24,13 @@ export const getPegawai = async (
   data: PegawaiProps[] | [];
   total_data: number;
 }> => {
-  try {
-    const condition = {
-      where: {
-        is_deleted: false,
-        is_active: filter?.active,
-        ...(filter?.department && {
-          department_id: Number(filter?.department),
-        }),
-        ...(filter?.sub_department && {
-          sub_department_id: Number(filter?.sub_department),
-        }),
-        ...(search && {
-          OR: [
-            {
-              nama: {
-                contains: search,
-              },
-            },
-          ],
-        }),
-      },
-    };
-
-    const [totalData, result] = await Promise.all([
-      prisma.pegawai.count({ ...condition }),
-      prisma.pegawai.findMany({
-      select: {
-        id: true,
-        panji_id: true,
-        nama: true,
-        position: true,
-        department: {
-          select: {
-            id: true,
-            nama_department: true,
-          },
-        },
-        sub_department: {
-          select: {
-            id: true,
-            nama_sub_department: true,
-          },
-        },
-        is_active: true,
-        user: {
-          select: {
-            id: true,
-            is_deleted: true,
-          },
-          take: 1,
-        },
-      },
-      ...condition,
-      orderBy: [
-        {
-          department_id: "asc",
-        },
-        {
-          sub_department_id: "asc",
-        },
-        {
-          nama: "asc",
-        },
-      ],
-      skip: currentPage ? (currentPage - 1) * 10 : 0,
-      take: currentPage ? 10 : undefined,
-    }) as Promise<PegawaiProps[]>,
-    ]);
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-        total_data: 0,
-      };
-    }
-
-    const newData = result.map((item, index) => ({
-      number: currentPage
-        ? (Number(currentPage) - 1) * 10 + index + 1
-        : index + 1,
-      ...item,
-    }));
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: newData,
-      total_data: totalData,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return (await apiList<PegawaiProps>("/api/hr/data-karyawan", {
+    search,
+    department: filter?.department,
+    sub_department: filter?.sub_department,
+    active: filter?.active,
+    page: currentPage,
+  })) as any;
 };
 
 export const getPegawaiId = async (
@@ -124,70 +40,9 @@ export const getPegawaiId = async (
   message: string;
   data: PegawaiProps | null;
 }> => {
-  try {
-    const result = (await prisma.pegawai.findFirst({
-      select: {
-        id: true,
-        panji_id: true,
-        nama: true,
-        nik_ktp: true,
-        position: true,
-        tmp_lahir: true,
-        tgl_lahir: true,
-        jk: true,
-        agama: true,
-        telp: true,
-        email: true,
-        rt: true,
-        rw: true,
-        kel: true,
-        kec: true,
-        kota: true,
-        kebangsaan: true,
-        status_nikah: true,
-        npwp: true,
-        jenis_bank: true,
-        no_rek: true,
-        bpjs_kes: true,
-        bpjs_tk: true,
-        is_active: true,
-        is_overtime: true,
-        shift_id: true,
-        department: {
-          select: {
-            id: true,
-            nama_department: true,
-          },
-        },
-        sub_department: {
-          select: {
-            id: true,
-            nama_sub_department: true,
-          },
-        },
-      },
-      where: {
-        is_deleted: false,
-        id,
-      },
-    })) as PegawaiProps;
+  const hasil = await apiGet<PegawaiProps>(`/api/hr/data-karyawan/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: null,
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? null };
 };
 
 export const createDataKaryawan = async (
@@ -196,74 +51,9 @@ export const createDataKaryawan = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.$transaction(async (prisma) => {
-      const createPegawai = await prisma.pegawai.create({
-        data: {
-          panji_id: data.panji_id?.toUpperCase(),
-          nama: data.nama?.toUpperCase(),
-          nik_ktp: data.nik_ktp.toString(),
-          tmp_lahir: data.tmp_lahir?.toUpperCase(),
-          tgl_lahir: data.tgl_lahir,
-          jk: data.jk,
-          agama: data.agama,
-          kebangsaan: data.kebangsaan?.toUpperCase(),
-          alamat: data.alamat?.toUpperCase(),
-          rt: data.rt?.toUpperCase(),
-          rw: data.rw?.toUpperCase(),
-          kel: data.kel?.toUpperCase(),
-          kec: data.kec?.toUpperCase(),
-          kota: data.kota?.toUpperCase(),
-          telp: data.telp.toString(),
-          status_nikah: data.status_nikah,
-          email: data.email,
-          position: data.position?.toUpperCase(),
-          npwp: data.npwp,
-          jenis_bank: data.jenis_bank,
-          no_rek: data.no_rek,
-          bpjs_tk: data.bpjs_tk,
-          bpjs_kes: data.bpjs_kes,
-          department_id: data.department_id,
-          sub_department_id: data.sub_department_id,
-        },
-      });
+  const hasil = await apiPost("/api/hr/data-karyawan", data as any);
 
-      const createUser = await prisma.user.create({
-        data: {
-          username: data.telp.toString(),
-          password: await bcrypt.hash(data.telp, 10),
-          name: data.nama?.toUpperCase(),
-          telp: data.telp.toString(),
-          pegawai_id: createPegawai.id,
-          created_at: DateNowFormat(),
-        },
-      });
-
-      await prisma.pegawai_history.create({
-        data: {
-          pegawai_id: createPegawai.id,
-          jenis: "JOIN",
-          tanggal: data.tgl_join ? ConvertDate(data.tgl_join) : DateNowFormat(),
-        },
-      });
-
-      return { createPegawai, createUser };
-    });
-
-    if (!result.createPegawai || !result.createUser) {
-      return {
-        status: false,
-        message: "Add data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Add data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const editDataKaryawan = async (
@@ -272,58 +62,10 @@ export const editDataKaryawan = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.pegawai.update({
-      data: {
-        panji_id: data.panji_id?.toUpperCase(),
-        nama: data.nama?.toUpperCase(),
-        nik_ktp: data.nik_ktp.toString(),
-        tmp_lahir: data.tmp_lahir?.toUpperCase(),
-        tgl_lahir: data.tgl_lahir,
-        jk: data.jk,
-        agama: data.agama,
-        kebangsaan: data.kebangsaan?.toUpperCase(),
-        alamat: data.alamat?.toUpperCase(),
-        rt: data.rt?.toUpperCase(),
-        rw: data.rw?.toUpperCase(),
-        kel: data.kel?.toUpperCase(),
-        kec: data.kec?.toUpperCase(),
-        kota: data.kota?.toUpperCase(),
-        telp: data.telp.toString(),
-        status_nikah: data.status_nikah,
-        email: data.email,
-        position: data.position?.toUpperCase(),
-        npwp: data.npwp,
-        jenis_bank: data.jenis_bank,
-        no_rek: data.no_rek,
-        bpjs_tk: data.bpjs_tk,
-        bpjs_kes: data.bpjs_kes,
-        department_id: data.department_id,
-        sub_department_id: data.sub_department_id,
-        is_active: data.is_active,
-        is_overtime: data.is_overtime,
-        shift_id: data.shift_id,
-      },
-      where: {
-        id: data.id,
-        is_deleted: false,
-      },
-    });
+  const { id, ...body } = data as any;
+  const hasil = await apiPut(`/api/hr/data-karyawan/${id}`, body);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Edit data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Edit data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const deleteDataKaryawan = async (
@@ -332,31 +74,9 @@ export const deleteDataKaryawan = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.pegawai.update({
-      data: {
-        is_deleted: true,
-      },
-      where: {
-        id: id,
-        is_deleted: false,
-      },
-    });
+  const hasil = await apiDelete(`/api/hr/data-karyawan/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Delete data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Delete data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const setActiveDataKaryawan = async (
@@ -366,35 +86,9 @@ export const setActiveDataKaryawan = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.pegawai.update({
-      data: {
-        is_active: is_active,
-      },
-      where: {
-        id: id,
-        is_deleted: false,
-      },
-    });
+  const hasil = await apiPatch(`/api/hr/data-karyawan/${id}/status`, { is_active });
 
-    if (!result) {
-      return {
-        status: false,
-        message: is_active
-          ? "Set active data failed"
-          : "Set inactive data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: is_active
-        ? "Set active data successfully"
-        : "Set inactive data successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const createUserPegawai = async (
@@ -403,70 +97,7 @@ export const createUserPegawai = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const getPegawai = await prisma.pegawai.findFirst({
-      select: {
-        id: true,
-        nama: true,
-        telp: true,
-      },
-      where: {
-        id: pegawaiId,
-      },
-    });
+  const hasil = await apiPost(`/api/hr/data-karyawan/${pegawaiId}/user`);
 
-    if (!getPegawai) {
-      return {
-        status: false,
-        message: "Pegawai not found",
-      };
-    }
-
-    const checkUser = await prisma.user.findFirst({
-      select: {
-        id: true,
-        is_deleted: true,
-      },
-      where: {
-        pegawai_id: pegawaiId,
-      },
-    });
-
-    let result;
-    if (checkUser) {
-      result = await prisma.user.update({
-        where: {
-          id: checkUser.id,
-        },
-        data: {
-          is_deleted: false,
-        },
-      });
-    } else {
-      result = await prisma.user.create({
-        data: {
-          username: getPegawai.telp.toString(),
-          password: await bcrypt.hash(getPegawai.telp, 10),
-          name: getPegawai.nama?.toUpperCase(),
-          telp: getPegawai.telp.toString(),
-          pegawai_id: getPegawai.id,
-          created_at: DateNowFormat(),
-        },
-      });
-    }
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Create user failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Create user successfully",
-    };
-  } catch (error) {
-    return HandleError(error);
-  }
+  return { status: hasil.status, message: hasil.message };
 };

@@ -1,8 +1,21 @@
 "use server";
 
-import { ConvertDateZeroHours } from "@/libs/ConvertDate";
-import { HandleError } from "@/libs/Error";
-import prisma from "@/libs/Prisma";
+import { apiDelete, apiGet, apiList, apiPost, apiPut } from "@/libs/ApiClient";
+
+/** Config > Tanggal Merah — memanggil `ems-backend`, tanda tangan tidak berubah. */
+
+type TanggalMerahProps = {
+  id: number;
+  bulan: number;
+  tahun: number;
+  tanggal_merah_list: {
+    tanggal_nomor: string;
+  }[];
+  department: {
+    id: number;
+    nama_department: string;
+  };
+};
 
 export const getTanggalMerah = async (filter: {
   department: string | number;
@@ -10,65 +23,14 @@ export const getTanggalMerah = async (filter: {
 }): Promise<{
   status: boolean;
   message: string;
-  data: {
-    id: number;
-    bulan: number;
-    tahun: number;
-    tanggal_merah_list: {
-      tanggal_nomor: string;
-    }[];
-    department: {
-      id: number;
-      nama_department: string;
-    };
-  }[];
+  data: TanggalMerahProps[];
 }> => {
-  try {
-    const result = await prisma.tanggal_merah.findMany({
-      select: {
-        id: true,
-        bulan: true,
-        tahun: true,
-        tanggal_merah_list: {
-          select: {
-            tanggal_nomor: true,
-          },
-          orderBy: {
-            tanggal_nomor: "asc",
-          },
-        },
-        department: {
-          select: {
-            id: true,
-            nama_department: true,
-          },
-        },
-      },
-      where: {
-        tahun: Number(filter.tahun),
-        department_id: Number(filter.department),
-      },
-      orderBy: {
-        bulan: "asc",
-      },
-    });
+  const hasil = await apiList<TanggalMerahProps>("/api/config/tanggal-merah", {
+    department: filter.department,
+    tahun: filter.tahun,
+  });
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: [],
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data };
 };
 
 export const getTanggalMerahId = async (
@@ -76,61 +38,11 @@ export const getTanggalMerahId = async (
 ): Promise<{
   status: boolean;
   message: string;
-  data: {
-    id: number;
-    bulan: number;
-    tahun: number;
-    tanggal_merah_list: {
-      tanggal_nomor: string;
-    }[];
-    department: {
-      id: number;
-      nama_department: string;
-    };
-  } | null;
+  data: TanggalMerahProps | null;
 }> => {
-  try {
-    const result = await prisma.tanggal_merah.findFirst({
-      select: {
-        id: true,
-        bulan: true,
-        tahun: true,
-        tanggal_merah_list: {
-          select: {
-            tanggal_nomor: true,
-          },
-          orderBy: {
-            tanggal_nomor: "asc",
-          },
-        },
-        department: {
-          select: {
-            id: true,
-            nama_department: true,
-          },
-        },
-      },
-      where: {
-        id: id,
-      },
-    });
+  const hasil = await apiGet<TanggalMerahProps>(`/api/config/tanggal-merah/${id}`);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Data not found",
-        data: null,
-      };
-    }
-
-    return {
-      status: true,
-      message: "Data fetched successfully",
-      data: result,
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message, data: hasil.data ?? null };
 };
 
 export const createTanggalMerah = async (data: {
@@ -145,37 +57,12 @@ export const createTanggalMerah = async (data: {
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.tanggal_merah.create({
-      data: {
-        department_id: Number(data.department),
-        bulan: Number(data.bulan),
-        tahun: Number(data.tahun),
-        tanggal_merah_list: {
-          create: data.tanggal.map((item) => ({
-            tanggal_nomor: item.value,
-            tanggal: ConvertDateZeroHours(
-              new Date(`${data.tahun}-${data.bulan}-${item.value}`)
-            ),
-          })),
-        },
-      },
-    });
+  // Kolom `tanggal` penuh tidak lagi disusun di sini — backend menurunkannya
+  // dari bulan/tahun + nomor tanggal, sekaligus membuang tanggal yang tidak ada
+  // di bulan itu (mis. 31 April).
+  const hasil = await apiPost("/api/config/tanggal-merah", data);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Add data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Add data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const editTanggalMerah = async (data: {
@@ -191,41 +78,10 @@ export const editTanggalMerah = async (data: {
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.tanggal_merah.update({
-      where: {
-        id: data.id,
-      },
-      data: {
-        department_id: Number(data.department),
-        bulan: Number(data.bulan),
-        tahun: Number(data.tahun),
-        tanggal_merah_list: {
-          deleteMany: {},
-          create: data.tanggal.map((item) => ({
-            tanggal_nomor: item.value,
-            tanggal: ConvertDateZeroHours(
-              new Date(`${data.tahun}-${data.bulan}-${item.value}`)
-            ),
-          })),
-        },
-      },
-    });
+  const { id, ...body } = data;
+  const hasil = await apiPut(`/api/config/tanggal-merah/${id}`, body);
 
-    if (!result) {
-      return {
-        status: false,
-        message: "Edit data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Edit data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };
 
 export const deleteTanggalMerah = async (
@@ -234,35 +90,7 @@ export const deleteTanggalMerah = async (
   status: boolean;
   message: string;
 }> => {
-  try {
-    const result = await prisma.$transaction(async (prisma) => {
-      await prisma.tanggal_merah_list.deleteMany({
-        where: {
-          tanggal_merah_id: id,
-        },
-      });
+  const hasil = await apiDelete(`/api/config/tanggal-merah/${id}`);
 
-      await prisma.tanggal_merah.delete({
-        where: {
-          id: id,
-        },
-      });
-
-      return true;
-    });
-
-    if (!result) {
-      return {
-        status: false,
-        message: "Delete data failed",
-      };
-    }
-
-    return {
-      status: true,
-      message: "Delete data successfully",
-    };
-  } catch (error) {
-    return HandleError(error) as any;
-  }
+  return { status: hasil.status, message: hasil.message };
 };

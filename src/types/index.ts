@@ -112,8 +112,14 @@ export type SeesionProps = {
   user: {
     id: string;
     username: string;
+    name?: string;
     role_id: number;
     role_name: string;
+    /**
+     * JWT terbitan ems-backend, dipakai `libs/ApiClient` untuk memanggil API.
+     * Hanya ada di sisi server — jangan diteruskan ke komponen client.
+     */
+    accessToken?: string;
     access_department: AccessDepartmentProps;
     access_sub_department: AccessSubDepartmentProps;
     menu: {
