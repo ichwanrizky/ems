@@ -22,16 +22,7 @@ const nextConfig: NextConfig = {
     return [
       {
         // Cache static assets (JS, CSS, fonts, images) for 1 year
-        source: "/assets/:path*",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      {
-        source: "/sass/:path*",
+        source: "/workload/:path*",
         headers: [
           {
             key: "Cache-Control",
