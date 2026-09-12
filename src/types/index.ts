@@ -527,3 +527,109 @@ export type ReportAttdProps = {
   overtime: number;
   overtime_total: number;
 };
+
+// ---------------------------------------------------------------------------
+// SALES
+// ---------------------------------------------------------------------------
+
+export type CustomerProps = {
+  number?: number;
+  id: number;
+  kode: string;
+  nama_customer: string;
+  alamat: string | null;
+  telp: string | null;
+  email: string | null;
+  jumlah_quotation?: number;
+};
+
+/** Status tersimpan di kolom `status`. `kadaluarsa` TIDAK termasuk — itu flag turunan. */
+export type QuotationStatus =
+  | "draft"
+  | "terkirim"
+  | "disetujui"
+  | "ditolak"
+  | "dibatalkan"
+  | "direvisi";
+
+export type QuotationGambarProps = {
+  uuid: string;
+  nama_asli: string;
+};
+
+export type QuotationItemProps = {
+  id?: number;
+  urut?: number;
+  deskripsi: string;
+  satuan: string | null;
+  qty: number | string;
+  harga: number | string;
+  diskon_persen: number | string;
+  jumlah?: number;
+  /** Ikut dasar pengenaan PPh saat pph_dasar = "item". */
+  kena_pph: boolean;
+  gambar: QuotationGambarProps[];
+};
+
+/** Item selalu berada di dalam grup; GRUP yang memikul subtotal. */
+export type QuotationGrupProps = {
+  id?: number;
+  urut?: number;
+  nama: string;
+  subtotal?: number;
+  item: QuotationItemProps[];
+};
+
+export type QuotationLogProps = {
+  id: number;
+  status_lama: string | null;
+  status_baru: string;
+  catatan: string | null;
+  nama_user: string | null;
+  created_at: string | null;
+};
+
+export type QuotationProps = {
+  number?: number;
+  id: number;
+  uuid: string | null;
+  nomor: string;
+  revisi: number;
+  nomor_induk: string | null;
+  induk_id: number | null;
+  tanggal: string;
+  berlaku_sampai: string;
+  perihal: string | null;
+  attn: string | null;
+  status: QuotationStatus;
+  /** Turunan backend: `terkirim` yang sudah lewat `berlaku_sampai`. */
+  kadaluarsa: boolean;
+  subtotal: number;
+  diskon_persen: number;
+  diskon_nominal: number;
+  dpp: number;
+  ppn_persen: number;
+  ppn_nominal: number;
+  pph_persen: number;
+  /** "item" = hanya item yang dicentang; "total" = seluruh DPP. */
+  pph_dasar: "item" | "total";
+  pph_nominal: number;
+  total: number;
+  /** Mati = penawaran berisi pilihan, hanya subtotal grup yang bermakna. */
+  tampilkan_grand_total: boolean;
+  syarat_pembayaran: string | null;
+  catatan: string | null;
+  alasan: string | null;
+  nama_pembuat: string | null;
+  created_at: string | null;
+  dikirim_at: string | null;
+  diputuskan_at: string | null;
+  customer: {
+    id: number;
+    kode: string | null;
+    nama_customer: string | null;
+    alamat: string | null;
+  };
+  grup?: QuotationGrupProps[];
+  log?: QuotationLogProps[];
+};

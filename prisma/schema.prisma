@@ -524,3 +524,176 @@ model thr {
   pph21         Int        @default(0)
   net_thr       Int        @default(0)
 }
+
+// ============================================================================
+// SALES
+// ============================================================================
+// Penawaran harga (quotation) ke customer, beserta master customernya.
+// Modul ini murni dokumen — tidak menyentuh perhitungan gaji/absensi mana pun.
+
+// Memetakan `tb_customer` milik sistempanji satu lawan satu (kode, nama,
+// alamat, telp), ditambah `email` yang memang hanya ada di EMS.
+//
+// `kode` UNIQUE di sini padahal di sistem asal boleh berulang — lihat
+// `ems_backend/database/migrasi-customer-sistempanji.sql` untuk daftar kode
+// yang diberi angka saat impor.
+model customer {
+  id            Int         @id @default(autoincrement())
+  kode          String      @unique
+  nama_customer String
+  alamat        String?     @db.Text
+  telp          String?
+  email         String?
+  created_at    DateTime?   @db.DateTime(0)
+  is_deleted    Boolean     @default(false)
+  quotation     quotation[]
+
+  @@index([nama_customer])
+}
+
+// Header penawaran. Nominalnya DECIMAL (bukan Int seperti gaji) karena qty
+// boleh pecahan — 1,5 bulan jasa × harga satuan tidak bulat ke rupiah.
+model quotation {
+  id                Int              @id @default(autoincrement())
+  uuid              String           @unique @default(uuid())
+  nomor             String           @unique
+  revisi            Int              @default(0)
+  // Penawaran revisi menunjuk ke penawaran asalnya; yang asal otomatis
+  // berstatus `direvisi` dan tidak bisa diubah lagi.
+  induk_id          Int?
+  induk             quotation?       @relation("revisi", fields: [induk_id], references: [id])
+  revisi_dari       quotation[]      @relation("revisi")
+  tanggal           DateTime         @db.Date
+  berlaku_sampai    DateTime         @db.Date
+  customer_id       Int
+  customer          customer         @relation(fields: [customer_id], references: [id])
+  attn              String?
+  perihal           String
+  syarat_pembayaran String?          @db.Text
+  catatan           String?          @db.Text
+  subtotal          Decimal          @default(0) @db.Decimal(18, 2)
+  diskon_persen     Decimal          @default(0) @db.Decimal(5, 2)
+  diskon_nominal    Decimal          @default(0) @db.Decimal(18, 2)
+  dpp               Decimal          @default(0) @db.Decimal(18, 2)
+  ppn_persen        Decimal          @default(0) @db.Decimal(5, 2)
+  ppn_nominal       Decimal          @default(0) @db.Decimal(18, 2)
+  // PPh dipotong customer, jadi ia PENGURANG: total = dpp + ppn - pph.
+  // `pph_dasar`: "item" = hanya item yang dicentang; "total" = seluruh dpp.
+  pph_persen        Decimal          @default(0) @db.Decimal(5, 2)
+  pph_dasar         String           @default("item")
+  pph_nominal       Decimal          @default(0) @db.Decimal(18, 2)
+  total             Decimal          @default(0) @db.Decimal(18, 2)
+  // Penawaran berisi beberapa PILIHAN tidak punya grand total yang bermakna:
+  // yang tampil hanya subtotal tiap grup. Lihat catatan di QuotationController.
+  tampilkan_grand_total Boolean      @default(true)
+  // draft | terkirim | disetujui | ditolak | dibatalkan | direvisi
+  status            String           @default("draft")
+  alasan            String?          @db.Text
+  created_by        Int?
+  created_at        DateTime?        @db.DateTime(0)
+  updated_at        DateTime?        @db.DateTime(0)
+  dikirim_at        DateTime?        @db.DateTime(0)
+  diputuskan_at     DateTime?        @db.DateTime(0)
+  diputuskan_by     Int?
+  is_deleted        Boolean          @default(false)
+  quotation_item    quotation_item[]
+  quotation_grup    quotation_grup[]
+  quotation_gambar  quotation_gambar[]
+  quotation_log     quotation_log[]
+
+  @@index([status, tanggal])
+  @@index([customer_id])
+}
+
+model quotation_item {
+  id            Int       @id @default(autoincrement())
+  quotation_id  Int
+  quotation     quotation @relation(fields: [quotation_id], references: [id], onDelete: Cascade)
+  grup_id       Int?
+  grup          quotation_grup? @relation(fields: [grup_id], references: [id], onDelete: SetNull)
+  urut          Int
+  deskripsi     String    @db.Text
+  satuan        String?
+  qty           Decimal   @default(1) @db.Decimal(14, 2)
+  harga         Decimal   @default(0) @db.Decimal(18, 2)
+  diskon_persen Decimal   @default(0) @db.Decimal(5, 2)
+  jumlah        Decimal   @default(0) @db.Decimal(18, 2)
+  // Dicentang = ikut dasar pengenaan PPh saat `pph_dasar = "item"`.
+  kena_pph      Boolean   @default(false)
+  quotation_item_gambar quotation_item_gambar[]
+
+  @@index([quotation_id, urut])
+}
+
+// Jejak perpindahan status. Penawaran yang sudah dikirim ke customer tidak
+// boleh "berubah pikiran" tanpa bekas — inilah yang membuat riwayatnya terbaca.
+model quotation_log {
+  id           Int       @id @default(autoincrement())
+  quotation_id Int
+  quotation    quotation @relation(fields: [quotation_id], references: [id], onDelete: Cascade)
+  status_lama  String?
+  status_baru  String
+  catatan      String?   @db.Text
+  user_id      Int?
+  created_at   DateTime? @db.DateTime(0)
+
+  @@index([quotation_id, id])
+}
+
+/// Kelompok item di dalam satu penawaran — "Alat Elektronik", "Jasa Instalasi",
+/// atau "Opsi A" / "Opsi B" kalau penawarannya berisi pilihan.
+///
+/// Selalu ada minimal satu grup; item tanpa grup tidak pernah tersimpan. Grup
+/// inilah yang memikul subtotal, dan ketika `tampilkan_grand_total` mati,
+/// subtotal grup adalah satu-satunya angka yang tercetak.
+model quotation_grup {
+  id             Int              @id @default(autoincrement())
+  quotation_id   Int
+  quotation      quotation        @relation(fields: [quotation_id], references: [id], onDelete: Cascade)
+  urut           Int
+  nama           String
+  subtotal       Decimal          @default(0) @db.Decimal(18, 2)
+  quotation_item quotation_item[]
+
+  @@index([quotation_id, urut])
+}
+
+/// Gambar milik SATU PENAWARAN, bukan satu item.
+///
+/// Item ditulis ulang seluruhnya setiap kali penawaran disunting (lihat
+/// QuotationController::ubah), jadi kalau gambar digantung ke `item_id` ia ikut
+/// hilang setiap kali disimpan. Karena itu berkasnya milik penawaran, dan
+/// kaitannya ke item ditaruh di tabel penghubung yang ikut ditulis ulang.
+///
+/// `quotation_id` boleh NULL: saat membuat penawaran baru, gambar sudah
+/// diunggah sebelum penawarannya punya id sama sekali. Baris seperti itu
+/// "yatim", dimiliki pengunggahnya lewat `created_by`, dan diklaim penawaran
+/// saat disimpan. Yang tidak pernah diklaim dibersihkan belakangan.
+model quotation_gambar {
+  id                    Int                     @id @default(autoincrement())
+  quotation_id          Int?
+  quotation             quotation?              @relation(fields: [quotation_id], references: [id], onDelete: Cascade)
+  uuid                  String                  @unique @default(uuid())
+  nama_asli             String
+  tipe                  String
+  ukuran                Int
+  created_by            Int?
+  created_at            DateTime?               @db.DateTime(0)
+  quotation_item_gambar quotation_item_gambar[]
+
+  @@index([quotation_id])
+  @@index([created_by, quotation_id])
+}
+
+/// Kaitan item ke gambar, beserta urutan tampilnya di baris item itu.
+model quotation_item_gambar {
+  id        Int              @id @default(autoincrement())
+  item_id   Int
+  item      quotation_item   @relation(fields: [item_id], references: [id], onDelete: Cascade)
+  gambar_id Int
+  gambar    quotation_gambar @relation(fields: [gambar_id], references: [id], onDelete: Cascade)
+  urut      Int
+
+  @@unique([item_id, gambar_id])
+  @@index([item_id, urut])
+}
