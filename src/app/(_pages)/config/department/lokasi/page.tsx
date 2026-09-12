@@ -19,22 +19,16 @@ export default async function DepartmentLokasiPage({
   if (!dept.status || !dept.data) redirect("/config/department");
 
   return (
-    <div className="main-content" style={{ height: "90vh", overflowY: "auto" }}>
-      <div className="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-        <div className="breadcrumb-title pe-3">Section</div>
-        <div className="ps-3">
-          <nav aria-label="breadcrumb">
-            <ol className="breadcrumb mb-0 p-0">
-              <li className="breadcrumb-item">
-                <a href="/config/department">List</a>
-              </li>
-              <li className="breadcrumb-item active" aria-current="page">
-                Lokasi
-              </li>
-            </ol>
-          </nav>
+    <>
+      <div className="row page-titles mx-0">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item active">
+              <a href="javascript:void(0)">Section</a>
+            </li>
+            <li className="breadcrumb-item"><a href="/config/department">List</a></li>
+            <li className="breadcrumb-item">Lokasi</li>
+          </ol>
         </div>
-      </div>
 
       {session.user.role_id === 1 ? (
         <DepartmentLokasiView
@@ -46,6 +40,6 @@ export default async function DepartmentLokasiPage({
           Access Denied
         </div>
       )}
-    </div>
+    </>
   );
 }

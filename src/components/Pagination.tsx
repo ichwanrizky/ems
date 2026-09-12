@@ -44,27 +44,25 @@ const Pagination = (props: PaginationProps) => {
   }
 
   return (
-    <>
-      <nav aria-label="Page navigation example">
-        <ul className="pagination">
-          <li className={`page-item ${currentPage === 1 ? "disabled" : ""}`}>
-            <a className="page-link" href="#" onClick={() => setCurrentPage(1)}>
-              First
-            </a>
-          </li>
-          {pageNumbers}
-          <li className="page-item">
-            <a
-              className="page-link"
-              href="#"
-              onClick={() => setCurrentPage(totalPage)}
-            >
-              Last
-            </a>
-          </li>
-        </ul>
-      </nav>
-    </>
+    <nav aria-label="Page navigation">
+      <ul className="pagination pagination-gutter pagination-primary justify-content-end mt-3 mb-0">
+        <li className={`page-item page-indicator ${currentPage === 1 ? "disabled" : ""}`}>
+          <a className="page-link" href="#" onClick={() => setCurrentPage(1)}>
+            <i className="fas fa-angle-double-left"></i> First
+          </a>
+        </li>
+        {pageNumbers}
+        <li className="page-item page-indicator">
+          <a
+            className="page-link"
+            href="#"
+            onClick={() => setCurrentPage(totalPage)}
+          >
+            Last <i className="fas fa-angle-double-right"></i>
+          </a>
+        </li>
+      </ul>
+    </nav>
   );
 };
 

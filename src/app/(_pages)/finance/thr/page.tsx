@@ -21,10 +21,14 @@ export default async function ThrPage() {
   };
 
   return (
-    <div className="main-content" style={{ height: "90vh", overflowY: "auto" }}>
-      <div className="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-        <div className="breadcrumb-title pe-3">THR</div>
-      </div>
+    <>
+      <div className="row page-titles mx-0">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item active">
+              <a href="javascript:void(0)">THR</a>
+            </li>
+          </ol>
+        </div>
 
       {foundMenu ? (
         <ThrView
@@ -36,6 +40,6 @@ export default async function ThrPage() {
           Access Denied
         </div>
       )}
-    </div>
+    </>
   );
 }

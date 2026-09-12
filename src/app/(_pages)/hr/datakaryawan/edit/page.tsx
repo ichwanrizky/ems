@@ -48,19 +48,15 @@ export default async function DataKaryawanEditPage({
   if (!pegawaiData) redirect("/hr/datakaryawan");
 
   return (
-    <div className="main-content" style={{ height: "90vh", overflowY: "auto" }}>
-      <div className="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-        <div className="breadcrumb-title pe-3">Data Karyawan</div>
-        <div className="ps-3">
-          <nav aria-label="breadcrumb">
-            <ol className="breadcrumb mb-0 p-0">
-              <li className="breadcrumb-item active" aria-current="page">
-                Edit
-              </li>
-            </ol>
-          </nav>
+    <>
+      <div className="row page-titles mx-0">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item active">
+              <a href="javascript:void(0)">Data Karyawan</a>
+            </li>
+            <li className="breadcrumb-item">Edit</li>
+          </ol>
         </div>
-      </div>
 
       {foundMenu && foundMenu.access[0].update ? (
         <DataKaryawanEdit
@@ -73,6 +69,6 @@ export default async function DataKaryawanEditPage({
           Access Denied
         </div>
       )}
-    </div>
+    </>
   );
 }

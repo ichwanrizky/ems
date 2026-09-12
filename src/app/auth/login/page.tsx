@@ -1,6 +1,7 @@
 "use client";
 
 import Alert from "@/components/Alert";
+import ThemeToggle from "@/components/ThemeToggle";
 import { signIn } from "next-auth/react";
 import React from "react";
 import { useEffect, useState } from "react";
@@ -16,6 +17,7 @@ export default function LoginPage({ searchParams }: { searchParams: any }) {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const callbackUrl = React.use(searchParams) as any;
 
@@ -69,76 +71,90 @@ export default function LoginPage({ searchParams }: { searchParams: any }) {
       setIsLoading(false);
     }
   };
+
   return (
-    <div className="auth-basic-wrapper d-flex align-items-center justify-content-center">
-      <div className="container-fluid my-5 my-lg-0">
-        <div className="row">
-          <div className="col-12 col-md-8 col-lg-6 col-xl-5 col-xxl-4 mx-auto">
-            <div className="card rounded-4 mb-0 border-top border-4 border-primary">
-              {alert.status && (
-                <div className="px-3 mt-3">
-                  <Alert
-                    color={alert.color}
-                    message={alert.message}
-                    subMessage={alert.subMessage}
-                  />
-                </div>
-              )}
-              <div className="card-body p-5">
-                <img src="/img/panji.png" className="mb-4" width={80} />
-                <h4 className="fw-bold">PANJI JAYA</h4>
-                <p className="mb-0">ENTERPRISE MANAGEMENT SYSTEM</p>
-                <div className="form-body my-5">
-                  <form className="row g-3" onSubmit={handleSubmit}>
-                    <div className="col-12">
-                      <label htmlFor="username" className="form-label">
-                        Username
-                      </label>
-                      <input
-                        id="username"
-                        type="text"
-                        className="form-control"
-                        placeholder="Enter Username"
-                        onChange={(e) => setUsername(e.target.value)}
-                        value={username}
-                        required
-                      />
+    <div className="authincation">
+      <ThemeToggle className="theme-toggle-mengambang" />
+
+      <div className="container py-5">
+        <div className="row justify-content-center">
+          <div className="col-md-6">
+            <div className="authincation-content">
+              <div className="row no-gutters">
+                <div className="col-xl-12">
+                  <div className="auth-form">
+                    <div className="text-center mb-4">
+                      <img src="/img/panji.png" alt="PANJI JAYA" width={80} />
+                      <h3 className="fw-bold mt-3 mb-1">PANJI JAYA</h3>
+                      <p className="mb-0">ENTERPRISE MANAGEMENT SYSTEM</p>
                     </div>
-                    <div className="col-12">
-                      <label htmlFor="password" className="form-label">
-                        Password
-                      </label>
-                      <div className="input-group" id="show_hide_password">
+
+                    {alert.status && (
+                      <Alert
+                        color={alert.color}
+                        message={alert.message}
+                        subMessage={alert.subMessage}
+                      />
+                    )}
+
+                    <form onSubmit={handleSubmit}>
+                      <div className="mb-3">
+                        <label className="mb-1" htmlFor="username">
+                          <strong>Username</strong>
+                        </label>
                         <input
-                          id="password"
-                          type="password"
-                          className="form-control border-end-0"
-                          placeholder="Enter Password"
-                          onChange={(e) => setPassword(e.target.value)}
-                          value={password}
+                          id="username"
+                          type="text"
+                          className="form-control"
+                          placeholder="Enter Username"
+                          onChange={(e) => setUsername(e.target.value)}
+                          value={username}
                           required
                         />
-                        <a
-                          href="javascript:;"
-                          className="input-group-text bg-transparent"
-                        >
-                          <i className="bi bi-eye-slash-fill" />
+                      </div>
+
+                      <div className="mb-3">
+                        <label className="mb-1" htmlFor="password">
+                          <strong>Password</strong>
+                        </label>
+                        <div className="input-group">
+                          <input
+                            id="password"
+                            type={showPassword ? "text" : "password"}
+                            className="form-control border-end-0"
+                            placeholder="Enter Password"
+                            onChange={(e) => setPassword(e.target.value)}
+                            value={password}
+                            required
+                          />
+                          <button
+                            type="button"
+                            className="input-group-text bg-transparent"
+                            onClick={() => setShowPassword((tampil) => !tampil)}
+                            aria-label={
+                              showPassword ? "Sembunyikan password" : "Tampilkan password"
+                            }
+                          >
+                            <i
+                              className={`bi ${
+                                showPassword ? "bi-eye-fill" : "bi-eye-slash-fill"
+                              }`}
+                            />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="d-flex justify-content-end mb-3">
+                        <a href="http://wa.me/628117779914" target="_blank">
+                          Forgot Password ?
                         </a>
                       </div>
-                    </div>
-                    <div className="col-md-6"></div>
-                    <div className="col-md-6 text-end">
-                      <a href="http://wa.me/628117779914" target="_blank">
-                        Forgot Password ?
-                      </a>
-                    </div>
-                    <hr className="mt-4" />
-                    <div className="col-12 mt-4">
-                      <div className="d-grid">
+
+                      <div className="text-center">
                         {isLoading ? (
                           <button
                             type="button"
-                            className="btn btn-primary"
+                            className="btn btn-primary btn-block"
                             disabled
                           >
                             <span
@@ -149,13 +165,13 @@ export default function LoginPage({ searchParams }: { searchParams: any }) {
                             LOADING ...
                           </button>
                         ) : (
-                          <button type="submit" className="btn btn-primary">
+                          <button type="submit" className="btn btn-primary btn-block">
                             LOGIN
                           </button>
                         )}
                       </div>
-                    </div>
-                  </form>
+                    </form>
+                  </div>
                 </div>
               </div>
             </div>

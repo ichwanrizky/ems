@@ -186,9 +186,7 @@ export default function ReportAttdBulanView(props: Props) {
               value={searchTerm}
               onChange={handleSearch}
             />
-            <span className="material-icons-outlined position-absolute ms-3 translate-middle-y start-0 top-50 fs-5">
-              search
-            </span>
+            <i className="fas fa-search position-absolute ms-3 translate-middle-y start-0 top-50 fs-5" />
           </div>
         </div>
 

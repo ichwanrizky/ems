@@ -8,35 +8,35 @@ type MenuProps = {
   menu: { id: number; menu: string; path: string }[];
 }[];
 
+/** Ikon per menu group. Grup yang belum terdaftar memakai ikon default. */
+const GROUP_ICON: Record<string, string> = {
+  CONFIG: "fas fa-cogs",
+  HR: "fas fa-users",
+  FINANCE: "fas fa-wallet",
+  KEUANGAN: "fas fa-wallet",
+  SALES: "fas fa-file-invoice-dollar",
+  REPORT: "fas fa-chart-line",
+  MASTER: "fas fa-database",
+};
+
+const iconFor = (group: string) =>
+  GROUP_ICON[group?.toUpperCase()] ?? "fas fa-th-large";
+
 export default function DashboardSidebar({ menu }: { menu: MenuProps }) {
   return (
-    <aside className="sidebar-wrapper" data-simplebar="true">
-      <div className="sidebar-header">
-        <div className="logo-icon"></div>
-        <div className="logo-name flex-grow-1">
-          <h5 className="mb-0">PANJI JAYA</h5>
-        </div>
-        <div className="sidebar-close">
-          <span className="material-icons-outlined">close</span>
-        </div>
-      </div>
-      <div className="sidebar-nav">
-        <ul className="metismenu" id="sidenav">
+    <div className="dlabnav">
+      <div className="dlabnav-scroll">
+        <ul className="metismenu" id="menu">
           {menu.map((item, index: number) => (
             <li key={index}>
-              <a href="#" className="has-arrow">
-                <div className="parent-icon">
-                  <i className="material-icons-outlined">home</i>
-                </div>
-                <div className="menu-title">{item.menu_group}</div>
+              <a className="has-arrow" href="javascript:void(0)" aria-expanded="false">
+                <i className={iconFor(item.menu_group)}></i>
+                <span className="nav-text">{item.menu_group}</span>
               </a>
-              <ul>
+              <ul aria-expanded="false">
                 {item.menu.map((e) => (
                   <li key={e.id}>
-                    <Link href={`/${e.path}`}>
-                      <i className="material-icons-outlined">arrow_right</i>
-                      {e.menu}
-                    </Link>
+                    <Link href={`/${e.path}`}>{e.menu}</Link>
                   </li>
                 ))}
               </ul>
@@ -44,6 +44,6 @@ export default function DashboardSidebar({ menu }: { menu: MenuProps }) {
           ))}
         </ul>
       </div>
-    </aside>
+    </div>
   );
 }

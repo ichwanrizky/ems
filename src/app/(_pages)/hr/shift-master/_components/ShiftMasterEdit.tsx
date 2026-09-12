@@ -1,5 +1,6 @@
 "use client";
 
+import Textarea from "@/components/Textarea";
 import Modal from "@/components/Modal";
 import { AccessDepartmentProps, ShiftMasterProps } from "@/types";
 import { useState } from "react";
@@ -161,16 +162,15 @@ export default function ShiftMasterEdit(props: Props) {
         <label htmlFor="keterangan" className="form-label">
           KETERANGAN
         </label>
-        <textarea
+        <Textarea
           id="keterangan"
-          className="form-control text-uppercase"
-          rows={5}
+          className="text-uppercase"
           onChange={(e) =>
             setFormData({ ...formData, keterangan: e.target.value })
           }
           value={formData.keterangan}
           required
-        ></textarea>
+        />
       </div>
 
       <div className="form-group mb-3">

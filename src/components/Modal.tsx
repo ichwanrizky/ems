@@ -12,6 +12,14 @@ type ModalProps = {
   isLoadingModal?: boolean;
   isLoadingSubmit?: boolean;
   onSubmit?: any;
+  /**
+   * Kelas ukuran Bootstrap (`modal-lg`, `modal-xl`). Kosong = lebar default,
+   * yang dipakai semua form sebelumnya — jadi menambah prop ini tidak mengubah
+   * satu pun modal yang sudah ada.
+   */
+  size?: string;
+  /** Teks tombol simpan; default "SAVE DATA". */
+  submitLabel?: string;
 };
 
 export default function Modal(props: ModalProps) {
@@ -23,6 +31,8 @@ export default function Modal(props: ModalProps) {
     isLoadingModal,
     isLoadingSubmit,
     onSubmit,
+    size,
+    submitLabel,
   } = props;
 
   const [alertModal, setAlertModal] = useState<AlertProps | null>(
@@ -52,42 +62,35 @@ export default function Modal(props: ModalProps) {
         className="modal fade show"
         tabIndex={-1}
         role="dialog"
-        aria-labelledby="exampleModalScrollableTitle"
+        aria-labelledby="emsModalTitle"
         aria-hidden="true"
         style={{ display: "block" }}
       >
-        <div className="modal-dialog" role="document">
+        <div
+          className={`modal-dialog modal-dialog-centered ${size ?? ""}`}
+          role="document"
+        >
           <div className="modal-content">
             <form onSubmit={onSubmit}>
               <div className="modal-header">
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    width: "100%",
-                  }}
-                >
-                  <h5 className="modal-title" id="exampleModalScrollableTitle">
-                    {modalTitle}
-                    {isLoadingModal && (
-                      <span className="spinner-border spinner-border-sm ms-2"></span>
-                    )}
-                  </h5>
-                </div>
+                <h5 className="modal-title" id="emsModalTitle">
+                  {modalTitle}
+                  {isLoadingModal && (
+                    <span className="spinner-border spinner-border-sm ms-2"></span>
+                  )}
+                </h5>
 
                 <button
                   type="button"
-                  className="primaery-menu-close"
+                  className="btn-close"
                   data-bs-dismiss="modal"
                   aria-label="Close"
                   onClick={onClose}
-                >
-                  <i className="material-icons-outlined">close</i>
-                </button>
+                />
               </div>
 
               {alertModal?.status && (
-                <div className="px-3 mt-3">
+                <div className="px-4 pt-3">
                   <Alert
                     color={alertModal.color}
                     message={alertModal.message}
@@ -98,17 +101,17 @@ export default function Modal(props: ModalProps) {
 
               <div style={{ maxHeight: "80vh", overflowY: "auto" }}>
                 <div className="modal-body">{children}</div>
-                <div className="modal-footer border-top-1">
+                <div className="modal-footer">
                   <button
                     type="button"
-                    className="btn btn-secondary"
+                    className="btn btn-light"
                     onClick={onClose}
                   >
                     CLOSE
                   </button>
 
                   {isLoadingSubmit ? (
-                    <button type="button" className="btn btn-success" disabled>
+                    <button type="button" className="btn btn-primary" disabled>
                       <span
                         className="spinner-border spinner-border-sm me-2"
                         role="status"
@@ -117,8 +120,8 @@ export default function Modal(props: ModalProps) {
                       LOADING ...
                     </button>
                   ) : (
-                    <button type="submit" className="btn btn-success">
-                      SAVE DATA
+                    <button type="submit" className="btn btn-primary">
+                      {submitLabel ?? "SAVE DATA"}
                     </button>
                   )}
                 </div>

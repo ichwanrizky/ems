@@ -1,5 +1,6 @@
 "use client";
 
+import Textarea from "@/components/Textarea";
 import Modal from "@/components/Modal";
 import { AccessDepartmentProps, AdjustmentProps } from "@/types";
 import { useEffect, useState } from "react";
@@ -291,16 +292,14 @@ export default function AdjustmentEdit(props: Props) {
         <label htmlFor="keterangan" className="form-label">
           KETERANGAN
         </label>
-        <textarea
+        <Textarea
           id="keterangan"
-          className="form-control"
-          rows={3}
           onChange={(e) => {
             setFormData({ ...formData, keterangan: e.target.value });
           }}
           value={formData.keterangan || ""}
           required
-        ></textarea>
+        />
       </div>
     </Modal>
   );

@@ -8,4 +8,14 @@ export function mainMiddleware(request: NextRequest) {
   return res;
 }
 
-export default withAuth(mainMiddleware, ["/hr/", "/finance/", "/config/"]);
+// Setiap modul baru di `(_pages)` HARUS ditambahkan di sini. Halaman yang tidak
+// terdaftar tetap terlindungi layout `(_pages)` (yang menendang sesi kosong ke
+// /auth/logout), tapi lewat middleware pengalihannya jadi ke halaman login
+// beserta `callbackUrl` — user kembali ke halaman yang dituju setelah login,
+// bukan terlempar keluar.
+export default withAuth(mainMiddleware, [
+  "/hr/",
+  "/finance/",
+  "/sales/",
+  "/config/",
+]);

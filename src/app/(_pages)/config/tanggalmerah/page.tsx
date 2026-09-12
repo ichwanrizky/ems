@@ -24,10 +24,14 @@ export default async function TanggalMerahPage() {
   };
 
   return (
-    <div className="main-content" style={{ height: "90vh", overflowY: "auto" }}>
-      <div className="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-        <div className="breadcrumb-title pe-3">Tanggal Merah</div>
-      </div>
+    <>
+      <div className="row page-titles mx-0">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item active">
+              <a href="javascript:void(0)">Tanggal Merah</a>
+            </li>
+          </ol>
+        </div>
 
       {foundMenu ? (
         <TanggalMerahView
@@ -39,6 +43,6 @@ export default async function TanggalMerahPage() {
           Access Denied
         </div>
       )}
-    </div>
+    </>
   );
 }

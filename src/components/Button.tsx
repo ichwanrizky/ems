@@ -13,11 +13,19 @@ type ButtonProps = {
   isActive?: boolean;
 };
 
+const TombolAksiLoading = () => (
+  <button className="btn btn-light btn-xs sharp" type="button" disabled>
+    <span
+      className="spinner-border spinner-border-sm"
+      role="status"
+      aria-hidden="true"
+    ></span>
+  </button>
+);
+
 export default function Button(props: ButtonProps) {
   const {
-    children,
     type,
-    disabled,
     isLoading,
     indexData,
     onClick,
@@ -26,31 +34,22 @@ export default function Button(props: ButtonProps) {
     onSetActive,
     isActive,
   } = props;
+
   switch (type) {
     case "actionTable":
       return isLoading ? (
-        <button
-          className="btn btn-sm btn-filter dropdown-toggle dropdown-toggle-nocaret"
-          type="button"
-          disabled
-        >
-          <span
-            className="spinner-border spinner-border-sm"
-            role="status"
-            aria-hidden="true"
-          ></span>
-        </button>
+        <TombolAksiLoading />
       ) : (
         <div className="dropdown">
           <button
             id={`dropdownMenuButton-${indexData}`}
-            className="btn btn-sm btn-filter dropdown-toggle dropdown-toggle-nocaret"
+            className="btn btn-light btn-xs sharp"
             type="button"
             data-bs-toggle="dropdown"
             data-bs-display="static"
             aria-expanded="false"
           >
-            <i className="bi bi-three-dots" />
+            <i className="fas fa-ellipsis-h" />
           </button>
           <ul
             className="dropdown-menu"
@@ -64,7 +63,7 @@ export default function Button(props: ButtonProps) {
           >
             <li>
               <button type="button" className="dropdown-item" onClick={onEdit}>
-                <i className="bi bi-pencil me-2"></i>
+                <i className="fas fa-pencil-alt text-primary me-2"></i>
                 EDIT
               </button>
             </li>
@@ -78,8 +77,8 @@ export default function Button(props: ButtonProps) {
                   onClick={onSetActive}
                 >
                   <i
-                    className={`bi ${
-                      isActive ? "bi-person-dash" : "bi-person-check"
+                    className={`fas ${
+                      isActive ? "fa-user-slash" : "fa-user-check"
                     } me-2`}
                   ></i>
                   {isActive ? "SET INACTIVE" : "SET ACTIVE"}
@@ -92,7 +91,7 @@ export default function Button(props: ButtonProps) {
                 className="dropdown-item text-danger"
                 onClick={onDelete}
               >
-                <i className="bi bi-trash me-2"></i>
+                <i className="fa fa-trash me-2"></i>
                 DELETE
               </button>
             </li>
@@ -102,28 +101,18 @@ export default function Button(props: ButtonProps) {
 
     case "actionTable2":
       return isLoading ? (
-        <button
-          className="btn btn-sm btn-filter dropdown-toggle dropdown-toggle-nocaret"
-          type="button"
-          disabled
-        >
-          <span
-            className="spinner-border spinner-border-sm"
-            role="status"
-            aria-hidden="true"
-          ></span>
-        </button>
+        <TombolAksiLoading />
       ) : (
         <div className="dropdown">
           <button
             id={`dropdownMenuButton-${indexData}`}
-            className="btn btn-sm btn-filter dropdown-toggle dropdown-toggle-nocaret"
+            className="btn btn-light btn-xs sharp"
             type="button"
             data-bs-toggle="dropdown"
             data-bs-display="static"
             aria-expanded="false"
           >
-            <i className="bi bi-three-dots" />
+            <i className="fas fa-ellipsis-h" />
           </button>
           <ul
             className="dropdown-menu"
@@ -141,7 +130,7 @@ export default function Button(props: ButtonProps) {
                 className="dropdown-item text-danger"
                 onClick={onDelete}
               >
-                <i className="bi bi-trash me-2"></i>
+                <i className="fa fa-trash me-2"></i>
                 DELETE
               </button>
             </li>
@@ -160,12 +149,8 @@ export default function Button(props: ButtonProps) {
           LOADING ...
         </button>
       ) : (
-        <button
-          className="btn btn-primary px-4"
-          type="button"
-          onClick={onClick}
-        >
-          <i className="bi bi-plus-lg me-2" />
+        <button className="btn btn-primary px-4" type="button" onClick={onClick}>
+          <i className="fas fa-plus me-2" />
           ADD DATA
         </button>
       );
@@ -181,12 +166,8 @@ export default function Button(props: ButtonProps) {
           LOADING ...
         </button>
       ) : (
-        <button
-          className="btn btn-primary px-4"
-          type="button"
-          onClick={onClick}
-        >
-          <i className="bi bi-save me-2" />
+        <button className="btn btn-primary px-4" type="button" onClick={onClick}>
+          <i className="fas fa-save me-2" />
           SAVE DATA
         </button>
       );

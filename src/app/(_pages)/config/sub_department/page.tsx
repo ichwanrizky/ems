@@ -21,10 +21,14 @@ export default async function SubDepartmentPage() {
   const departmentData = await handleGetDepartment();
 
   return (
-    <div className="main-content" style={{ height: "90vh", overflowY: "auto" }}>
-      <div className="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-        <div className="breadcrumb-title pe-3">Department</div>
-      </div>
+    <>
+      <div className="row page-titles mx-0">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item active">
+              <a href="javascript:void(0)">Department</a>
+            </li>
+          </ol>
+        </div>
 
       {session.user.role_id === 1 ? (
         <SubDepartmentView departmentData={departmentData} />
@@ -33,6 +37,6 @@ export default async function SubDepartmentPage() {
           Access Denied
         </div>
       )}
-    </div>
+    </>
   );
 }

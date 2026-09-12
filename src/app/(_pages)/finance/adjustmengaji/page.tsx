@@ -25,10 +25,14 @@ export default async function AdjustmentPage() {
   };
 
   return (
-    <div className="main-content" style={{ height: "90vh", overflowY: "auto" }}>
-      <div className="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
-        <div className="breadcrumb-title pe-3">Adjustment Gaji</div>
-      </div>
+    <>
+      <div className="row page-titles mx-0">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item active">
+              <a href="javascript:void(0)">Adjustment Gaji</a>
+            </li>
+          </ol>
+        </div>
 
       {foundMenu ? (
         <AdjustmentView
@@ -40,6 +44,6 @@ export default async function AdjustmentPage() {
           Access Denied
         </div>
       )}
-    </div>
+    </>
   );
 }

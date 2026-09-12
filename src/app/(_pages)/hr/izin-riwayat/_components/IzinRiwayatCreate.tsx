@@ -1,4 +1,5 @@
 "use client";
+import Textarea from "@/components/Textarea";
 import Modal from "@/components/Modal";
 import { AccessDepartmentProps, MenuGroupProps } from "@/types";
 import React, { useState } from "react";
@@ -421,10 +422,8 @@ export default function IzinRiwayatCreate(props: Props) {
             <label htmlFor="ket" className="form-label">
               KET.
             </label>
-            <textarea
+            <Textarea
               id="ket"
-              rows={4}
-              className="form-control"
               required
               value={formData.keterangan}
               onChange={(e) =>

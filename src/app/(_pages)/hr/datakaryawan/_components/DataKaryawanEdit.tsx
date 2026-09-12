@@ -1,4 +1,5 @@
 "use client";
+import Textarea from "@/components/Textarea";
 import Alert from "@/components/Alert";
 import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
@@ -573,10 +574,8 @@ export default function DataKaryawanEdit(props: DataKaryawanEditProps) {
                     <label htmlFor="alamat " className="form-label">
                       ALAMAT
                     </label>
-                    <textarea
+                    <Textarea
                       autoComplete="off"
-                      className="form-control"
-                      rows={4}
                       id="alamat"
                       onChange={(e) =>
                         setFormData({

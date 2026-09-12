@@ -162,9 +162,7 @@ export default function DepartmentView() {
               value={searchTerm}
               onChange={handleSearch}
             />
-            <span className="material-icons-outlined position-absolute ms-3 translate-middle-y start-0 top-50 fs-5">
-              search
-            </span>
+            <i className="fas fa-search position-absolute ms-3 translate-middle-y start-0 top-50 fs-5" />
           </div>
         </div>
         <div className="col-auto flex-grow-1 overflow-auto"></div>
@@ -245,7 +243,7 @@ export default function DepartmentView() {
                             href={`/config/department/lokasi?department_id=${item.id}`}
                             className="btn btn-sm btn-outline-primary"
                           >
-                            <i className="material-icons-outlined" style={{ fontSize: 16, verticalAlign: "middle" }}>location_on</i>
+                            <i className="fas fa-map-marker-alt" style={{ fontSize: 16, verticalAlign: "middle" }} />
                             {" "}LOKASI
                           </a>
                         </td>

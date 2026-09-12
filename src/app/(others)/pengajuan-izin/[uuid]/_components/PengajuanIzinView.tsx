@@ -1,5 +1,6 @@
 "use client";
 
+import Textarea from "@/components/Textarea";
 import React, { useEffect, useState } from "react";
 import { createPengajuanIzin, getRequestPengajuanIzin } from "../_libs/action";
 import DatePicker from "react-datepicker";
@@ -401,10 +402,8 @@ export default function PengajuanIzinView({ uuid }: { uuid: string }) {
                         <label htmlFor="ket" className="form-label">
                           KET.
                         </label>
-                        <textarea
+                        <Textarea
                           id="ket"
-                          rows={4}
-                          className="form-control"
                           required
                           value={formData.keterangan}
                           onChange={(e) =>
