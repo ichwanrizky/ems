@@ -79,42 +79,51 @@ const skemaGambar = z.object({
   nama_asli: z.string(),
 });
 
-const skemaItem = z.object({
-  deskripsi: z
-    .string()
-    .trim()
-    .min(1, "Uraian item wajib diisi")
-    .max(1000, "Uraian item maksimal 1000 karakter"),
+const skemaItem = z
+  .object({
+    judul: z.boolean(),
 
-  // `?? ""` di komponen membuat nilainya tidak pernah null saat diketik, tapi
-  // item dari backend bisa membawa null — keduanya diterima, keluar sebagai "".
-  satuan: z
-    .union([z.string(), z.null(), z.undefined()])
-    .transform((v) => (v ?? "").trim())
-    .refine(
-      (v) => v.length <= MAKS_TEKS,
-      `Satuan maksimal ${MAKS_TEKS} karakter`,
-    ),
+    deskripsi: z
+      .string()
+      .trim()
+      .min(1, "Uraian item wajib diisi")
+      .max(1000, "Uraian item maksimal 1000 karakter"),
 
-  qty: angka("Qty harus berupa angka").refine(
-    (n) => n > 0,
-    "Qty harus lebih dari 0",
-  ),
+    // `?? ""` di komponen membuat nilainya tidak pernah null saat diketik, tapi
+    // item dari backend bisa membawa null — keduanya diterima, keluar sebagai "".
+    satuan: z
+      .union([z.string(), z.null(), z.undefined()])
+      .transform((v) => (v ?? "").trim())
+      .refine(
+        (v) => v.length <= MAKS_TEKS,
+        `Satuan maksimal ${MAKS_TEKS} karakter`,
+      ),
 
-  harga: angka("Harga harus berupa angka").refine(
-    (n) => n >= 0,
-    "Harga tidak boleh negatif",
-  ),
+    qty: angka("Qty harus berupa angka"),
 
-  diskon_persen: persen("Diskon item"),
+    harga: angka("Harga harus berupa angka"),
 
-  kena_pph: z.boolean(),
+    diskon_persen: persen("Diskon item"),
 
-  gambar: z
-    .array(skemaGambar)
-    .max(MAKS_GAMBAR, `Maksimal ${MAKS_GAMBAR} gambar per item`)
-    .default([]),
-});
+    kena_pph: z.boolean(),
+
+    gambar: z
+      .array(skemaGambar)
+      .max(MAKS_GAMBAR, `Maksimal ${MAKS_GAMBAR} gambar per item`)
+      .default([]),
+  })
+  // Batas qty/harga dipindah ke tingkat OBJEK, bukan menempel di fieldnya,
+  // karena keduanya cuma berlaku untuk baris barang. Baris judul tidak punya
+  // qty maupun harga — menuntutnya "lebih dari 0" akan menolak judul yang
+  // sempurna sah, dan pesannya muncul di kolom yang bahkan tidak ditampilkan.
+  .refine((d) => d.judul || d.qty > 0, {
+    path: ["qty"],
+    error: "Qty harus lebih dari 0",
+  })
+  .refine((d) => d.judul || d.harga >= 0, {
+    path: ["harga"],
+    error: "Harga tidak boleh negatif",
+  });
 
 const skemaGrup = z.object({
   nama: z
@@ -126,7 +135,13 @@ const skemaGrup = z.object({
   item: z
     .array(skemaItem)
     .min(1, "Grup ini belum punya item")
-    .max(MAKS_ITEM, `Item maksimal ${MAKS_ITEM} baris`),
+    .max(MAKS_ITEM, `Item maksimal ${MAKS_ITEM} baris`)
+    // Grup yang isinya judul semua tidak menawarkan apa pun — hampir selalu
+    // centang yang lupa dicabut, bukan maksud sebenarnya. Backend menolak hal
+    // yang sama; ini cuma supaya ketahuannya sebelum dikirim.
+    .refine((item) => item.some((b) => !b.judul), {
+      error: "Grup ini cuma berisi judul, belum ada itemnya",
+    }),
 });
 
 export const skemaQuotation = z
@@ -170,6 +185,14 @@ export const skemaQuotation = z
 
     tampilkan_grand_total: z.boolean(),
 
+    // Daftar tertutup, bukan teks bebas: nilainya jadi awalan nominal di PDF,
+    // dan salah ketik di situ mengubah arti angka pada dokumen yang sudah
+    // terlanjur dikirim ke customer.
+    currency: z.enum(
+      ["IDR", "USD", "SGD"],
+      "Mata uang harus IDR, USD, atau SGD",
+    ),
+
     grup: z
       .array(skemaGrup)
       .min(1, "Quotation minimal punya satu grup item")
@@ -202,18 +225,55 @@ export type QuotationInput = z.infer<typeof skemaQuotation>;
  * Garis miringnya diganti strip, BUKAN di-`encodeURIComponent`: `%2F` di dalam
  * path ditolak sebagian proxy dan dinormalkan sebagian yang lain, jadi
  * tautannya akan hidup-mati tergantung apa yang berdiri di depan aplikasi.
- * Backend mencocokkan ke arah sebaliknya (`REPLACE(nomor, '/', '-')`), jadi
- * penggantian ini tidak perlu bisa dibalik.
+ * Backend mencocokkan ke arah sebaliknya (`REPLACE`), jadi penggantian ini
+ * tidak perlu bisa dibalik.
+ *
+ * SPASI ikut jadi strip, bukan dibuang. Empat nomor hasil impor sistempanji
+ * memuat spasi di segmen kode customer (`PJ-Q-BRI KCP-24-0068`); membuangnya
+ * menghasilkan `PJ-Q-BRIKCP-…` yang tidak cocok dengan `REPLACE` di backend,
+ * dan keempat dokumen itu tidak akan pernah bisa dicetak.
  */
 export const nomorKeSlug = (nomor: string) =>
   nomor
     .trim()
-    .replace(/\//g, "-")
+    .replace(/[/\s]+/g, "-")
     .replace(/[^A-Za-z0-9-]/g, "");
 
 /** Tautan PDF satu penawaran. `unduh` memaksa download, bukan buka di tab. */
 export const tautanPdf = (nomor: string, unduh = false) =>
   `/api/sales/quotation/${nomorKeSlug(nomor)}/pdf${unduh ? "?unduh=1" : ""}`;
+
+/**
+ * Nominal + mata uangnya, satu-satunya pemformat uang di modul ini.
+ *
+ * Sengaja dipusatkan: sebelumnya tiga komponen memegang salinan `Intl`-nya
+ * sendiri yang sama persis, dan begitu mata uang berhenti selalu IDR ketiganya
+ * harus diubah berbarengan — yang terlewat satu akan mencetak "Rp" di atas
+ * angka dolar tanpa ada yang menyadarinya.
+ *
+ * Locale mengikuti mata uang, bukan selalu id-ID: "US$ 1.250,50" gaya Indonesia
+ * salah baca sejuta kali lipat bagi pembaca yang memang memakai dolar.
+ */
+const LOCALE: Record<string, string> = {
+  IDR: "id-ID",
+  USD: "en-US",
+  SGD: "en-SG",
+};
+
+export const uang = (nilai: number, currency: string = "IDR") => {
+  const kode = (currency || "IDR").toUpperCase();
+  const n = Number.isFinite(nilai) ? nilai : 0;
+
+  return new Intl.NumberFormat(LOCALE[kode] ?? "en-US", {
+    style: "currency",
+    currency: kode,
+    // Pecahan ditampilkan hanya kalau memang ada. Penawaran rupiah hampir
+    // selalu bulat, dan ",00" di tiap baris cuma kebisingan; penawaran dolar
+    // justru sering bersen, dan membulatkannya menyembunyikan selisih.
+    minimumFractionDigits: 0,
+    maximumFractionDigits: Number.isInteger(n) ? 0 : 2,
+  }).format(n);
+};
 
 /**
  * Pesan kesalahan, dikunci path: `"perihal"`, `"grup.0.nama"`,

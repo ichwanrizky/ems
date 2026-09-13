@@ -4,7 +4,19 @@ import { getServerSession } from "next-auth";
 import React from "react";
 import QuotationView from "./_components/QuotationView";
 
-export default async function QuotationPage() {
+export default async function QuotationPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string }>;
+}) {
+  // Halaman daftar dibaca dari URL, bukan cuma state komponen.
+  //
+  // Tanpa ini, kembali dari form edit selalu mendarat di halaman 1 — dan
+  // dengan 5.000-an penawaran, itu berarti menyusuri ulang daftarnya sampai
+  // baris yang barusan disunting. Ia juga membuat halamannya bisa disegarkan
+  // dan ditautkan tanpa kehilangan posisi.
+  const halamanAwal = Number((await searchParams).page);
+
   const session: SeesionProps | null = await getServerSession(authOptions);
 
   if (!session) return null;
@@ -37,7 +49,12 @@ export default async function QuotationPage() {
       </div>
 
       {foundMenu ? (
-        <QuotationView accessMenu={foundMenu.access[0] || {}} />
+        <QuotationView
+          accessMenu={foundMenu.access[0] || {}}
+          halamanAwal={
+            Number.isInteger(halamanAwal) && halamanAwal > 0 ? halamanAwal : 1
+          }
+        />
       ) : (
         <div className="d-flex justify-content-center align-items-center text-danger">
           Access Denied

@@ -543,14 +543,11 @@ export type CustomerProps = {
   jumlah_quotation?: number;
 };
 
-/** Status tersimpan di kolom `status`. `kadaluarsa` TIDAK termasuk — itu flag turunan. */
-export type QuotationStatus =
-  | "draft"
-  | "terkirim"
-  | "disetujui"
-  | "ditolak"
-  | "dibatalkan"
-  | "direvisi";
+/**
+ * Mata uang dokumen — penentu simbol yang tercetak, BUKAN kurs. Nominalnya
+ * disimpan apa adanya dan tidak pernah dikonversi.
+ */
+export type QuotationCurrency = "IDR" | "USD" | "SGD";
 
 export type QuotationGambarProps = {
   uuid: string;
@@ -560,6 +557,14 @@ export type QuotationGambarProps = {
 export type QuotationItemProps = {
   id?: number;
   urut?: number;
+  /**
+   * Baris ini JUDUL bagian, bukan barang: hanya `deskripsi` yang berarti, dan
+   * qty/harga/jumlah dipaksa nol backend supaya tidak ikut dijumlahkan.
+   *
+   * Berbeda dari grup — grup memikul subtotal; judul cuma penanda, dan boleh
+   * berkali-kali di dalam satu grup.
+   */
+  judul: boolean;
   deskripsi: string;
   satuan: string | null;
   qty: number | string;
@@ -580,29 +585,18 @@ export type QuotationGrupProps = {
   item: QuotationItemProps[];
 };
 
-export type QuotationLogProps = {
-  id: number;
-  status_lama: string | null;
-  status_baru: string;
-  catatan: string | null;
-  nama_user: string | null;
-  created_at: string | null;
-};
-
 export type QuotationProps = {
   number?: number;
   id: number;
   uuid: string | null;
   nomor: string;
+  /** Diisi user, 0 = bukan revisi. Bukan hitungan sistem. */
   revisi: number;
-  nomor_induk: string | null;
-  induk_id: number | null;
   tanggal: string;
   berlaku_sampai: string;
   perihal: string | null;
   attn: string | null;
-  status: QuotationStatus;
-  /** Turunan backend: `terkirim` yang sudah lewat `berlaku_sampai`. */
+  /** Turunan backend: `berlaku_sampai` sudah lewat. */
   kadaluarsa: boolean;
   subtotal: number;
   diskon_persen: number;
@@ -617,13 +611,11 @@ export type QuotationProps = {
   total: number;
   /** Mati = penawaran berisi pilihan, hanya subtotal grup yang bermakna. */
   tampilkan_grand_total: boolean;
+  currency: QuotationCurrency;
   syarat_pembayaran: string | null;
   catatan: string | null;
-  alasan: string | null;
   nama_pembuat: string | null;
   created_at: string | null;
-  dikirim_at: string | null;
-  diputuskan_at: string | null;
   customer: {
     id: number;
     kode: string | null;
@@ -631,5 +623,4 @@ export type QuotationProps = {
     alamat: string | null;
   };
   grup?: QuotationGrupProps[];
-  log?: QuotationLogProps[];
 };

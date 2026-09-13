@@ -9,29 +9,45 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import {
   deleteQuotation,
-  duplikatQuotation,
   getQuotation,
   getQuotationId,
   QuotationFilterProps,
 } from "../_libs/action";
-import { tautanPdf } from "../_libs/skema";
+import { tautanPdf, uang } from "../_libs/skema";
 import QuotationDetail from "./QuotationDetail";
 
 type QuotationViewProps = {
   accessMenu: AccessProps;
+  /** Halaman awal dari URL (?page=), supaya kembali dari form tidak reset. */
+  halamanAwal: number;
 };
 
 const ITEM_PER_PAGE = 10;
 
-const rupiah = (n: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(n ?? 0);
+/**
+ * Sel tabel yang isinya boleh MELIPAT ke baris berikutnya.
+ *
+ * Pembungkus tabel ini ber-`white-space-nowrap`, jadi teks panjang tidak pernah
+ * turun baris — ia mendorong tabelnya melebar sampai kolom lain keluar layar.
+ * Dua kolom terkena: PERIHAL (sampai 159 karakter, 232 baris di atas 60) dan
+ * CUSTOMER (sampai 85 karakter, 217 baris di atas 45).
+ *
+ * Dipasang di `<div>` DI DALAM sel, bukan di `<td>`-nya: tabelnya ber-layout
+ * auto, dan di situ browser mengabaikan `max-width` pada sel — dipasang di
+ * `<td>` perbaikannya tidak bekerja sama sekali.
+ *
+ * `overflowWrap: anywhere` untuk kata yang tidak punya spasi sama sekali —
+ * nomor part seperti `W415266410111-XCSTA-REV2` lebih panjang dari kolomnya dan
+ * tanpa ini ia tetap menjebol lebar itu.
+ */
+const lipat = (maxWidth: number): React.CSSProperties => ({
+  maxWidth,
+  whiteSpace: "normal",
+  overflowWrap: "anywhere",
+});
 
 export default function QuotationView(props: QuotationViewProps) {
-  const { accessMenu } = props;
+  const { accessMenu, halamanAwal } = props;
 
   const { push } = useRouter();
 
@@ -45,7 +61,7 @@ export default function QuotationView(props: QuotationViewProps) {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(halamanAwal);
   const [totalData, setTotalData] = useState(0);
 
   const [filter, setFilter] = useState<QuotationFilterProps>({
@@ -80,6 +96,49 @@ export default function QuotationView(props: QuotationViewProps) {
   useEffect(() => {
     fetchData(debouncedSearchTerm, filter, currentPage);
   }, [debouncedSearchTerm, filter, currentPage]);
+
+  /**
+   * Cerminkan halaman aktif ke URL supaya form bisa kembali ke sini.
+   *
+   * `replace`, bukan `push`: memberi satu entri riwayat per halaman membuat
+   * tombol Back menyusuri pagination satu per satu, bukan keluar dari daftar.
+   * `scroll: false` supaya layar tidak melompat ke atas tiap ganti halaman.
+   */
+  useEffect(() => {
+    const url =
+      currentPage > 1
+        ? `/sales/quotation?page=${currentPage}`
+        : "/sales/quotation";
+
+    window.history.replaceState(null, "", url);
+  }, [currentPage]);
+
+  /**
+   * Hasil simpan dari form, dititipkan lewat sessionStorage.
+   *
+   * Bukan lewat query string: pesannya bukan bagian dari alamat halaman ini,
+   * dan URL yang menyimpan "berhasil disimpan" akan mengulang banner itu tiap
+   * kali ditautkan atau disegarkan. sessionStorage sekali baca lalu dibuang.
+   *
+   * Dipakai karena banner di form sendiri praktis tidak pernah terlihat:
+   * tombol simpan ada di dasar form yang panjang, sementara banner-nya di
+   * puncak — user sudah berpindah halaman sebelum sempat menggulir ke atas.
+   */
+  useEffect(() => {
+    try {
+      const titipan = sessionStorage.getItem("quotation:hasil");
+      if (!titipan) return;
+
+      sessionStorage.removeItem("quotation:hasil");
+
+      const { color, message, subMessage } = JSON.parse(titipan);
+      setAlertPage({ status: true, color, message, subMessage });
+    } catch {
+      // sessionStorage bisa ditolak (private window, cookie diblokir) dan
+      // isinya bisa saja bukan JSON. Banner yang hilang bukan alasan untuk
+      // menggagalkan halaman daftarnya.
+    }
+  }, []);
 
   const fetchData = async (
     search: string,
@@ -214,7 +273,9 @@ export default function QuotationView(props: QuotationViewProps) {
             {accessMenu.insert && (
               <Button
                 type="createTable"
-                onClick={() => push("/sales/quotation/create")}
+                onClick={() =>
+                  push(`/sales/quotation/create?page=${currentPage}`)
+                }
               />
             )}
           </div>
@@ -322,7 +383,7 @@ export default function QuotationView(props: QuotationViewProps) {
                                       onClick={() => {
                                         if (accessMenu.update) {
                                           push(
-                                            `/sales/quotation/edit?id=${item.id}`,
+                                            `/sales/quotation/edit?id=${item.id}&page=${currentPage}`,
                                           );
                                         } else {
                                           setAlertPage({
@@ -337,32 +398,6 @@ export default function QuotationView(props: QuotationViewProps) {
                                     >
                                       <i className="fas fa-pencil-alt text-primary me-2" />
                                       EDIT
-                                    </button>
-                                  </li>
-                                  <li>
-                                    <button
-                                      type="button"
-                                      className="dropdown-item"
-                                      onClick={() => {
-                                        if (accessMenu.insert) {
-                                          jalankanAksi(
-                                            item.id,
-                                            () => duplikatQuotation(item.id),
-                                            `Duplikat ${item.nomor} jadi penawaran baru?`,
-                                          );
-                                        } else {
-                                          setAlertPage({
-                                            status: true,
-                                            color: "danger",
-                                            message:
-                                              "You don't have access to create",
-                                            subMessage: "",
-                                          });
-                                        }
-                                      }}
-                                    >
-                                      <i className="fas fa-copy text-info me-2" />
-                                      DUPLIKAT
                                     </button>
                                   </li>
                                   <li>
@@ -408,15 +443,18 @@ export default function QuotationView(props: QuotationViewProps) {
                                 Revisi mengubah arti dokumennya — yang ini
                                 menggantikan yang lama — jadi ia harus terbaca
                                 saat memindai daftar, bukan baru ketahuan
-                                setelah barisnya dibaca teliti. */}
+                                setelah barisnya dibaca teliti.
+
+                                Ditaruh di BARIS SENDIRI di bawah nomor, bukan
+                                menempel di sebelahnya: nomor penawaran sudah
+                                panjang (`PJ-Q-SCH-26-0707`), dan lencana yang
+                                menyambung di belakangnya melebarkan kolom hanya
+                                untuk baris yang kebetulan punya revisi. */}
                             {item.revisi > 0 && (
-                              <span className="badge badge-dark light ms-2">
-                                REV {item.revisi}
-                              </span>
-                            )}
-                            {item.nomor_induk && (
-                              <div className="text-muted fs-6">
-                                dari {item.nomor_induk}
+                              <div>
+                                <span className="badge badge-dark light">
+                                  REV {item.revisi}
+                                </span>
                               </div>
                             )}
                           </td>
@@ -427,8 +465,16 @@ export default function QuotationView(props: QuotationViewProps) {
                               yang dicari orang saat menelusuri penawaran adalah
                               "ini dulu ke siapa", bukan nomor internalnya. */}
                           <td align="left">
-                            {item.customer.nama_customer}
-                            <div className="text-muted fs-6">
+                            {/* Dilipat dengan alasan yang sama seperti kolom
+                                PERIHAL di bawah: nama customer di data ini
+                                mencapai 85 karakter ("PT BANK RAKYAT INDONESIA
+                                (PERSERO) Tbk. KANTOR WILAYAH …"), dan 217 baris
+                                lewat dari 45. Tanpa batas, kolom ini ikut
+                                mendorong tabelnya melebar. */}
+                            <div style={lipat(240)}>
+                              {item.customer.nama_customer}
+                            </div>
+                            <div className="text-muted fs-6" style={lipat(240)}>
                               {item.attn ? (
                                 <>
                                   <i className="fas fa-user me-1" />
@@ -439,8 +485,25 @@ export default function QuotationView(props: QuotationViewProps) {
                               )}
                             </div>
                           </td>
-                          <td align="left">{item.perihal}</td>
-                          <td align="right">{rupiah(item.total)}</td>
+                          {/* Dipotong dengan elipsis, dan lebarnya dikunci px.
+                              Pembungkus tabel ini ber-`white-space-nowrap`,
+                              jadi perihal panjang tidak pernah melipat — ia
+                              melebarkan tabel sampai kolom lain terdorong
+                              keluar layar. Perihal penawaran hasil impor
+                              diturunkan dari uraian item dan bisa sampai 159
+                              karakter, jadi ini bukan kasus langka.
+
+                              DILIPAT, bukan dipotong elipsis: perihal itu yang
+                              dibaca orang saat mencari penawaran di daftar ini,
+                              dan separuh kalimat yang diakhiri "…" memaksa buka
+                              detail satu per satu. Barisnya jadi lebih tinggi,
+                              tapi isinya terbaca utuh. */}
+                          <td align="left">
+                            <div style={lipat(260)}>{item.perihal}</div>
+                          </td>
+                          <td align="right">
+                            {uang(item.total, item.currency)}
+                          </td>
                           <td align="center">
                             {item.kadaluarsa ? (
                               <span className="badge badge-warning light">
@@ -484,6 +547,7 @@ export default function QuotationView(props: QuotationViewProps) {
           onChanged={segarkan}
           data={quotationTerpilih}
           accessMenu={accessMenu}
+          halaman={currentPage}
         />
       )}
     </>

@@ -8,7 +8,12 @@ import {
   apiPut,
   getAccessToken,
 } from "@/libs/ApiClient";
-import { CustomerProps, QuotationGrupProps, QuotationProps } from "@/types";
+import {
+  CustomerProps,
+  QuotationCurrency,
+  QuotationGrupProps,
+  QuotationProps,
+} from "@/types";
 import { ErrorForm, validasiQuotation } from "./skema";
 
 /**
@@ -36,6 +41,7 @@ export type QuotationFormProps = {
   pph_persen: number | string;
   pph_dasar: "item" | "total";
   tampilkan_grand_total: boolean;
+  currency: QuotationCurrency;
   grup: QuotationGrupProps[];
 };
 
@@ -50,19 +56,29 @@ type HasilSimpan = {
   error?: ErrorForm;
 };
 
-/** Bentuk yang diterima backend: gambar dikirim sebagai daftar uuid saja. */
+/**
+ * Bentuk yang diterima backend: gambar dikirim sebagai daftar uuid saja.
+ *
+ * Ditulis sebagai "BUANG yang dihitung server", bukan "pilih yang dikirim".
+ *
+ * Versi sebelumnya menyebut satu per satu field yang ikut, dan itu menelan
+ * field baru tanpa suara: `judul` sempat sudah ada di model, form, skema zod,
+ * dan backend — tapi tidak pernah sampai ke server karena lupa ditambahkan di
+ * daftar ini. Formnya terlihat bekerja, centangnya tersimpan di state, dan
+ * hasilnya hilang saat disimpan tanpa pesan kesalahan apa pun.
+ *
+ * Dengan bentuk ini, field baru ikut terkirim dengan sendirinya; yang perlu
+ * diingat cuma menambahkan ke daftar buang kalau memang milik server.
+ */
 const untukKirim = (data: QuotationFormProps) => ({
   ...data,
   grup: data.grup.map((g) => ({
     nama: g.nama,
-    item: g.item.map((i) => ({
-      deskripsi: i.deskripsi,
-      satuan: i.satuan,
-      qty: i.qty,
-      harga: i.harga,
-      diskon_persen: i.diskon_persen,
-      kena_pph: i.kena_pph,
-      gambar: (i.gambar ?? []).map((g) => g.uuid),
+    // id/urut/jumlah dihitung backend — `jumlah` malah SENGAJA diabaikan di
+    // sana, karena total tidak boleh ditentukan client.
+    item: g.item.map(({ id, urut, jumlah, gambar, ...sisa }) => ({
+      ...sisa,
+      gambar: (gambar ?? []).map((g) => g.uuid),
     })),
   })),
 });
@@ -231,14 +247,6 @@ export const unggahGambarQuotation = async (
       nama_asli: "",
     };
   }
-};
-
-export const duplikatQuotation = async (
-  id: number,
-): Promise<{ status: boolean; message: string }> => {
-  const hasil = await apiPost(`/api/sales/quotation/${id}/duplikat`);
-
-  return { status: hasil.status, message: hasil.message };
 };
 
 export const deleteQuotation = async (

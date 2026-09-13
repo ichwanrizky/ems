@@ -5,7 +5,7 @@ import { AccessProps, QuotationProps } from "@/types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { deleteQuotation } from "../_libs/action";
-import { tautanPdf } from "../_libs/skema";
+import { tautanPdf, uang } from "../_libs/skema";
 
 /**
  * Detail quotation + aksi atas satu penawaran.
@@ -41,14 +41,9 @@ type Props = {
   onChanged: () => void;
   data: QuotationProps;
   accessMenu: AccessProps;
+  /** Halaman daftar yang sedang dibuka, ikut dibawa ke form edit. */
+  halaman: number;
 };
-
-const rupiah = (n: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(n ?? 0);
 
 const tanggal = (iso?: string | null) => {
   if (!iso) return "-";
@@ -64,8 +59,9 @@ const tanggal = (iso?: string | null) => {
 /**
  * Tanggal + jam, untuk stempel waktu sistem (`created_at`).
  *
- * Jamnya ikut karena revisi dan duplikat sering dibuat di hari yang sama —
- * tanggal saja tidak memisahkan "yang tadi pagi" dari "yang barusan".
+ * Jamnya ikut karena beberapa penawaran untuk customer yang sama sering dibuat
+ * di hari yang sama — tanggal saja tidak memisahkan "yang tadi pagi" dari
+ * "yang barusan".
  */
 const waktu = (iso?: string | null) => {
   if (!iso) return "-";
@@ -81,7 +77,7 @@ const waktu = (iso?: string | null) => {
 };
 
 export default function QuotationDetail(props: Props) {
-  const { isOpen, onClose, onChanged, data, accessMenu } = props;
+  const { isOpen, onClose, onChanged, data, accessMenu, halaman } = props;
   const { push } = useRouter();
 
   const [alertModal, setAlertModal] = useState({
@@ -215,17 +211,19 @@ export default function QuotationDetail(props: Props) {
                   </div>
                 )}
 
-                {/* KAPAN-nya ikut disebut. "Revisi ke-2 dari 001/QUO/…" saja
-                    tidak cukup untuk yang sedang mencocokkan dengan berkas
-                    kiriman customer: yang ditanyakan biasanya "ini revisi yang
-                    mana, yang saya terima minggu lalu atau yang kemarin".
-                    Dipakai `created_at` — waktu dokumen revisinya lahir, bukan
-                    `tanggal` yang boleh diketik bebas dan sering diisi mundur. */}
-                {data.nomor_induk && (
+                {/* KAPAN-nya ikut disebut. "Revisi ke-2" saja tidak cukup untuk
+                    yang sedang mencocokkan dengan berkas kiriman customer: yang
+                    ditanyakan biasanya "ini revisi yang mana, yang saya terima
+                    minggu lalu atau yang kemarin". Dipakai `created_at` — waktu
+                    dokumen ini lahir, bukan `tanggal` yang boleh diketik bebas
+                    dan sering diisi mundur.
+
+                    Dokumen ASALNYA tidak disebut karena memang tidak direkam:
+                    angka revisi diketik user, bukan tautan antar penawaran. */}
+                {data.revisi > 0 && (
                   <div className="alert alert-info solid py-2 px-3 mb-3">
                     <i className="fas fa-code-branch me-2" />
-                    Revisi ke-<strong>{data.revisi}</strong> dari{" "}
-                    <strong>{data.nomor_induk}</strong>
+                    Revisi ke-<strong>{data.revisi}</strong>
                     {data.created_at && <> · dibuat {waktu(data.created_at)}</>}
                   </div>
                 )}
@@ -291,17 +289,26 @@ export default function QuotationDetail(props: Props) {
                 </div>
 
                 {(data.grup ?? []).map((g, gi) => {
-                  // Nomor item berjalan terus lintas grup, sama seperti di PDF.
+                  // Nomor item berjalan terus lintas grup, sama seperti di PDF,
+                  // dan baris JUDUL tidak ikut bernomor — juga sama seperti di
+                  // PDF. Karena itu yang dihitung cuma baris non-judul.
                   const mulaiNomor = (data.grup ?? [])
                     .slice(0, gi)
-                    .reduce((t, x) => t + x.item.length, 0);
+                    .reduce(
+                      (t, x) => t + x.item.filter((b) => !b.judul).length,
+                      0,
+                    );
+
+                  // Nomor berjalan di dalam grup ini; dinaikkan hanya saat
+                  // barisnya memang barang.
+                  let nomor = mulaiNomor;
 
                   return (
                     <div key={gi} className="mb-3">
                       {(data.grup ?? []).length > 1 && (
                         <div className="d-flex justify-content-between fw-bold mb-1">
                           <span>{g.nama}</span>
-                          <span>{rupiah(g.subtotal ?? 0)}</span>
+                          <span>{uang(g.subtotal ?? 0, data.currency)}</span>
                         </div>
                       )}
                       <div className="table-responsive">
@@ -319,60 +326,81 @@ export default function QuotationDetail(props: Props) {
                             </tr>
                           </thead>
                           <tbody>
-                            {g.item.map((item, index) => (
-                              <tr key={index}>
-                                <td align="center">{mulaiNomor + index + 1}</td>
-                                <td style={{ whiteSpace: "pre-wrap" }}>
-                                  {item.deskripsi}
-                                  {(item.gambar ?? []).length > 0 && (
-                                    <div className="d-flex flex-wrap gap-2 mt-2">
-                                      {(item.gambar ?? []).map((gb) => (
-                                        <a
-                                          key={gb.uuid}
-                                          href={`/api/sales/quotation/gambar/${gb.uuid}`}
-                                          target="_blank"
-                                          rel="noreferrer"
-                                        >
-                                          <img
-                                            src={`/api/sales/quotation/gambar/${gb.uuid}`}
-                                            alt={gb.nama_asli}
-                                            title={gb.nama_asli}
-                                            style={{
-                                              width: 52,
-                                              height: 52,
-                                              objectFit: "cover",
-                                              borderRadius: 6,
-                                              border:
-                                                "1px solid var(--ems-tepi-input)",
-                                            }}
-                                          />
-                                        </a>
-                                      ))}
-                                    </div>
-                                  )}
-                                </td>
-                                <td align="center">{item.qty}</td>
-                                <td align="center">{item.satuan || "-"}</td>
-                                <td align="right">
-                                  {rupiah(Number(item.harga))}
-                                </td>
-                                <td align="center">
-                                  {Number(item.diskon_persen) > 0
-                                    ? `${item.diskon_persen}%`
-                                    : "-"}
-                                </td>
-                                <td align="center">
-                                  {item.kena_pph ? (
-                                    <i className="fas fa-check text-success" />
-                                  ) : (
-                                    "-"
-                                  )}
-                                </td>
-                                <td align="right">
-                                  {rupiah(item.jumlah ?? 0)}
-                                </td>
-                              </tr>
-                            ))}
+                            {g.item.map((item, index) => {
+                              // Baris judul: melintang, tanpa nomor dan tanpa
+                              // kolom angka — persis seperti di PDF, supaya
+                              // yang dilihat di layar sama dengan yang dicetak.
+                              if (item.judul) {
+                                return (
+                                  <tr key={index} className="table-light">
+                                    <td colSpan={8}>
+                                      <strong
+                                        style={{ whiteSpace: "pre-wrap" }}
+                                      >
+                                        {item.deskripsi}
+                                      </strong>
+                                    </td>
+                                  </tr>
+                                );
+                              }
+
+                              nomor += 1;
+
+                              return (
+                                <tr key={index}>
+                                  <td align="center">{nomor}</td>
+                                  <td style={{ whiteSpace: "pre-wrap" }}>
+                                    {item.deskripsi}
+                                    {(item.gambar ?? []).length > 0 && (
+                                      <div className="d-flex flex-wrap gap-2 mt-2">
+                                        {(item.gambar ?? []).map((gb) => (
+                                          <a
+                                            key={gb.uuid}
+                                            href={`/api/sales/quotation/gambar/${gb.uuid}`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                          >
+                                            <img
+                                              src={`/api/sales/quotation/gambar/${gb.uuid}`}
+                                              alt={gb.nama_asli}
+                                              title={gb.nama_asli}
+                                              style={{
+                                                width: 52,
+                                                height: 52,
+                                                objectFit: "cover",
+                                                borderRadius: 6,
+                                                border:
+                                                  "1px solid var(--ems-tepi-input)",
+                                              }}
+                                            />
+                                          </a>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td align="center">{item.qty}</td>
+                                  <td align="center">{item.satuan || "-"}</td>
+                                  <td align="right">
+                                    {uang(Number(item.harga), data.currency)}
+                                  </td>
+                                  <td align="center">
+                                    {Number(item.diskon_persen) > 0
+                                      ? `${item.diskon_persen}%`
+                                      : "-"}
+                                  </td>
+                                  <td align="center">
+                                    {item.kena_pph ? (
+                                      <i className="fas fa-check text-success" />
+                                    ) : (
+                                      "-"
+                                    )}
+                                  </td>
+                                  <td align="right">
+                                    {uang(item.jumlah ?? 0, data.currency)}
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
@@ -411,7 +439,9 @@ export default function QuotationDetail(props: Props) {
                       <tbody>
                         <tr>
                           <td className="text-muted">Subtotal</td>
-                          <td align="right">{rupiah(data.subtotal)}</td>
+                          <td align="right">
+                            {uang(data.subtotal, data.currency)}
+                          </td>
                         </tr>
                         {data.diskon_persen > 0 && (
                           <>
@@ -420,12 +450,8 @@ export default function QuotationDetail(props: Props) {
                                 Diskon ({data.diskon_persen}%)
                               </td>
                               <td align="right">
-                                - {rupiah(data.diskon_nominal)}
+                                - {uang(data.diskon_nominal, data.currency)}
                               </td>
-                            </tr>
-                            <tr>
-                              <td className="text-muted">DPP</td>
-                              <td align="right">{rupiah(data.dpp)}</td>
                             </tr>
                           </>
                         )}
@@ -434,7 +460,9 @@ export default function QuotationDetail(props: Props) {
                             <td className="text-muted">
                               PPN ({data.ppn_persen}%)
                             </td>
-                            <td align="right">{rupiah(data.ppn_nominal)}</td>
+                            <td align="right">
+                              {uang(data.ppn_nominal, data.currency)}
+                            </td>
                           </tr>
                         )}
                         {data.pph_nominal > 0 && (
@@ -446,7 +474,9 @@ export default function QuotationDetail(props: Props) {
                                 : ""}
                               )
                             </td>
-                            <td align="right">- {rupiah(data.pph_nominal)}</td>
+                            <td align="right">
+                              - {uang(data.pph_nominal, data.currency)}
+                            </td>
                           </tr>
                         )}
                         {/* Namanya tetap GRAND TOTAL apa pun isinya. Dulu
@@ -455,7 +485,9 @@ export default function QuotationDetail(props: Props) {
                             cuma menyulitkan orang mencocokkannya dengan PDF. */}
                         <tr className="fw-bold border-top">
                           <td>GRAND TOTAL</td>
-                          <td align="right">{rupiah(data.total)}</td>
+                          <td align="right">
+                            {uang(data.total, data.currency)}
+                          </td>
                         </tr>
                       </tbody>
                     </table>
@@ -498,7 +530,11 @@ export default function QuotationDetail(props: Props) {
                     type="button"
                     className="btn btn-outline-primary"
                     disabled={isLoading}
-                    onClick={() => push(`/sales/quotation/edit?id=${data.id}`)}
+                    onClick={() =>
+                      push(
+                        `/sales/quotation/edit?id=${data.id}&page=${halaman}`,
+                      )
+                    }
                   >
                     <i className="fas fa-pencil-alt me-2" />
                     EDIT

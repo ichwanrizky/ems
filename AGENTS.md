@@ -189,10 +189,24 @@ menyentuhnya dari sini:
   jam browser bisa salah, dan menandai penawaran kedaluwarsa sehari lebih cepat
   membuat orang membatalkan tawaran yang masih sah.
 
-  Kolom `status` masih ada di database dan endpoint `/status` serta `/revisi`
-  masih hidup di backend, tapi **tidak ada UI yang memanggilnya** — semua baris
-  baru lahir dan menetap sebagai `draft`. Jangan menambah tombol yang
-  membangunkannya kembali tanpa memutuskan dulu alur statusnya seperti apa.
+  Backend pun sudah tidak menyimpannya: kolom `status`/`alasan`, tabel
+  `quotation_log`, kolom `induk_id`, dan endpoint `/status`, `/revisi`, serta
+  `/duplikat` semuanya dibuang. Yang menggantikan kebutuhannya cuma `revisi` —
+  angka yang diketik user di form edit untuk menandai dokumen pengganti.
+  Penawaran baru dibuat dari menu Tambah, bukan disalin: salinan membawa serta
+  syarat pembayaran, catatan, dan lampiran gambar lama tanpa terlihat. Jangan
+  menambahkan alur status kembali hanya karena "dokumen biasanya punya status".
+- **Baris judul** — item bisa dicentang "Jadikan judul bagian": barisnya jadi
+  penanda, kolom angkanya dilebur jadi satu sel keterangan, dan ia tidak
+  kebagian nomor urut (sama seperti di PDF). Jangan menukarnya dengan grup —
+  grup memikul subtotal, judul cuma tulisan pemisah dan boleh berkali-kali
+  dalam satu grup.
+- **Mata uang per penawaran** (`currency`: IDR/USD/SGD) — penentu simbol, BUKAN
+  kurs: harga diketik dalam mata uang itu dan tidak pernah dikonversi. Satu-
+  satunya pemformat uang di modul ini `uang()` di `_libs/skema.ts`; jangan
+  membuat `Intl.NumberFormat` sendiri di komponen. Dulu tiga komponen memegang
+  salinannya masing-masing yang semuanya mengunci `"IDR"`, dan begitu mata uang
+  berhenti selalu rupiah, yang terlewat akan mencetak "Rp" di atas angka dolar.
 - **PDF-nya biner, jadi tidak lewat `ApiClient`.** `ApiClient` selalu mem-parse
   JSON dan tokennya tidak pernah sampai ke browser, karena itu ada route
   `app/api/sales/quotation/[nomor]/pdf/route.ts` yang mengambilkan di server.

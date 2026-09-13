@@ -4,11 +4,12 @@ import Alert from "@/components/Alert";
 import Textarea from "@/components/Textarea";
 import {
   CustomerProps,
+  QuotationCurrency,
   QuotationGrupProps,
   QuotationItemProps,
   QuotationProps,
 } from "@/types";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { NumericFormat } from "react-number-format";
 import Select from "react-select";
@@ -25,6 +26,7 @@ import {
   kunciItem,
   MAKS_GAMBAR,
   ringkasError,
+  uang,
   validasiQuotation,
 } from "../_libs/skema";
 
@@ -62,9 +64,14 @@ import {
  *
  * ## Yang TIDAK disembunyikan
  *
- * Kolom **PPh** di tabel dan seluruh baris di panel nilai (Diskon, DPP, PPN,
- * PPh) selalu tampil selama penawarannya bukan pilihan paket — termasuk saat
+ * Kolom **PPh** di tabel dan seluruh baris di panel nilai (Diskon, PPN, PPh)
+ * selalu tampil selama penawarannya bukan pilihan paket — termasuk saat
  * nilainya masih nol.
+ *
+ * Kecuali **DPP** (subtotal − diskon), yang tidak ditampilkan di mana pun. Ia
+ * tetap dihitung dan tetap jadi dasar PPN/PPh, tapi untuk penawaran tanpa
+ * diskon nilainya sama persis dengan Subtotal — barisnya cuma mengulang angka
+ * di atasnya.
  *
  * Sempat dibuat muncul-hilang mengikuti isian, dan itu salah: angkanya jadi
  * sulit dicocokkan karena barisnya berpindah sambil user mengetik, dan yang
@@ -96,6 +103,7 @@ type Props = {
 };
 
 const ITEM_KOSONG = (): QuotationItemProps => ({
+  judul: false,
   deskripsi: "",
   satuan: "",
   qty: 1,
@@ -137,13 +145,6 @@ const namaGrupBaru = (daftar: QuotationGrupProps[]) => {
   return `Grup ${Math.max(tertinggi, daftar.length) + 1}`;
 };
 
-const rupiah = (n: number) =>
-  new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    minimumFractionDigits: 0,
-  }).format(Number.isFinite(n) ? n : 0);
-
 const angka = (nilai: number | string): number => {
   const n = typeof nilai === "number" ? nilai : parseFloat(String(nilai));
   return Number.isFinite(n) ? n : 0;
@@ -161,6 +162,39 @@ const hariIni = (tambahHari = 0) => {
 export default function QuotationForm({ quotationEdit }: Props) {
   const mode = quotationEdit ? "edit" : "create";
   const { push } = useRouter();
+
+  /**
+   * Alamat daftar yang harus dituju setelah selesai — lengkap dengan halaman
+   * asalnya. Tanpa ini, menyunting baris di halaman 4 selalu memulangkan user
+   * ke halaman 1, dan dengan 5.000-an penawaran itu berarti menyusuri daftarnya
+   * dari awal cuma untuk melihat hasil suntingannya.
+   */
+  const halaman = Number(useSearchParams().get("page"));
+  const kembaliKeDaftar =
+    Number.isInteger(halaman) && halaman > 1
+      ? `/sales/quotation?page=${halaman}`
+      : "/sales/quotation";
+
+  /**
+   * Titipkan hasil simpan untuk ditampilkan halaman daftar.
+   *
+   * Banner di form ini sendiri praktis tidak pernah terbaca: tombol simpan ada
+   * di dasar form yang panjang sementara banner-nya di puncak, jadi user sudah
+   * berpindah halaman sebelum sempat menggulir ke atas. Yang gagal tetap
+   * ditampilkan DI SINI — form-nya tidak ditinggalkan, dan pesannya menempel
+   * pada isian yang perlu diperbaiki.
+   */
+  const titipHasil = (subMessage: string) => {
+    try {
+      sessionStorage.setItem(
+        "quotation:hasil",
+        JSON.stringify({ color: "success", message: "Success", subMessage }),
+      );
+    } catch {
+      // Private window / cookie diblokir. Banner yang hilang bukan alasan
+      // untuk menggagalkan penyimpanan yang sudah berhasil.
+    }
+  };
 
   const [alert, setAlert] = useState({
     status: false,
@@ -194,6 +228,7 @@ export default function QuotationForm({ quotationEdit }: Props) {
     pph_persen: quotationEdit?.pph_persen ?? 2,
     pph_dasar: quotationEdit?.pph_dasar ?? "item",
     tampilkan_grand_total: quotationEdit?.tampilkan_grand_total ?? true,
+    currency: quotationEdit?.currency ?? "IDR",
     grup:
       quotationEdit?.grup && quotationEdit.grup.length > 0
         ? quotationEdit.grup.map((g) => ({
@@ -398,7 +433,10 @@ export default function QuotationForm({ quotationEdit }: Props) {
     }));
 
   // -------------------------------------------------------------- hitung
+  // Baris judul tidak pernah menyumbang nilai — sama seperti di
+  // QuotationController::hitung(), yang jadi acuannya.
   const jumlahBaris = (b: QuotationItemProps) => {
+    if (b.judul) return 0;
     const kotor = angka(b.qty) * angka(b.harga);
     return kotor - (kotor * angka(b.diskon_persen)) / 100;
   };
@@ -467,13 +505,11 @@ export default function QuotationForm({ quotationEdit }: Props) {
           : await createQuotation(formData);
 
       if (result.status) {
-        setAlert({
-          status: true,
-          color: "success",
-          message: "Success",
-          subMessage: result.message,
-        });
-        setTimeout(() => push("/sales/quotation"), 1000);
+        // Langsung pindah, tanpa jeda 1 detik seperti sebelumnya: bannernya
+        // sekarang muncul di halaman daftar, jadi menahan user di form yang
+        // sudah selesai hanya membuat tombol simpan terasa menggantung.
+        titipHasil(result.message);
+        push(kembaliKeDaftar);
       } else {
         if (result.error) setErrorForm(result.error);
         setAlert({
@@ -720,7 +756,7 @@ export default function QuotationForm({ quotationEdit }: Props) {
                       </div>
                     </div>
 
-                    <div className="col-md-6">
+                    <div className="col-md-4">
                       <div className="form-group mb-3">
                         <label htmlFor="perihal" className="form-label">
                           PERIHAL
@@ -739,6 +775,34 @@ export default function QuotationForm({ quotationEdit }: Props) {
                           }
                         />
                         {pesan("perihal")}
+                      </div>
+                    </div>
+
+                    {/* Mata uang menentukan SIMBOL yang tercetak, bukan kurs:
+                        harga diketik dalam mata uang ini dan tidak pernah
+                        dikonversi. Dropdown, bukan isian bebas — nilainya jadi
+                        awalan tiap nominal di PDF. */}
+                    <div className="col-md-2">
+                      <div className="form-group mb-3">
+                        <label htmlFor="currency" className="form-label">
+                          MATA UANG
+                        </label>
+                        <select
+                          id="currency"
+                          className={kelas("currency", "form-control")}
+                          value={formData.currency}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              currency: e.target.value as QuotationCurrency,
+                            })
+                          }
+                        >
+                          <option value="IDR">IDR — Rupiah</option>
+                          <option value="USD">USD — Dolar AS</option>
+                          <option value="SGD">SGD — Dolar Singapura</option>
+                        </select>
+                        {pesan("currency")}
                       </div>
                     </div>
                   </div>
@@ -852,7 +916,7 @@ export default function QuotationForm({ quotationEdit }: Props) {
                             {pesan(kunciGrup(gi))}
                           </div>
                           <span className="ms-auto fw-bold">
-                            {rupiah(subtotalGrup(g))}
+                            {uang(subtotalGrup(g), formData.currency)}
                           </span>
                           <button
                             type="button"
@@ -891,12 +955,18 @@ export default function QuotationForm({ quotationEdit }: Props) {
                                 const jumlahGambar = (baris.gambar ?? [])
                                   .length;
                                 const penuh = jumlahGambar >= MAKS_GAMBAR;
-                                nomorItem += 1;
+
+                                // Baris judul TIDAK ikut bernomor — sama
+                                // seperti di PDF. Nomor item itu alat rujuk
+                                // ("tolong revisi item 4"); memberi judul nomor
+                                // menggeser nomor barang di bawahnya menjauh
+                                // dari yang tertulis di PO customer.
+                                if (!baris.judul) nomorItem += 1;
 
                                 return (
                                   <tr key={ii}>
                                     <td align="center" className="sel-statis">
-                                      {nomorItem}
+                                      {baris.judul ? "" : nomorItem}
                                     </td>
                                     <td>
                                       <Textarea
@@ -904,7 +974,11 @@ export default function QuotationForm({ quotationEdit }: Props) {
                                           kunciItem(gi, ii, "deskripsi"),
                                           "form-control-sm",
                                         )}
-                                        placeholder="Nama / uraian item"
+                                        placeholder={
+                                          baris.judul
+                                            ? "Judul bagian"
+                                            : "Nama / uraian item"
+                                        }
                                         value={baris.deskripsi}
                                         onChange={(e) =>
                                           ubahItem(
@@ -917,7 +991,40 @@ export default function QuotationForm({ quotationEdit }: Props) {
                                       />
                                       {pesan(kunciItem(gi, ii, "deskripsi"))}
 
-                                      <div className="lampiran-item">
+                                      {/* Saklarnya di sini, menempel pada
+                                          uraiannya — bukan di kolom tersendiri.
+                                          Yang diubah centang ini memang arti
+                                          baris ITU, dan menambah satu kolom
+                                          sempit lagi untuk saklar yang jarang
+                                          dipakai cuma mempersempit kolom uraian
+                                          yang justru paling butuh tempat. */}
+                                      <div className="form-check mt-1">
+                                        <input
+                                          type="checkbox"
+                                          className="form-check-input"
+                                          id={`judul-${gi}-${ii}`}
+                                          checked={!!baris.judul}
+                                          onChange={(e) =>
+                                            ubahItem(
+                                              gi,
+                                              ii,
+                                              "judul",
+                                              e.target.checked,
+                                            )
+                                          }
+                                        />
+                                        <label
+                                          className="form-check-label text-muted fs-6"
+                                          htmlFor={`judul-${gi}-${ii}`}
+                                        >
+                                          Jadikan judul bagian
+                                        </label>
+                                      </div>
+
+                                      <div
+                                        className="lampiran-item"
+                                        hidden={!!baris.judul}
+                                      >
                                         {(baris.gambar ?? []).map((gb) => (
                                           <span className="kotak" key={gb.uuid}>
                                             <img
@@ -989,133 +1096,184 @@ export default function QuotationForm({ quotationEdit }: Props) {
                                       </div>
                                       {pesan(kunciItem(gi, ii, "gambar"))}
                                     </td>
-                                    {/* Pesan error sel angka sengaja TIDAK
+                                    {/* Baris judul tidak punya angka sama
+                                        sekali, jadi seluruh kolom angkanya
+                                        dilebur jadi satu sel keterangan.
+                                        Sebelumnya sempat dibiarkan tampil tapi
+                                        disabled — hasilnya deretan kotak abu
+                                        berisi "0" yang tetap terbaca sebagai
+                                        harga, padahal barisnya judul. */}
+                                    {baris.judul ? (
+                                      <td
+                                        colSpan={kolomPph ? 6 : 5}
+                                        align="center"
+                                        className="sel-statis text-muted fst-italic fs-6"
+                                      >
+                                        judul bagian &middot; tidak ikut
+                                        dihitung
+                                      </td>
+                                    ) : (
+                                      <>
+                                        {/* Pesan error sel angka sengaja TIDAK
                                         dicetak di bawah kolomnya — lebarnya
                                         cuma 9% dan satu kalimat di situ
                                         merentangkan barisnya jadi empat baris.
                                         Yang menandai cukup tepi merah, dan
                                         kalimat lengkapnya naik ke alert atas
                                         form lewat `ringkasError`. */}
-                                    <td>
-                                      <NumericFormat
-                                        className={kelas(
-                                          kunciItem(gi, ii, "qty"),
-                                          "form-control form-control-sm text-end",
+                                        <td>
+                                          <NumericFormat
+                                            className={kelas(
+                                              kunciItem(gi, ii, "qty"),
+                                              "form-control form-control-sm text-end",
+                                            )}
+                                            title={
+                                              errorForm[
+                                                kunciItem(gi, ii, "qty")
+                                              ]
+                                            }
+                                            thousandSeparator=","
+                                            decimalScale={2}
+                                            value={baris.qty}
+                                            onValueChange={(v) =>
+                                              ubahItem(
+                                                gi,
+                                                ii,
+                                                "qty",
+                                                v.floatValue ?? 0,
+                                              )
+                                            }
+                                            onWheel={(e: any) =>
+                                              e.target.blur()
+                                            }
+                                          />
+                                        </td>
+                                        <td>
+                                          <input
+                                            type="text"
+                                            className={kelas(
+                                              kunciItem(gi, ii, "satuan"),
+                                              "form-control form-control-sm",
+                                            )}
+                                            title={
+                                              errorForm[
+                                                kunciItem(gi, ii, "satuan")
+                                              ]
+                                            }
+                                            placeholder="unit"
+                                            value={baris.satuan ?? ""}
+                                            onChange={(e) =>
+                                              ubahItem(
+                                                gi,
+                                                ii,
+                                                "satuan",
+                                                e.target.value,
+                                              )
+                                            }
+                                          />
+                                        </td>
+                                        <td>
+                                          <NumericFormat
+                                            className={kelas(
+                                              kunciItem(gi, ii, "harga"),
+                                              "form-control form-control-sm text-end",
+                                            )}
+                                            title={
+                                              errorForm[
+                                                kunciItem(gi, ii, "harga")
+                                              ]
+                                            }
+                                            thousandSeparator=","
+                                            decimalScale={2}
+                                            value={baris.harga}
+                                            onValueChange={(v) =>
+                                              ubahItem(
+                                                gi,
+                                                ii,
+                                                "harga",
+                                                v.floatValue ?? 0,
+                                              )
+                                            }
+                                            onWheel={(e: any) =>
+                                              e.target.blur()
+                                            }
+                                          />
+                                        </td>
+                                        <td>
+                                          <NumericFormat
+                                            className={kelas(
+                                              kunciItem(
+                                                gi,
+                                                ii,
+                                                "diskon_persen",
+                                              ),
+                                              "form-control form-control-sm text-end",
+                                            )}
+                                            title={
+                                              errorForm[
+                                                kunciItem(
+                                                  gi,
+                                                  ii,
+                                                  "diskon_persen",
+                                                )
+                                              ]
+                                            }
+                                            decimalScale={2}
+                                            value={baris.diskon_persen}
+                                            onValueChange={(v) =>
+                                              ubahItem(
+                                                gi,
+                                                ii,
+                                                "diskon_persen",
+                                                v.floatValue ?? 0,
+                                              )
+                                            }
+                                            onWheel={(e: any) =>
+                                              e.target.blur()
+                                            }
+                                          />
+                                        </td>
+                                        {kolomPph && (
+                                          <td
+                                            align="center"
+                                            className="sel-statis"
+                                          >
+                                            <input
+                                              type="checkbox"
+                                              className="form-check-input"
+                                              title={
+                                                pphPerItem
+                                                  ? "Item ini dikenakan PPh"
+                                                  : "PPh sedang dikenakan atas seluruh nilai, jadi centang per item tidak berlaku"
+                                              }
+                                              checked={
+                                                pphPerItem
+                                                  ? !!baris.kena_pph
+                                                  : true
+                                              }
+                                              disabled={!pphPerItem}
+                                              onChange={(e) =>
+                                                ubahItem(
+                                                  gi,
+                                                  ii,
+                                                  "kena_pph",
+                                                  e.target.checked,
+                                                )
+                                              }
+                                            />
+                                          </td>
                                         )}
-                                        title={
-                                          errorForm[kunciItem(gi, ii, "qty")]
-                                        }
-                                        thousandSeparator=","
-                                        decimalScale={2}
-                                        value={baris.qty}
-                                        onValueChange={(v) =>
-                                          ubahItem(
-                                            gi,
-                                            ii,
-                                            "qty",
-                                            v.floatValue ?? 0,
-                                          )
-                                        }
-                                        onWheel={(e: any) => e.target.blur()}
-                                      />
-                                    </td>
-                                    <td>
-                                      <input
-                                        type="text"
-                                        className={kelas(
-                                          kunciItem(gi, ii, "satuan"),
-                                          "form-control form-control-sm",
-                                        )}
-                                        title={
-                                          errorForm[kunciItem(gi, ii, "satuan")]
-                                        }
-                                        placeholder="unit"
-                                        value={baris.satuan ?? ""}
-                                        onChange={(e) =>
-                                          ubahItem(
-                                            gi,
-                                            ii,
-                                            "satuan",
-                                            e.target.value,
-                                          )
-                                        }
-                                      />
-                                    </td>
-                                    <td>
-                                      <NumericFormat
-                                        className={kelas(
-                                          kunciItem(gi, ii, "harga"),
-                                          "form-control form-control-sm text-end",
-                                        )}
-                                        title={
-                                          errorForm[kunciItem(gi, ii, "harga")]
-                                        }
-                                        thousandSeparator=","
-                                        decimalScale={2}
-                                        value={baris.harga}
-                                        onValueChange={(v) =>
-                                          ubahItem(
-                                            gi,
-                                            ii,
-                                            "harga",
-                                            v.floatValue ?? 0,
-                                          )
-                                        }
-                                        onWheel={(e: any) => e.target.blur()}
-                                      />
-                                    </td>
-                                    <td>
-                                      <NumericFormat
-                                        className={kelas(
-                                          kunciItem(gi, ii, "diskon_persen"),
-                                          "form-control form-control-sm text-end",
-                                        )}
-                                        title={
-                                          errorForm[
-                                            kunciItem(gi, ii, "diskon_persen")
-                                          ]
-                                        }
-                                        decimalScale={2}
-                                        value={baris.diskon_persen}
-                                        onValueChange={(v) =>
-                                          ubahItem(
-                                            gi,
-                                            ii,
-                                            "diskon_persen",
-                                            v.floatValue ?? 0,
-                                          )
-                                        }
-                                        onWheel={(e: any) => e.target.blur()}
-                                      />
-                                    </td>
-                                    {kolomPph && (
-                                      <td align="center" className="sel-statis">
-                                        <input
-                                          type="checkbox"
-                                          className="form-check-input"
-                                          title={
-                                            pphPerItem
-                                              ? "Item ini dikenakan PPh"
-                                              : "PPh sedang dikenakan atas seluruh nilai, jadi centang per item tidak berlaku"
-                                          }
-                                          checked={
-                                            pphPerItem ? !!baris.kena_pph : true
-                                          }
-                                          disabled={!pphPerItem}
-                                          onChange={(e) =>
-                                            ubahItem(
-                                              gi,
-                                              ii,
-                                              "kena_pph",
-                                              e.target.checked,
-                                            )
-                                          }
-                                        />
-                                      </td>
+                                        <td
+                                          align="right"
+                                          className="sel-statis"
+                                        >
+                                          {uang(
+                                            jumlahBaris(baris),
+                                            formData.currency,
+                                          )}
+                                        </td>
+                                      </>
                                     )}
-                                    <td align="right" className="sel-statis">
-                                      {rupiah(jumlahBaris(baris))}
-                                    </td>
                                     <td align="center" className="sel-statis">
                                       <button
                                         type="button"
@@ -1352,7 +1510,7 @@ export default function QuotationForm({ quotationEdit }: Props) {
                                   {g.nama || `Grup ${gi + 1}`}
                                 </td>
                                 <td align="right" className="fw-bold">
-                                  {rupiah(subtotalGrup(g))}
+                                  {uang(subtotalGrup(g), formData.currency)}
                                 </td>
                               </tr>
                             ))}
@@ -1368,7 +1526,9 @@ export default function QuotationForm({ quotationEdit }: Props) {
                                   memang tidak dicetak. */}
                               <tr>
                                 <td className="text-muted">Subtotal</td>
-                                <td align="right">{rupiah(subtotal)}</td>
+                                <td align="right">
+                                  {uang(subtotal, formData.currency)}
+                                </td>
                               </tr>
                               <tr
                                 className={diskonPersen > 0 ? "" : "text-muted"}
@@ -1378,18 +1538,16 @@ export default function QuotationForm({ quotationEdit }: Props) {
                                 </td>
                                 <td align="right">
                                   {diskonNominal > 0 ? "- " : ""}
-                                  {rupiah(diskonNominal)}
+                                  {uang(diskonNominal, formData.currency)}
                                 </td>
-                              </tr>
-                              <tr>
-                                <td className="text-muted">DPP</td>
-                                <td align="right">{rupiah(dpp)}</td>
                               </tr>
                               <tr className={ppnPersen > 0 ? "" : "text-muted"}>
                                 <td className="text-muted">
                                   PPN ({ppnPersen}%)
                                 </td>
-                                <td align="right">{rupiah(ppnNominal)}</td>
+                                <td align="right">
+                                  {uang(ppnNominal, formData.currency)}
+                                </td>
                               </tr>
                               <tr
                                 className={pphNominal > 0 ? "" : "text-muted"}
@@ -1403,12 +1561,14 @@ export default function QuotationForm({ quotationEdit }: Props) {
                                 </td>
                                 <td align="right">
                                   {pphNominal > 0 ? "- " : ""}
-                                  {rupiah(pphNominal)}
+                                  {uang(pphNominal, formData.currency)}
                                 </td>
                               </tr>
                               <tr className="fw-bold border-top">
                                 <td>GRAND TOTAL</td>
-                                <td align="right">{rupiah(total)}</td>
+                                <td align="right">
+                                  {uang(total, formData.currency)}
+                                </td>
                               </tr>
                             </>
                           )}
@@ -1424,7 +1584,7 @@ export default function QuotationForm({ quotationEdit }: Props) {
                 </div>
 
                 <div className="card-footer py-3">
-                  <a href="/sales/quotation" className="btn btn-secondary me-2">
+                  <a href={kembaliKeDaftar} className="btn btn-secondary me-2">
                     CLOSE
                   </a>
 

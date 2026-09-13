@@ -553,16 +553,23 @@ model customer {
 
 // Header penawaran. Nominalnya DECIMAL (bukan Int seperti gaji) karena qty
 // boleh pecahan — 1,5 bulan jasa × harga satuan tidak bulat ke rupiah.
+//
+// TIDAK punya siklus hidup: tidak ada draft/terkirim/disetujui, tidak ada
+// jejak perpindahan status, dan tidak ada penawaran yang "menggantikan"
+// penawaran lain. Penawaran dikirim lewat email atau WhatsApp di luar aplikasi
+// ini, dan status yang harus dipelihara tangan selalu berakhir bohong: tidak
+// ada yang kembali ke sini untuk menandai "sudah dikirim". Yang tersisa cuma
+// dokumennya — dibuat, diubah, dicetak, dihapus — dan satu keadaan yang bisa
+// dihitung sendiri tanpa ada yang mengisinya: `berlaku_sampai` yang sudah
+// lewat.
 model quotation {
   id                Int              @id @default(autoincrement())
   uuid              String           @unique @default(uuid())
   nomor             String           @unique
+  // Diisi tangan, 0 = bukan revisi. Bukan hitungan sistem: yang menentukan
+  // sebuah penawaran itu "revisi ke-2" adalah kesepakatan dengan customer di
+  // luar aplikasi ini, bukan tombol di sini.
   revisi            Int              @default(0)
-  // Penawaran revisi menunjuk ke penawaran asalnya; yang asal otomatis
-  // berstatus `direvisi` dan tidak bisa diubah lagi.
-  induk_id          Int?
-  induk             quotation?       @relation("revisi", fields: [induk_id], references: [id])
-  revisi_dari       quotation[]      @relation("revisi")
   tanggal           DateTime         @db.Date
   berlaku_sampai    DateTime         @db.Date
   customer_id       Int
@@ -586,22 +593,20 @@ model quotation {
   // Penawaran berisi beberapa PILIHAN tidak punya grand total yang bermakna:
   // yang tampil hanya subtotal tiap grup. Lihat catatan di QuotationController.
   tampilkan_grand_total Boolean      @default(true)
-  // draft | terkirim | disetujui | ditolak | dibatalkan | direvisi
-  status            String           @default("draft")
-  alasan            String?          @db.Text
+  // Mata uang dokumen — penentu simbol yang tercetak di PDF, BUKAN kurs:
+  // nominalnya disimpan apa adanya dalam mata uang ini, tidak pernah
+  // dikonversi. Sebagian besar penawaran IDR; USD/SGD dipakai untuk customer
+  // luar negeri.
+  currency          String           @default("IDR")
   created_by        Int?
   created_at        DateTime?        @db.DateTime(0)
   updated_at        DateTime?        @db.DateTime(0)
-  dikirim_at        DateTime?        @db.DateTime(0)
-  diputuskan_at     DateTime?        @db.DateTime(0)
-  diputuskan_by     Int?
   is_deleted        Boolean          @default(false)
   quotation_item    quotation_item[]
   quotation_grup    quotation_grup[]
   quotation_gambar  quotation_gambar[]
-  quotation_log     quotation_log[]
 
-  @@index([status, tanggal])
+  @@index([tanggal])
   @@index([customer_id])
 }
 
@@ -612,6 +617,18 @@ model quotation_item {
   grup_id       Int?
   grup          quotation_grup? @relation(fields: [grup_id], references: [id], onDelete: SetNull)
   urut          Int
+  /// Baris ini JUDUL, bukan barang: hanya `deskripsi` yang berarti, dan qty /
+  /// harga / jumlah dipaksa nol supaya ia tidak pernah ikut penjumlahan.
+  ///
+  /// Ada karena penawaran nyata sering butuh penanda bagian di tengah daftar
+  /// ("Pengadaan Sembako", lalu barangnya). Sistem lama tidak punya ini, jadi
+  /// orang menyiasatinya dengan item berharga Rp 0 — yang tetap dihitung, tetap
+  /// bernomor, dan tetap memakan kolom qty/satuan/harga yang kosong.
+  ///
+  /// Berbeda dari GRUP: grup memikul subtotal dan dipakai saat bagiannya memang
+  /// perlu dijumlahkan sendiri. Judul cuma tulisan pemisah, dan boleh berkali-
+  /// kali dalam satu grup.
+  judul         Boolean   @default(false)
   deskripsi     String    @db.Text
   satuan        String?
   qty           Decimal   @default(1) @db.Decimal(14, 2)
@@ -623,21 +640,6 @@ model quotation_item {
   quotation_item_gambar quotation_item_gambar[]
 
   @@index([quotation_id, urut])
-}
-
-// Jejak perpindahan status. Penawaran yang sudah dikirim ke customer tidak
-// boleh "berubah pikiran" tanpa bekas — inilah yang membuat riwayatnya terbaca.
-model quotation_log {
-  id           Int       @id @default(autoincrement())
-  quotation_id Int
-  quotation    quotation @relation(fields: [quotation_id], references: [id], onDelete: Cascade)
-  status_lama  String?
-  status_baru  String
-  catatan      String?   @db.Text
-  user_id      Int?
-  created_at   DateTime? @db.DateTime(0)
-
-  @@index([quotation_id, id])
 }
 
 /// Kelompok item di dalam satu penawaran — "Alat Elektronik", "Jasa Instalasi",
