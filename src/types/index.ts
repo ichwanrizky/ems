@@ -540,7 +540,50 @@ export type CustomerProps = {
   alamat: string | null;
   telp: string | null;
   email: string | null;
+  /**
+   * Tiga hitungan terpisah, bukan satu "jumlah dokumen": satu baris customer
+   * bisa berperan dua arah — yang kita tagih lewat Quotation, dan yang kita
+   * bayar lewat PO Keluar. Menjumlahkannya menyembunyikan perbedaan itu justru
+   * di tempat yang paling butuh membedakannya.
+   */
   jumlah_quotation?: number;
+  jumlah_po_keluar?: number;
+  jumlah_po_masuk?: number;
+};
+
+/**
+ * Sales > Tanda Tangan — satu orang yang berhak meneken dokumen.
+ *
+ * Dibuat sekali di master, lalu DIPILIH berulang kali oleh Quotation dan PO
+ * Keluar; yang menyusun dokumen tidak menggambar apa pun.
+ *
+ * `uuid` menunjuk berkas gambarnya, bukan barisnya — ia berganti setiap kali
+ * gambarnya diganti, dan itu yang dipakai `/api/sales/ttd/gambar/{uuid}`.
+ */
+export type TtdProps = {
+  number?: number;
+  id: number;
+  uuid: string | null;
+  nama: string;
+  jabatan: string | null;
+  /**
+   * Dua hitungan terpisah karena satu tanda tangan bisa dipakai dokumen yang
+   * kita tagih (quotation) dan yang kita bayar (PO keluar). Angka inilah yang
+   * membuat tombol hapus ditolak backend, jadi ia ikut tampil di daftarnya.
+   */
+  jumlah_quotation?: number;
+  jumlah_po_keluar?: number;
+};
+
+/**
+ * Tanda tangan seperti yang menempel pada satu dokumen. Null bila dokumennya
+ * tidak memilih apa pun — dokumen lama, atau memang mau diteken tangan.
+ */
+export type TtdDokumenProps = {
+  id: number;
+  uuid: string | null;
+  nama: string | null;
+  jabatan: string | null;
 };
 
 /**
@@ -615,6 +658,8 @@ export type QuotationProps = {
   syarat_pembayaran: string | null;
   catatan: string | null;
   nama_pembuat: string | null;
+  /** Penanda tangan yang dipilih. Null = ruang kosong + nama pembuat di PDF. */
+  ttd: TtdDokumenProps | null;
   created_at: string | null;
   customer: {
     id: number;
@@ -623,4 +668,131 @@ export type QuotationProps = {
     alamat: string | null;
   };
   grup?: QuotationGrupProps[];
+};
+
+/** Berkas arsip milik satu PO masuk. */
+export type PoBerkasProps = {
+  uuid: string;
+  nama_asli: string;
+  /** MIME asli — penentu ikon di daftar dan header saat berkasnya dibuka. */
+  tipe: string;
+  ukuran: number;
+};
+
+/** Penawaran dalam bentuk ringkas, untuk dropdown "PO ini menjawab yang mana". */
+export type QuotationPilihanProps = {
+  id: number;
+  nomor: string;
+  tanggal: string;
+  perihal: string | null;
+  total: number;
+  currency: QuotationCurrency;
+};
+
+/**
+ * PO yang DITERIMA dari customer — arsip, bukan dokumen yang kita susun.
+ *
+ * Tidak punya item: yang mengikat adalah berkas dari customer, dan mengetik
+ * ulang isinya cuma menciptakan versi kedua yang bisa berbeda.
+ */
+export type PoMasukProps = {
+  number?: number;
+  id: number;
+  uuid: string | null;
+  /** Nomor milik customer, diketik apa adanya. Bukan penomoran kita. */
+  nomor: string;
+  tanggal: string;
+  perihal: string | null;
+  requestor: string | null;
+  /**
+   * NULL berbeda dari 0: sebagian PO memang datang tanpa nominal (rate card,
+   * pesanan bertahap), dan nol yang dipaksakan terbaca sebagai "PO senilai nol".
+   */
+  nilai: number | null;
+  currency: QuotationCurrency;
+  catatan: string | null;
+  nama_pembuat: string | null;
+  created_at: string | null;
+  customer: {
+    id: number;
+    kode: string | null;
+    nama_customer: string | null;
+    alamat: string | null;
+  };
+  /** Penawaran yang dijawab PO ini. NULL = datang tanpa penawaran. */
+  quotation: { id: number; nomor: string | null } | null;
+  berkas: PoBerkasProps[];
+};
+
+export type PoKeluarItemProps = {
+  id?: number;
+  urut?: number;
+  /**
+   * Baris ini JUDUL bagian, bukan barang: hanya `deskripsi` yang berarti, dan
+   * qty/harga/jumlah dipaksa nol backend supaya tidak ikut dijumlahkan.
+   */
+  judul: boolean;
+  deskripsi: string;
+  satuan: string | null;
+  qty: number | string;
+  harga: number | string;
+  diskon_persen: number | string;
+  jumlah?: number;
+  /** Ikut dasar pengenaan PPh saat pph_dasar = "item". */
+  kena_pph: boolean;
+  /** Keterangan singkat per baris: nomor part, lead time, merek yang diminta. */
+  remarks: string | null;
+};
+
+/**
+ * PO yang KITA terbitkan ke pemasok.
+ *
+ * Lawan transaksinya tetap `customer` — master yang sama dengan quotation dan
+ * PO masuk, karena begitulah sistem lama bekerja dan begitu pula datanya datang.
+ * Di layar dan di cetakan ia disebut "supplier"; itu perannya pada dokumen ini,
+ * bukan tabel yang berbeda.
+ *
+ * Susunan nominalnya sama dengan `QuotationProps`. Yang TIDAK ada di sini dan
+ * sengaja: grup item (PO tidak pernah menawarkan pilihan — semua barisnya
+ * dibeli), `tampilkan_grand_total` (PO selalu punya grand total, itu yang akan
+ * dibayar), dan `berlaku_sampai`/`kadaluarsa` (PO tidak kadaluarsa; ia dipenuhi
+ * atau dibatalkan, dan keduanya terjadi di luar aplikasi ini).
+ */
+export type PoKeluarProps = {
+  number?: number;
+  id: number;
+  uuid: string | null;
+  nomor: string;
+  /** Diisi user, 0 = bukan revisi. Bukan hitungan sistem. */
+  revisi: number;
+  tanggal: string;
+  /** Kapan barangnya diminta sampai. Permintaan, bukan keadaan dokumen. */
+  tanggal_kirim: string | null;
+  perihal: string | null;
+  attn: string | null;
+  subtotal: number;
+  diskon_persen: number;
+  diskon_nominal: number;
+  dpp: number;
+  ppn_persen: number;
+  ppn_nominal: number;
+  pph_persen: number;
+  /** "item" = hanya item yang dicentang; "total" = seluruh DPP. */
+  pph_dasar: "item" | "total";
+  pph_nominal: number;
+  total: number;
+  currency: QuotationCurrency;
+  syarat_pembayaran: string | null;
+  catatan: string | null;
+  nama_pembuat: string | null;
+  /** Penanda tangan yang dipilih. Null = ruang kosong + nama pembuat di PDF. */
+  ttd: TtdDokumenProps | null;
+  created_at: string | null;
+  customer: {
+    id: number;
+    kode: string | null;
+    nama_customer: string | null;
+    alamat: string | null;
+  };
+  item?: PoKeluarItemProps[];
 };

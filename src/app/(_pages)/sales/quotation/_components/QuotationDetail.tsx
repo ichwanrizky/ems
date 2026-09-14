@@ -283,6 +283,37 @@ export default function QuotationDetail(props: Props) {
                             {data.nama_pembuat ? ` · ${data.nama_pembuat}` : ""}
                           </td>
                         </tr>
+                        {/* Ditampilkan walau kosong, bukan disembunyikan:
+                            "tidak ada tanda tangan" itu keterangan yang perlu
+                            dibaca sebelum dokumennya dikirim, dan baris yang
+                            hilang terbaca seolah fiturnya tidak ada. */}
+                        <tr>
+                          <td className="text-muted">Tanda tangan</td>
+                          <td>
+                            {data.ttd ? (
+                              <span className="d-inline-flex align-items-center gap-2">
+                                {data.ttd.uuid && (
+                                  // eslint-disable-next-line @next/next/no-img-element
+                                  <img
+                                    src={`/api/sales/ttd/gambar/${data.ttd.uuid}`}
+                                    alt={`Tanda tangan ${data.ttd.nama ?? ""}`}
+                                    style={{ maxHeight: 34 }}
+                                  />
+                                )}
+                                <span>
+                                  {data.ttd.nama}
+                                  {data.ttd.jabatan
+                                    ? ` · ${data.ttd.jabatan}`
+                                    : ""}
+                                </span>
+                              </span>
+                            ) : (
+                              <span className="text-muted">
+                                Tanpa tanda tangan — diteken manual
+                              </span>
+                            )}
+                          </td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>

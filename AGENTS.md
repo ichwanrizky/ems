@@ -54,16 +54,18 @@ src/
 │   ├── (_pages)/            # Authenticated dashboard (sidebar + header layout)
 │   │   ├── hr/              # datakaryawan, absensi, izin-*, ot-*, shift-*, reportattd-*
 │   │   ├── finance/         # gaji, mastergaji, pph, thr, adjustmengaji
-│   │   ├── sales/           # customer, quotation
+│   │   ├── sales/           # customer, quotation, po-masuk, po-keluar
 │   │   └── config/          # department, sub_department, user, roles, access, tanggalmerah, ...
 │   ├── (others)/            # Public, tokenized views (slipgaji, slipthr, pengajuan-izin)
 │   ├── auth/                # login / logout / redirect
 │   └── api/
 │       ├── auth/[...nextauth]/
 │       ├── mobile/*         # PROXY tipis ke backend (lihat di bawah)
-│       └── sales/quotation/[id]/pdf   # penerus PDF (biner, bukan JSON)
+│       └── sales/*          # penerus berkas biner (bukan JSON): PDF quotation,
+│                            # gambar item, PDF po-keluar, berkas arsip po-masuk
 ├── components/              # Shared UI (Button, Pagination, Alert, Modal, Dashboard*, Filter*)
-├── libs/                    # ApiClient, ProxyBackend, AuthOptions, date/format helpers, Slip PDF
+├── libs/                    # ApiClient, ProxyBackend, AuthOptions, Dokumen (uang/nomor),
+│                            # date/format helpers, Slip PDF
 ├── middlewares/             # WithAuth.ts (JWT gate)
 └── types/                   # Shared TS interfaces (index.ts)
 ```
@@ -118,7 +120,7 @@ Login menukar kredensial ke backend, dan JWT-nya disimpan di session NextAuth
 (`session.user.accessToken`). `ApiClient` mengambilnya lewat `getServerSession` —
 semua pemanggilan terjadi di server, token tidak pernah sampai ke browser.
 
-Masa berlaku session NextAuth dan token backend sama-sama 8 jam supaya keduanya
+Masa berlaku session NextAuth dan token backend sama-sama 1 jam supaya keduanya
 kedaluwarsa bersamaan.
 
 ## API mobile = proxy
@@ -228,6 +230,198 @@ menyentuhnya dari sini:
   bukan dari kode di sini. Sidebar menyusun dirinya dari tabel `menu`/`access`,
   jadi setelah migrasi dijalankan usernya perlu **login ulang** agar menunya
   muncul di session.
+## Sales > Purchase Order
+
+Dua dokumen berbeda yang sama-sama bernama "PO", dan sengaja jadi dua menu
+karena arahnya berlawanan:
+
+| Menu | Arah | Form | PDF |
+|---|---|---|---|
+| `sales/po-masuk` | PO **diterima** dari customer | modal | tidak — yang disimpan berkasnya |
+| `sales/po-keluar` | PO **kita terbitkan** ke pemasok | halaman penuh | ya |
+
+Menu dan hak aksesnya lahir dari
+`ems_backend/database/migrasi-purchase-order.sql`, bukan dari kode di sini —
+sidebar menyusun dirinya dari tabel `menu`/`access`, jadi setelah migrasi
+dijalankan usernya perlu **login ulang** agar menunya muncul di session.
+
+**Keduanya sudah berisi data sungguhan** hasil impor dari `sistempanji`: 84 PO
+masuk (2019–2020) berikut PDF arsipnya, dan 735 PO keluar (2020–2026) dengan
+1.803 item. Apa pun yang mengasumsikan tabelnya kecil atau datanya rapi akan
+patah — daftar lengkap keanehannya ada di AGENTS.md backend, bagian
+**Sales > Purchase Order → Isinya data sungguhan**.
+
+### TIDAK ada master supplier — pemasoknya dari daftar CUSTOMER
+
+`sales/po-keluar` mengambil lawan transaksinya dari master **Customer** yang
+sama dengan Quotation. Di layar ia tetap berlabel "SUPPLIER", karena itu
+perannya pada dokumen itu — bukan nama tabelnya.
+
+Sempat dibuat menu `sales/supplier` tersendiri, lalu dibatalkan begitu dump
+sistem lama dibaca: `tb_po2.cust_id` ternyata berisi id baris `tb_customer`, dan
+730 dari 735 PO lamanya cocok ke `customer.kode` yang sudah diimpor. Master
+terpisah berarti 313 baris harus diketik ulang untuk mendapatkan daftar yang
+isinya sudah ada.
+
+Yang terlihat dari sini:
+
+- **`getCustomerPilihan()` di `po-keluar/_libs/action.ts` memanggil
+  `/api/sales/customer/pilihan`** — bukan salah endpoint. Backend menerimanya
+  dari pemegang akses view pada quotation, PO masuk, ATAU PO keluar, jadi orang
+  yang cuma boleh membuat PO tetap dapat daftarnya.
+- **`PoKeluarProps.customer`**, bukan `.supplier`. Bentuk responsnya sengaja
+  sama dengan Quotation dan PO Masuk: ketiganya menunjuk tabel yang sama, dan
+  nama kunci yang berbeda cuma akan membuat orang mengira masternya berbeda.
+- **Master Customer menampilkan TIGA hitungan** — QUO, PO MSK, PO KLR — bukan
+  satu angka "dokumen". Satu baris customer bisa berperan dua arah, dan
+  meleburnya menyembunyikan perbedaan itu justru di tempat yang paling butuh
+  membedakannya.
+- **Menghapus customer bisa ditolak karena PO**, bukan cuma karena quotation.
+
+### PO Masuk
+
+**Formnya MODAL**, bukan halaman penuh seperti quotation dan PO keluar:
+delapan field tanpa tabel item, jadi tidak ada yang memaksa dua scrollbar
+bersarang. Yang panjang di modul ini daftarnya, bukan formnya.
+
+- **Dropdown quotation menyusul customer.** Baru terisi setelah customer
+  dipilih, dan isinya cuma penawaran milik customer itu (backend membatasi 50
+  terbaru). Ada 5.000-an penawaran — dropdown yang memuat semuanya bukan
+  bantuan, melainkan daftar yang harus disaring sendiri oleh user.
+
+  Mengganti customer **mengosongkan** pilihan penawaran. Kalau dibiarkan, PO
+  tersimpan menunjuk penawaran pihak lain; backend menolak dengan 409, tapi user
+  baru tahu setelah menekan simpan dan tidak diberi tahu field mana yang salah.
+- **`nilai` boleh kosong, dan itu BEDA dari nol.** Bentuknya `number | ""`,
+  bukan `number` berdefault 0. Sebagian PO datang tanpa nominal (rate card,
+  pesanan bertahap), dan nol yang dipaksakan membuat daftarnya memuat baris
+  "Rp 0" untuk PO yang nominalnya memang tidak tercantum. Daftar menampilkannya
+  sebagai "tidak tercantum".
+- **`setFormData` di `PoMasukFields` bertipe `Dispatch<SetStateAction<…>>`**,
+  bukan `(data) => void` seperti `CustomerFields`. Unggah berkas asinkron dan
+  bisa memakan belasan detik; selama itu user masih mengetik, jadi `formData`
+  yang tertangkap closure sudah basi saat unggahannya selesai — menyimpannya
+  dengan objek utuh akan mengembalikan isian ke keadaan sebelum diketik.
+- **Berkas diunggah SEKARANG, bukan saat submit.** Barisnya lahir yatim di
+  backend lalu diklaim saat disimpan — satu-satunya cara form create bisa punya
+  berkas, karena ia belum punya id apa pun. Berkas yang dibuang dari form ikut
+  terhapus dari penyimpanan saat disimpan, bukan cuma dilepas kaitannya.
+- Berkasnya dilayani lewat `app/api/sales/po-masuk/berkas/[uuid]/route.ts` —
+  `Content-Type` **diteruskan** dari backend, tidak dipatok seperti route gambar
+  quotation yang selalu `image/jpeg`. Di sana semua unggahan di-encode ulang
+  jadi JPEG; di sini berkasnya disimpan apa adanya dan bisa PDF, PNG, atau XLSX,
+  dan memaksakan satu tipe membuat browser mengunduh PDF sebagai berkas rusak.
+
+### PO Keluar
+
+Polanya mengikuti Quotation nyaris baris per baris — form halaman penuh
+(`create` dan `edit`, `PoKeluarForm` dipakai keduanya dan modenya ditentukan ada
+tidaknya prop `poEdit`), detail berupa modal, daftar dengan filter tahun,
+halaman aktif dicerminkan ke `?page=`, dan hasil simpan dititipkan lewat
+`sessionStorage` karena banner di dasar form panjang tidak pernah terbaca.
+
+Yang **sengaja berbeda** dari form quotation:
+
+- **Tidak ada grup item.** Itemnya satu daftar datar. Grup di quotation ada
+  karena penawaran kadang berisi pilihan paket yang tidak boleh dijumlahkan; PO
+  tidak pernah menawarkan pilihan — ia perintah beli, dan semua barisnya dibeli.
+  Karena itu tidak ada pula pilihan "Kategori / Pilihan paket", dan grand
+  totalnya selalu tampil.
+- **Ada kolom REMARKS** per baris (nomor part, lead time, merek yang diminta).
+  Kolomnya ada di PO sistem lama, memang dipakai, dan ikut tercetak di PDF.
+- **Ada TANGGAL KIRIM**, opsional. Bukan `berlaku_sampai`: PO tidak kadaluarsa,
+  jadi tidak ada lencana "lewat masa berlaku" di daftarnya.
+- **PPh default 0%,** bukan 2%. Tidak semua pembelian kena PPh 23 — barang
+  tidak, jasa iya — dan tarifnya berbeda untuk objek berbeda. Sistem lama
+  memakai pilihan "Service: Yes/No" yang dipatok 2%; angka yang terisi sendiri
+  adalah angka yang ikut tercetak tanpa pernah diputuskan siapa pun.
+- **Harga NEGATIF diterima**, sementara skema quotation menolaknya. Baris
+  potongan ("Discount") ditulis begitu di PO lama dan memang mengurangi
+  tagihan — satu baris seperti itu ikut terimpor. Menolaknya berarti PO itu
+  tidak bisa disunting sama sekali tanpa mengubah isinya lebih dulu. Yang tetap
+  ditolak cuma qty nol atau negatif.
+
+Yang **ikut** dan berlaku aturan yang sama seperti di quotation:
+
+- **Jangan menghitung total di sini.** `PoKeluarForm` menjumlahkan
+  subtotal/PPN/PPh sambil user mengetik, tapi itu murni pratinjau — yang
+  disimpan dan yang tercetak dihitung ulang backend dari item.
+- **Validasinya zod, error itemnya dikunci path** (`item.2.qty` — satu tingkat,
+  bukan dua seperti `grup.0.item.2.qty` milik quotation). Komponen membacanya
+  lewat `kunciItem()`, dan `ringkasError()` menaikkan error pertama ke alert atas
+  form karena tabel itemnya bisa sepanjang layar. Batas angkanya (item 200,
+  revisi 0–99, persen 0–100) disalin dari `PoKeluarController` dan harus tetap
+  sama dengannya.
+- **Baris judul** — item bisa dicentang "Jadikan judul bagian": barisnya jadi
+  penanda, kolom angkanya dilebur jadi satu sel keterangan, dan ia tidak
+  kebagian nomor urut (sama seperti di PDF).
+- **Customer tidak bisa diganti lewat edit** — dropdownnya dikunci dan backend
+  menolak dengan 409. Nomor PO memuat kode customer dan sudah terbit atas nama
+  itu.
+- **Mata uang per PO** (`currency`: IDR/USD/SGD) — penentu simbol, BUKAN kurs.
+- **PDF-nya biner, jadi tidak lewat `ApiClient`**, dan tautannya **dikunci
+  NOMOR** lewat `tautanPdf(nomor)` dari `_libs/skema.ts`. Alasannya sama persis
+  dengan quotation; jangan menyusun URL-nya dengan tangan.
+- **TIDAK ada alur status.** Tidak ada draft/dikirim/disetujui. PO dikirim lewat
+  email atau WhatsApp di luar aplikasi ini, dan status yang harus dipelihara
+  tangan selalu berakhir bohong.
+
+### `uang()` dan `nomorKeSlug()` tinggal di `libs/Dokumen.ts`
+
+Keduanya dipakai quotation, PO masuk, dan PO keluar. Sebelum modul PO ada,
+`uang()` tinggal di `sales/quotation/_libs/skema.ts` — dan sebelum itu lagi ia
+digandakan di tiga komponen sekaligus, semuanya mengunci `"IDR"`, sehingga
+begitu mata uang berhenti selalu rupiah yang terlewat mencetak "Rp" di atas
+angka dolar.
+
+Menyalinnya ke `_libs/skema.ts` milik PO akan mengulang persis kesalahan itu
+satu tingkat lebih tinggi. Jadi ia naik ke `libs/Dokumen.ts`, dan
+`sales/quotation/_libs/skema.ts` serta `sales/po-keluar/_libs/skema.ts`
+**meneruskannya** (`export { uang, nomorKeSlug }`) supaya impor yang sudah ada
+tidak perlu disentuh dan tidak ada dua jalan impor untuk fungsi yang sama.
+
+Jangan membuat `Intl.NumberFormat` sendiri di komponen mana pun.
+
+## Sales > Tanda Tangan
+
+Master penanda tangan (`sales/ttd`), dipilih form Quotation dan PO Keluar lewat
+field `ttd_id` — opsional, kosong berarti dokumennya diteken basah seperti dulu.
+
+### Alurnya dua langkah, dan itu disengaja
+
+Gambar diunggah **lebih dulu** (`unggahGambarTtd` → uuid), baru barisnya
+disimpan dengan uuid itu. Menyatukannya jadi satu request multipart berarti
+validasi zod tidak bisa dipakai (`FormData` tidak melewati `apiPost`) dan
+pratinjau sebelum simpan tidak mungkin. Sama persis dengan pola lampiran gambar
+quotation, termasuk berkas yatimnya — form yang ditinggal pergi meninggalkan
+berkas tanpa pemilik, dan backend menyapunya pada unggahan berikutnya.
+
+### `components/TtdPad.tsx`
+
+Coretan disimpan sebagai **daftar titik**, bukan langsung ditumpuk ke canvas.
+Dua hal ikut selesai karenanya: undo cuma membuang elemen terakhir lalu
+menggambar ulang, dan canvas yang berubah lebar (ganti orientasi ponsel, sidebar
+dibuka) bisa digambar ulang di ukuran berapa pun — canvas yang di-resize
+kehilangan isinya.
+
+Pointer Events, bukan mouse + touch terpisah: menanganinya terpisah berarti
+garis ganda di perangkat yang mengirim keduanya, dan justru laptop layar sentuh
+yang paling mungkin dipakai orang untuk menandatangani. `touch-action: none`
+wajib, kalau tidak menggeser jari menggulung halaman alih-alih menggambar.
+
+Latar canvas **tidak** diisi putih. Transparansinya bagian dari isi: tanda
+tangan dicetak menumpang garis nama di PDF.
+
+### Dropdownnya selalu menampilkan pratinjau
+
+Nama di dropdown saja tidak cukup untuk tahu bahwa yang terpilih benar-benar
+coretan yang dimaksud, dan salah pilih baru ketahuan setelah PDF sampai ke
+customer. Gambarnya lewat `/api/sales/ttd/gambar/{uuid}` — route penerus, sama
+alasannya dengan gambar quotation: token backend tidak pernah sampai ke browser,
+jadi `<img>` tidak bisa menembak backend langsung.
+
+Daftar tanda tangan yang gagal dimuat **tidak** menghentikan form. Tanda tangan
+opsional; yang terjadi cuma dropdownnya kosong.
 
 ## Template UI (WorkLoad)
 
@@ -321,5 +515,8 @@ Subjek pendek dan imperatif. Kerjakan di branch dari `master` kecuali diminta la
 | pengajuan | request/submission |
 | slip gaji / slip thr | payslip / THR slip |
 | quotation / penawaran | price quotation to a customer |
+| PO masuk | purchase order received FROM a customer — we archive the file |
+| PO keluar | purchase order we ISSUE to a vendor |
+| supplier | vendor; counterparty of PO keluar — read from the CUSTOMER master, not a table of its own |
 | terbilang | amount spelled out in words |
 | DPP | taxable base (subtotal after discount) |

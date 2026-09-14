@@ -547,6 +547,8 @@ model customer {
   created_at    DateTime?   @db.DateTime(0)
   is_deleted    Boolean     @default(false)
   quotation     quotation[]
+  po_masuk      po_masuk[]
+  po_keluar     po_keluar[]
 
   @@index([nama_customer])
 }
@@ -563,60 +565,95 @@ model customer {
 // dihitung sendiri tanpa ada yang mengisinya: `berlaku_sampai` yang sudah
 // lewat.
 model quotation {
-  id                Int              @id @default(autoincrement())
-  uuid              String           @unique @default(uuid())
-  nomor             String           @unique
+  id                    Int                @id @default(autoincrement())
+  uuid                  String             @unique @default(uuid())
+  nomor                 String             @unique
   // Diisi tangan, 0 = bukan revisi. Bukan hitungan sistem: yang menentukan
   // sebuah penawaran itu "revisi ke-2" adalah kesepakatan dengan customer di
   // luar aplikasi ini, bukan tombol di sini.
-  revisi            Int              @default(0)
-  tanggal           DateTime         @db.Date
-  berlaku_sampai    DateTime         @db.Date
-  customer_id       Int
-  customer          customer         @relation(fields: [customer_id], references: [id])
-  attn              String?
-  perihal           String
-  syarat_pembayaran String?          @db.Text
-  catatan           String?          @db.Text
-  subtotal          Decimal          @default(0) @db.Decimal(18, 2)
-  diskon_persen     Decimal          @default(0) @db.Decimal(5, 2)
-  diskon_nominal    Decimal          @default(0) @db.Decimal(18, 2)
-  dpp               Decimal          @default(0) @db.Decimal(18, 2)
-  ppn_persen        Decimal          @default(0) @db.Decimal(5, 2)
-  ppn_nominal       Decimal          @default(0) @db.Decimal(18, 2)
+  revisi                Int                @default(0)
+  tanggal               DateTime           @db.Date
+  berlaku_sampai        DateTime           @db.Date
+  customer_id           Int
+  customer              customer           @relation(fields: [customer_id], references: [id])
+  attn                  String?
+  perihal               String
+  syarat_pembayaran     String?            @db.Text
+  catatan               String?            @db.Text
+  subtotal              Decimal            @default(0) @db.Decimal(18, 2)
+  diskon_persen         Decimal            @default(0) @db.Decimal(5, 2)
+  diskon_nominal        Decimal            @default(0) @db.Decimal(18, 2)
+  dpp                   Decimal            @default(0) @db.Decimal(18, 2)
+  ppn_persen            Decimal            @default(0) @db.Decimal(5, 2)
+  ppn_nominal           Decimal            @default(0) @db.Decimal(18, 2)
   // PPh dipotong customer, jadi ia PENGURANG: total = dpp + ppn - pph.
   // `pph_dasar`: "item" = hanya item yang dicentang; "total" = seluruh dpp.
-  pph_persen        Decimal          @default(0) @db.Decimal(5, 2)
-  pph_dasar         String           @default("item")
-  pph_nominal       Decimal          @default(0) @db.Decimal(18, 2)
-  total             Decimal          @default(0) @db.Decimal(18, 2)
+  pph_persen            Decimal            @default(0) @db.Decimal(5, 2)
+  pph_dasar             String             @default("item")
+  pph_nominal           Decimal            @default(0) @db.Decimal(18, 2)
+  total                 Decimal            @default(0) @db.Decimal(18, 2)
   // Penawaran berisi beberapa PILIHAN tidak punya grand total yang bermakna:
   // yang tampil hanya subtotal tiap grup. Lihat catatan di QuotationController.
-  tampilkan_grand_total Boolean      @default(true)
+  tampilkan_grand_total Boolean            @default(true)
   // Mata uang dokumen — penentu simbol yang tercetak di PDF, BUKAN kurs:
   // nominalnya disimpan apa adanya dalam mata uang ini, tidak pernah
   // dikonversi. Sebagian besar penawaran IDR; USD/SGD dipakai untuk customer
   // luar negeri.
-  currency          String           @default("IDR")
-  created_by        Int?
-  created_at        DateTime?        @db.DateTime(0)
-  updated_at        DateTime?        @db.DateTime(0)
-  is_deleted        Boolean          @default(false)
-  quotation_item    quotation_item[]
-  quotation_grup    quotation_grup[]
-  quotation_gambar  quotation_gambar[]
+  currency              String             @default("IDR")
+  // Penanda tangan yang tercetak di blok tanda tangan PDF. Opsional: ratusan
+  // penawaran lama tidak punya, dan yang kosong tercetak seperti dulu — ruang
+  // kosong untuk teken basah, dengan nama pembuat di bawah garis.
+  ttd_id                Int?
+  ttd                   ttd?               @relation(fields: [ttd_id], references: [id])
+  created_by            Int?
+  created_at            DateTime?          @db.DateTime(0)
+  updated_at            DateTime?          @db.DateTime(0)
+  is_deleted            Boolean            @default(false)
+  quotation_item        quotation_item[]
+  quotation_grup        quotation_grup[]
+  quotation_gambar      quotation_gambar[]
+  po_masuk              po_masuk[]
 
   @@index([tanggal])
   @@index([customer_id])
+  @@index([ttd_id])
+}
+
+/// Sales > Tanda Tangan — master orang yang berhak meneken dokumen.
+///
+/// Dibuat sekali, lalu DIPILIH berulang kali oleh quotation dan po_keluar;
+/// yang menyusun dokumen tidak menggambar apa pun. Ini yang menggantikan
+/// praktik cetak → teken tangan → pindai ulang.
+///
+/// Gambarnya TIDAK di sini. Sama seperti quotation_gambar dan po_berkas,
+/// berkasnya ada di luar document root backend (`storage/ttd/<uuid>.png`) dan
+/// `uuid` di baris ini yang menunjuk ke sana — jadi mengganti gambar berarti
+/// mengganti uuid-nya juga, dan cache browser tidak perlu dipikirkan.
+model ttd {
+  id         Int         @id @default(autoincrement())
+  /// Nama berkas gambarnya, bukan identitas barisnya — lihat catatan model.
+  uuid       String      @unique @default(uuid())
+  nama       String
+  /// Tercetak kecil di bawah nama. Opsional: sebagian penanda tangan cukup
+  /// dikenal dengan namanya saja.
+  jabatan    String?
+  created_by Int?
+  created_at DateTime?   @db.DateTime(0)
+  updated_at DateTime?   @db.DateTime(0)
+  is_deleted Boolean     @default(false)
+  quotation  quotation[]
+  po_keluar  po_keluar[]
+
+  @@index([is_deleted])
 }
 
 model quotation_item {
-  id            Int       @id @default(autoincrement())
-  quotation_id  Int
-  quotation     quotation @relation(fields: [quotation_id], references: [id], onDelete: Cascade)
-  grup_id       Int?
-  grup          quotation_grup? @relation(fields: [grup_id], references: [id], onDelete: SetNull)
-  urut          Int
+  id                    Int                     @id @default(autoincrement())
+  quotation_id          Int
+  quotation             quotation               @relation(fields: [quotation_id], references: [id], onDelete: Cascade)
+  grup_id               Int?
+  grup                  quotation_grup?         @relation(fields: [grup_id], references: [id], onDelete: SetNull)
+  urut                  Int
   /// Baris ini JUDUL, bukan barang: hanya `deskripsi` yang berarti, dan qty /
   /// harga / jumlah dipaksa nol supaya ia tidak pernah ikut penjumlahan.
   ///
@@ -628,15 +665,15 @@ model quotation_item {
   /// Berbeda dari GRUP: grup memikul subtotal dan dipakai saat bagiannya memang
   /// perlu dijumlahkan sendiri. Judul cuma tulisan pemisah, dan boleh berkali-
   /// kali dalam satu grup.
-  judul         Boolean   @default(false)
-  deskripsi     String    @db.Text
-  satuan        String?
-  qty           Decimal   @default(1) @db.Decimal(14, 2)
-  harga         Decimal   @default(0) @db.Decimal(18, 2)
-  diskon_persen Decimal   @default(0) @db.Decimal(5, 2)
-  jumlah        Decimal   @default(0) @db.Decimal(18, 2)
+  judul                 Boolean                 @default(false)
+  deskripsi             String                  @db.Text
+  satuan                String?
+  qty                   Decimal                 @default(1) @db.Decimal(14, 2)
+  harga                 Decimal                 @default(0) @db.Decimal(18, 2)
+  diskon_persen         Decimal                 @default(0) @db.Decimal(5, 2)
+  jumlah                Decimal                 @default(0) @db.Decimal(18, 2)
   // Dicentang = ikut dasar pengenaan PPh saat `pph_dasar = "item"`.
-  kena_pph      Boolean   @default(false)
+  kena_pph              Boolean                 @default(false)
   quotation_item_gambar quotation_item_gambar[]
 
   @@index([quotation_id, urut])
@@ -698,4 +735,195 @@ model quotation_item_gambar {
 
   @@unique([item_id, gambar_id])
   @@index([item_id, urut])
+}
+
+// ============================================================================
+// PURCHASE ORDER
+// ============================================================================
+//
+// Dua dokumen berbeda yang sama-sama bernama "PO", dan sengaja dipisah jadi dua
+// tabel karena arahnya berlawanan:
+//
+// - `po_masuk`  — PO yang DITERIMA dari customer. Kita tidak membuatnya; yang
+//   disimpan cuma arsipnya (berkas PDF/scan) beserta kaitannya ke penawaran
+//   kita. Tidak punya item: yang mengikat adalah berkas dari customer, dan
+//   mengetik ulang isinya cuma menciptakan versi kedua yang bisa berbeda.
+// - `po_keluar` — PO yang KITA terbitkan ke pemasok. Punya item, dinomori
+//   sendiri, dan dicetak jadi PDF seperti quotation.
+//
+// Sistem lama (`sistempanji`) menyebut keduanya "Data Purchase Order" di dua
+// menu (`data_po` dan `data_po2`) tanpa penjelasan mana yang mana — yang ini
+// menamai arahnya, supaya tidak perlu membuka isinya untuk tahu.
+//
+// TIDAK ADA tabel `supplier`. Pemasok pada `po_keluar` diambil dari `customer`,
+// master yang sama dengan quotation — begitulah sistem lama bekerja dan begitu
+// pula datanya datang: `tb_po2.cust_id` berisi `CUST-054`, id baris
+// `tb_customer`, dan grep `tb_supplier` di seluruh `sistempanji` hasilnya nol.
+// 730 dari 735 PO lamanya cocok ke `customer.kode` yang sudah diimpor ke sini.
+//
+// Konsekuensinya satu baris `customer` bisa berperan dua arah — yang kita tagih
+// lewat quotation, yang kita bayar lewat po_keluar — dan kodenya dipakai
+// bersama: `PJ-Q-SCH-26-0001` dan `PJ-PO-SCH-26-0001` menunjuk perusahaan yang
+// sama. Itu justru yang diinginkan: satu perusahaan satu kode, apa pun arah
+// transaksinya.
+
+/// PO yang diterima DARI customer — arsip, bukan dokumen yang kita susun.
+///
+/// Nomornya milik customer dan diketik apa adanya: ia identitas dokumen mereka,
+/// jadi tidak boleh dinormalkan, dinomori ulang, atau "dirapikan".
+///
+/// `quotation_id` opsional. PO yang datang tanpa penawaran itu hal biasa
+/// (pesanan ulang, pengadaan kecil), dan memaksa setiap PO menunjuk penawaran
+/// akan membuat orang mengarang kaitan supaya formnya bisa disimpan.
+model po_masuk {
+  id           Int         @id @default(autoincrement())
+  uuid         String      @unique @default(uuid())
+  /// Nomor PO milik customer. Unik, karena satu nomor PO fisik cuma ada satu —
+  /// dua baris dengan nomor sama berarti salah satunya salah input.
+  nomor        String      @unique
+  tanggal      DateTime    @db.Date
+  customer_id  Int
+  customer     customer    @relation(fields: [customer_id], references: [id])
+  /// Penawaran yang dijawab PO ini. NULL = PO datang tanpa penawaran.
+  quotation_id Int?
+  quotation    quotation?  @relation(fields: [quotation_id], references: [id])
+  perihal      String?
+  /// Nama orang di pihak customer yang meminta/menerbitkan PO ini.
+  requestor    String?
+  /// Nilai PO menurut dokumen customer. Opsional — sebagian PO datang tanpa
+  /// nominal (rate card, pesanan bertahap), dan nol yang dipaksakan akan
+  /// terbaca sebagai "PO senilai nol".
+  nilai        Decimal?    @db.Decimal(18, 2)
+  currency     String      @default("IDR")
+  catatan      String?     @db.Text
+  created_by   Int?
+  created_at   DateTime?   @db.DateTime(0)
+  updated_at   DateTime?   @db.DateTime(0)
+  is_deleted   Boolean     @default(false)
+  berkas       po_berkas[]
+
+  @@index([tanggal])
+  @@index([customer_id])
+  @@index([quotation_id])
+}
+
+/// Berkas arsip milik satu `po_masuk` — scan PO, lampiran, halaman tambahan.
+///
+/// `po_masuk_id` boleh NULL dengan alasan yang sama seperti `quotation_gambar`:
+/// form create mengunggah sebelum barisnya punya id. Baris seperti itu yatim,
+/// dimiliki pengunggahnya lewat `created_by`, dan diklaim saat disimpan.
+///
+/// Berbeda dari `quotation_gambar`, isinya TIDAK diperkecil atau di-encode
+/// ulang. Ini dokumen arsip — yang disimpan harus byte yang sama dengan yang
+/// dikirim customer, karena suatu saat ia dipakai membuktikan apa yang dipesan.
+model po_berkas {
+  id          Int       @id @default(autoincrement())
+  po_masuk_id Int?
+  po_masuk    po_masuk? @relation(fields: [po_masuk_id], references: [id], onDelete: Cascade)
+  uuid        String    @unique @default(uuid())
+  nama_asli   String
+  /// MIME asli, dipakai saat berkasnya dilayani kembali. Disimpan karena
+  /// ekstensi tidak cukup: PDF dan XLSX sama-sama perlu header yang benar
+  /// supaya browser membukanya, bukan mengunduhnya sebagai berkas tak dikenal.
+  tipe        String
+  ukuran      Int
+  created_by  Int?
+  created_at  DateTime? @db.DateTime(0)
+
+  @@index([po_masuk_id])
+  @@index([created_by, po_masuk_id])
+}
+
+/// PO yang KITA terbitkan ke pemasok.
+///
+/// Lawan transaksinya `customer`, bukan tabel `supplier` tersendiri — lihat
+/// catatan di kepala bagian PURCHASE ORDER di atas. Di layar dan di cetakan ia
+/// tetap disebut "supplier", karena itu perannya pada dokumen ini.
+///
+/// Susunan nominalnya sama persis dengan `quotation` (subtotal → diskon → dpp →
+/// ppn → pph → total) supaya kedua dokumen bisa dibaca dan dicocokkan dengan
+/// cara yang sama, dan supaya rumusnya cuma ada satu bentuk untuk diingat.
+///
+/// Yang SENGAJA tidak ikut dari quotation:
+///
+/// - **Grup item.** Quotation punya grup karena ia kadang menawarkan pilihan
+///   paket ("Opsi A" / "Opsi B") yang tidak boleh dijumlahkan. PO tidak pernah
+///   menawarkan pilihan — ia perintah beli, dan semua barisnya dibeli. Grup di
+///   sini cuma satu tingkat sarang tanpa arti.
+/// - **`berlaku_sampai` / `kadaluarsa`.** PO tidak kadaluarsa; ia dipenuhi atau
+///   dibatalkan, dan keduanya terjadi di luar aplikasi ini.
+///
+/// Yang ikut: `revisi` (diisi user, bukan hitungan sistem) dan `currency`
+/// (penentu simbol, bukan kurs) — keduanya dengan alasan yang sama seperti di
+/// quotation.
+model po_keluar {
+  id                Int              @id @default(autoincrement())
+  uuid              String           @unique @default(uuid())
+  nomor             String           @unique
+  revisi            Int              @default(0)
+  tanggal           DateTime         @db.Date
+  customer_id       Int
+  customer          customer         @relation(fields: [customer_id], references: [id])
+  attn              String?
+  perihal           String
+  /// Kapan barang/jasanya diminta sampai. Opsional: sebagian PO jasa tidak
+  /// punya tanggal kirim tunggal.
+  tanggal_kirim     DateTime?        @db.Date
+  syarat_pembayaran String?          @db.Text
+  catatan           String?          @db.Text
+  subtotal          Decimal          @default(0) @db.Decimal(18, 2)
+  diskon_persen     Decimal          @default(0) @db.Decimal(5, 2)
+  diskon_nominal    Decimal          @default(0) @db.Decimal(18, 2)
+  dpp               Decimal          @default(0) @db.Decimal(18, 2)
+  ppn_persen        Decimal          @default(0) @db.Decimal(5, 2)
+  ppn_nominal       Decimal          @default(0) @db.Decimal(18, 2)
+  /// PPh dipotong KITA sebagai pembeli dan disetorkan atas nama pemasok, jadi
+  /// ia mengurangi yang dibayarkan: total = dpp + ppn - pph. Arahnya kebetulan
+  /// sama dengan quotation, tapi alasannya terbalik — di sana kitalah yang
+  /// dipotong. Legacy `data_po2` memakai tarif 2% yang dipatok mati lewat
+  /// pilihan "Service: Yes/No"; di sini tarifnya diketik, karena PPh 23 punya
+  /// tarif lain dan NPWP yang tidak ada menggandakannya.
+  pph_persen        Decimal          @default(0) @db.Decimal(5, 2)
+  pph_dasar         String           @default("item")
+  pph_nominal       Decimal          @default(0) @db.Decimal(18, 2)
+  total             Decimal          @default(0) @db.Decimal(18, 2)
+  currency          String           @default("IDR")
+  /// Penanda tangan yang tercetak di blok "Ordered by". Opsional, dengan alasan
+  /// yang sama seperti di quotation.
+  ttd_id            Int?
+  ttd               ttd?             @relation(fields: [ttd_id], references: [id])
+  created_by        Int?
+  created_at        DateTime?        @db.DateTime(0)
+  updated_at        DateTime?        @db.DateTime(0)
+  is_deleted        Boolean          @default(false)
+  po_keluar_item    po_keluar_item[]
+
+  @@index([tanggal])
+  @@index([customer_id])
+  @@index([ttd_id])
+}
+
+model po_keluar_item {
+  id            Int       @id @default(autoincrement())
+  po_keluar_id  Int
+  po_keluar     po_keluar @relation(fields: [po_keluar_id], references: [id], onDelete: Cascade)
+  urut          Int
+  /// Baris JUDUL, bukan barang — sama artinya dengan `quotation_item.judul`:
+  /// hanya `deskripsi` yang berarti, angkanya dipaksa nol, dan ia tidak
+  /// kebagian nomor urut.
+  judul         Boolean   @default(false)
+  deskripsi     String    @db.Text
+  satuan        String?
+  qty           Decimal   @default(1) @db.Decimal(14, 2)
+  harga         Decimal   @default(0) @db.Decimal(18, 2)
+  diskon_persen Decimal   @default(0) @db.Decimal(5, 2)
+  jumlah        Decimal   @default(0) @db.Decimal(18, 2)
+  /// Dicentang = ikut dasar pengenaan PPh saat `pph_dasar = "item"`.
+  kena_pph      Boolean   @default(false)
+  /// Keterangan singkat per baris (nomor part, lead time, merek yang diminta).
+  /// Ada di sistem lama sebagai `item_remarks` dan ikut tercetak di PDF-nya —
+  /// dipertahankan karena kolom itu memang dipakai, bukan warisan kosong.
+  remarks       String?
+
+  @@index([po_keluar_id, urut])
 }

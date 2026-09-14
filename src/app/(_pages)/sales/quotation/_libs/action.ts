@@ -13,6 +13,7 @@ import {
   QuotationCurrency,
   QuotationGrupProps,
   QuotationProps,
+  TtdProps,
 } from "@/types";
 import { ErrorForm, validasiQuotation } from "./skema";
 
@@ -42,6 +43,8 @@ export type QuotationFormProps = {
   pph_dasar: "item" | "total";
   tampilkan_grand_total: boolean;
   currency: QuotationCurrency;
+  /** Penanda tangan dari master `ttd`. 0 / "" = tanpa tanda tangan. */
+  ttd_id: number | string;
   grup: QuotationGrupProps[];
 };
 
@@ -132,6 +135,29 @@ export const getCustomerPilihan = async (): Promise<{
   data: CustomerProps[];
 }> => {
   const hasil = await apiGet<CustomerProps[]>("/api/sales/customer/pilihan");
+
+  return {
+    status: hasil.status,
+    message: hasil.message,
+    data: Array.isArray(hasil.data) ? hasil.data : [],
+  };
+};
+
+/**
+ * Daftar penanda tangan untuk dropdown di form ini.
+ *
+ * Didefinisikan di sini, bukan diimpor dari modul Tanda Tangan, mengikuti pola
+ * `getCustomerPilihan` di atas: tiap modul memanggil endpoint yang dibutuhkan
+ * formnya sendiri. Backend sengaja melonggarkan aksesnya ke menu quotation,
+ * jadi orang yang boleh membuat penawaran tetap dapat isinya walau menu master
+ * tanda tangan tidak dibuka untuk dia.
+ */
+export const getTtdPilihan = async (): Promise<{
+  status: boolean;
+  message: string;
+  data: TtdProps[];
+}> => {
+  const hasil = await apiGet<TtdProps[]>("/api/sales/ttd/pilihan");
 
   return {
     status: hasil.status,
@@ -255,4 +281,18 @@ export const deleteQuotation = async (
   const hasil = await apiDelete(`/api/sales/quotation/${id}`);
 
   return { status: hasil.status, message: hasil.message };
+};
+
+/**
+ * Tahun yang ADA datanya, untuk mengisi filter tahun.
+ *
+ * Dropdown-nya tidak boleh menebak rentang dari kalender: data impor
+ * `sistempanji` jauh lebih tua dari tahun berjalan, dan tahun yang tidak ada di
+ * dropdown berarti barisnya tidak terjangkau sama sekali — bukan sekadar tidak
+ * terlihat.
+ */
+export const getTahun = async (): Promise<number[]> => {
+  const hasil = await apiGet<number[]>("/api/sales/quotation/tahun");
+
+  return Array.isArray(hasil.data) ? hasil.data : [];
 };

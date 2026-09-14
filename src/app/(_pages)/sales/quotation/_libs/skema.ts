@@ -1,3 +1,4 @@
+import { nomorKeSlug, uang } from "@/libs/Dokumen";
 import { z } from "zod";
 
 /**
@@ -193,6 +194,16 @@ export const skemaQuotation = z
       "Mata uang harus IDR, USD, atau SGD",
     ),
 
+    // Penanda tangan — OPSIONAL, jadi kosong dipetakan ke 0 dan bukan ditolak.
+    // Ratusan penawaran lama tidak punya, dan sebagian memang sengaja diteken
+    // basah. Backend memperlakukan 0 sama dengan "tidak dipilih".
+    ttd_id: z.preprocess(
+      (v) => (v === "" || v === null || v === undefined ? 0 : keAngka(v)),
+      z
+        .number("Tanda tangan tidak sah")
+        .refine((n) => Number.isInteger(n) && n >= 0, "Tanda tangan tidak sah"),
+    ),
+
     grup: z
       .array(skemaGrup)
       .min(1, "Quotation minimal punya satu grup item")
@@ -216,64 +227,23 @@ export const skemaQuotation = z
 export type QuotationInput = z.infer<typeof skemaQuotation>;
 
 /**
- * Nomor penawaran → segmen URL: `001/QUO/PJ/IX/2026` → `001-QUO-PJ-IX-2026`.
+ * `uang()` dan `nomorKeSlug()` sekarang tinggal di `@/libs/Dokumen` dan
+ * DITERUSKAN dari sini.
  *
- * Dipakai untuk tautan PDF, yang dikunci nomor dan bukan id karena tautannya
- * terlihat orang — muncul di address bar, disalin ke chat, jadi nama berkas
- * unduhan.
+ * Keduanya dibutuhkan modul PO juga, dan menyalinnya ke sana akan mengulang
+ * persis kesalahan yang dulu membuat `uang()` dipusatkan: tiga komponen dengan
+ * tiga salinan `Intl.NumberFormat` yang semuanya mengunci "IDR", dan yang
+ * terlewat mencetak "Rp" di atas angka dolar.
  *
- * Garis miringnya diganti strip, BUKAN di-`encodeURIComponent`: `%2F` di dalam
- * path ditolak sebagian proxy dan dinormalkan sebagian yang lain, jadi
- * tautannya akan hidup-mati tergantung apa yang berdiri di depan aplikasi.
- * Backend mencocokkan ke arah sebaliknya (`REPLACE`), jadi penggantian ini
- * tidak perlu bisa dibalik.
- *
- * SPASI ikut jadi strip, bukan dibuang. Empat nomor hasil impor sistempanji
- * memuat spasi di segmen kode customer (`PJ-Q-BRI KCP-24-0068`); membuangnya
- * menghasilkan `PJ-Q-BRIKCP-…` yang tidak cocok dengan `REPLACE` di backend,
- * dan keempat dokumen itu tidak akan pernah bisa dicetak.
+ * Diteruskan, bukan dipindahkan begitu saja, supaya belasan `import { uang }
+ * from "../_libs/skema"` yang sudah ada tidak perlu disentuh — dan supaya tidak
+ * ada dua jalan impor yang harus dipilih untuk fungsi yang sama.
  */
-export const nomorKeSlug = (nomor: string) =>
-  nomor
-    .trim()
-    .replace(/[/\s]+/g, "-")
-    .replace(/[^A-Za-z0-9-]/g, "");
+export { nomorKeSlug, uang };
 
 /** Tautan PDF satu penawaran. `unduh` memaksa download, bukan buka di tab. */
 export const tautanPdf = (nomor: string, unduh = false) =>
   `/api/sales/quotation/${nomorKeSlug(nomor)}/pdf${unduh ? "?unduh=1" : ""}`;
-
-/**
- * Nominal + mata uangnya, satu-satunya pemformat uang di modul ini.
- *
- * Sengaja dipusatkan: sebelumnya tiga komponen memegang salinan `Intl`-nya
- * sendiri yang sama persis, dan begitu mata uang berhenti selalu IDR ketiganya
- * harus diubah berbarengan — yang terlewat satu akan mencetak "Rp" di atas
- * angka dolar tanpa ada yang menyadarinya.
- *
- * Locale mengikuti mata uang, bukan selalu id-ID: "US$ 1.250,50" gaya Indonesia
- * salah baca sejuta kali lipat bagi pembaca yang memang memakai dolar.
- */
-const LOCALE: Record<string, string> = {
-  IDR: "id-ID",
-  USD: "en-US",
-  SGD: "en-SG",
-};
-
-export const uang = (nilai: number, currency: string = "IDR") => {
-  const kode = (currency || "IDR").toUpperCase();
-  const n = Number.isFinite(nilai) ? nilai : 0;
-
-  return new Intl.NumberFormat(LOCALE[kode] ?? "en-US", {
-    style: "currency",
-    currency: kode,
-    // Pecahan ditampilkan hanya kalau memang ada. Penawaran rupiah hampir
-    // selalu bulat, dan ",00" di tiap baris cuma kebisingan; penawaran dolar
-    // justru sering bersen, dan membulatkannya menyembunyikan selisih.
-    minimumFractionDigits: 0,
-    maximumFractionDigits: Number.isInteger(n) ? 0 : 2,
-  }).format(n);
-};
 
 /**
  * Pesan kesalahan, dikunci path: `"perihal"`, `"grup.0.nama"`,

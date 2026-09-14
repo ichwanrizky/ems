@@ -8,6 +8,7 @@ import {
   QuotationGrupProps,
   QuotationItemProps,
   QuotationProps,
+  TtdProps,
 } from "@/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,6 +18,7 @@ import {
   createQuotation,
   editQuotation,
   getCustomerPilihan,
+  getTtdPilihan,
   QuotationFormProps,
   unggahGambarQuotation,
 } from "../_libs/action";
@@ -205,6 +207,7 @@ export default function QuotationForm({ quotationEdit }: Props) {
   const [isLoadingSubmit, setIsLoadingSubmit] = useState(false);
   const [isLoadingPage, setIsLoadingPage] = useState(true);
   const [customerData, setCustomerData] = useState([] as CustomerProps[]);
+  const [ttdData, setTtdData] = useState([] as TtdProps[]);
   const [unggah, setUnggah] = useState<Record<string, boolean>>({});
   const [errorForm, setErrorForm] = useState<ErrorForm>({});
 
@@ -229,6 +232,9 @@ export default function QuotationForm({ quotationEdit }: Props) {
     pph_dasar: quotationEdit?.pph_dasar ?? "item",
     tampilkan_grand_total: quotationEdit?.tampilkan_grand_total ?? true,
     currency: quotationEdit?.currency ?? "IDR",
+    // Tanpa default: tanda tangan yang terpilih sendiri adalah tanda tangan
+    // yang ikut tercetak tanpa pernah diputuskan siapa pun.
+    ttd_id: quotationEdit?.ttd?.id ?? "",
     grup:
       quotationEdit?.grup && quotationEdit.grup.length > 0
         ? quotationEdit.grup.map((g) => ({
@@ -242,7 +248,13 @@ export default function QuotationForm({ quotationEdit }: Props) {
     const ambil = async () => {
       setIsLoadingPage(true);
       try {
-        const result = await getCustomerPilihan();
+        // Berbarengan, bukan berurutan: keduanya request mandiri, dan
+        // menunggunya satu per satu menambah waktu buka form tanpa alasan.
+        const [result, ttd] = await Promise.all([
+          getCustomerPilihan(),
+          getTtdPilihan(),
+        ]);
+
         if (result.status) {
           setCustomerData(result.data);
         } else {
@@ -252,6 +264,13 @@ export default function QuotationForm({ quotationEdit }: Props) {
             message: "Failed",
             subMessage: result.message,
           });
+        }
+
+        // Daftar tanda tangan yang gagal dimuat TIDAK menghentikan form:
+        // tanda tangan opsional, dan penawaran masih bisa disimpan tanpa itu.
+        // Yang terjadi cuma dropdownnya kosong.
+        if (ttd.status) {
+          setTtdData(ttd.data);
         }
       } catch (error) {
         setAlert({
@@ -804,6 +823,73 @@ export default function QuotationForm({ quotationEdit }: Props) {
                         </select>
                         {pesan("currency")}
                       </div>
+                    </div>
+                  </div>
+
+                  {/* Tanda tangan dipilih dari master, bukan digambar di sini.
+                      Yang menyusun penawaran sering bukan yang meneken — staf
+                      menyiapkan, manajer yang tanda tangan — dan itu kasus yang
+                      tidak bisa diselesaikan kalau tanda tangannya dibuat ulang
+                      tiap dokumen.
+
+                      Pratinjaunya ikut ditampilkan: nama di dropdown saja tidak
+                      cukup untuk tahu bahwa yang terpilih benar-benar coretan
+                      yang dimaksud, dan salah pilih baru ketahuan setelah PDF
+                      sampai ke customer. */}
+                  <div className="row">
+                    <div className="col-md-5">
+                      <div className="form-group mb-3">
+                        <label htmlFor="ttd_id" className="form-label">
+                          TANDA TANGAN
+                        </label>
+                        <select
+                          id="ttd_id"
+                          className={kelas("ttd_id", "form-control")}
+                          value={formData.ttd_id}
+                          onChange={(e) =>
+                            setFormData({ ...formData, ttd_id: e.target.value })
+                          }
+                        >
+                          <option value="">
+                            -- Tanpa tanda tangan (teken manual) --
+                          </option>
+                          {ttdData.map((t) => (
+                            <option key={t.id} value={t.id}>
+                              {t.nama}
+                              {t.jabatan ? ` — ${t.jabatan}` : ""}
+                            </option>
+                          ))}
+                        </select>
+                        {pesan("ttd_id") ?? (
+                          <small className="text-muted">
+                            Dikelola di Sales &rsaquo; Tanda Tangan.
+                          </small>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="col-md-7">
+                      {(() => {
+                        const dipilih = ttdData.find(
+                          (t) => String(t.id) === String(formData.ttd_id),
+                        );
+
+                        if (!dipilih?.uuid) return null;
+
+                        return (
+                          <div className="form-group mb-3">
+                            <label className="form-label">PRATINJAU</label>
+                            <div className="border rounded p-2 bg-light text-center">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={`/api/sales/ttd/gambar/${dipilih.uuid}`}
+                                alt={`Tanda tangan ${dipilih.nama}`}
+                                style={{ maxHeight: 70, maxWidth: "100%" }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })()}
                     </div>
                   </div>
 

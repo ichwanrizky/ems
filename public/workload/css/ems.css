@@ -5,6 +5,29 @@
  */
 
 /* ---------------------------------------------------------------
+   Kerangka halaman
+   Template WorkLoad membiarkan .footer mengikuti tinggi konten, jadi
+   di halaman yang isinya pendek footer ikut naik ke tengah layar.
+   #main-wrapper dijadikan kolom flex setinggi layar dengan
+   .content-body yang menyerap sisa ruang, sehingga footer selalu
+   menempel di bawah. .header, .nav-header, dan .dlabnav tidak ikut
+   terpengaruh: ketiganya fixed/absolute, jadi di luar aliran flex.
+   --------------------------------------------------------------- */
+#main-wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+#main-wrapper > .content-body {
+  flex: 1 0 auto;
+}
+
+#main-wrapper > .footer {
+  flex-shrink: 0;
+}
+
+/* ---------------------------------------------------------------
    Brand & header
    --------------------------------------------------------------- */
 .nav-header .brand-logo .logo-abbr {

@@ -201,16 +201,24 @@ export default function CustomerView(props: CustomerViewProps) {
                     <th style={{ width: "1%" }}>NO</th>
                     <th style={{ width: "10%" }}>KODE</th>
                     <th>NAMA CUSTOMER</th>
-                    <th style={{ width: "28%" }}>ALAMAT</th>
-                    <th style={{ width: "16%" }}>EMAIL</th>
-                    <th style={{ width: "13%" }}>TELP</th>
-                    <th style={{ width: "8%" }}>QUOTATION</th>
+                    <th style={{ width: "24%" }}>ALAMAT</th>
+                    <th style={{ width: "15%" }}>EMAIL</th>
+                    <th style={{ width: "12%" }}>TELP</th>
+                    {/* Tiga hitungan terpisah, bukan satu "dokumen": satu baris
+                        customer bisa berperan dua arah — yang kita tagih lewat
+                        Quotation, dan yang kita bayar lewat PO Keluar, karena
+                        PO Keluar memang mengambil pemasoknya dari master ini.
+                        Menjumlahkannya jadi satu angka menyembunyikan perbedaan
+                        itu justru di tempat yang paling butuh membedakannya. */}
+                    <th style={{ width: "7%" }}>QUO</th>
+                    <th style={{ width: "7%" }}>PO MSK</th>
+                    <th style={{ width: "7%" }}>PO KLR</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loadingPage ? (
                     <tr>
-                      <td colSpan={8} align="center">
+                      <td colSpan={10} align="center">
                         <div
                           className="spinner-border spinner-border-sm me-2"
                           role="status"
@@ -269,11 +277,21 @@ export default function CustomerView(props: CustomerViewProps) {
                             {item.jumlah_quotation ?? 0}
                           </span>
                         </td>
+                        <td align="center">
+                          <span className="badge badge-dark light">
+                            {item.jumlah_po_masuk ?? 0}
+                          </span>
+                        </td>
+                        <td align="center">
+                          <span className="badge badge-warning light">
+                            {item.jumlah_po_keluar ?? 0}
+                          </span>
+                        </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td colSpan={8} align="center">
+                      <td colSpan={10} align="center">
                         No data available
                       </td>
                     </tr>

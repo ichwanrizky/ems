@@ -11,6 +11,7 @@ import {
   deleteQuotation,
   getQuotation,
   getQuotationId,
+  getTahun,
   QuotationFilterProps,
 } from "../_libs/action";
 import { tautanPdf, uang } from "../_libs/skema";
@@ -65,8 +66,60 @@ export default function QuotationView(props: QuotationViewProps) {
   const [totalData, setTotalData] = useState(0);
 
   const [filter, setFilter] = useState<QuotationFilterProps>({
+    // Tahun awal DIGANTI begitu daftar tahun dari backend tiba — lihat efek di
+    // bawah. Nilai ini cuma pengisi sampai daftarnya sampai.
     tahun: new Date().getFullYear(),
   });
+
+  /**
+   * Tahun yang ADA datanya, dari backend.
+   *
+   * Dropdown-nya tidak boleh menebak rentang dari kalender. Data impor
+   * `sistempanji` jauh lebih tua dari tahun berjalan, dan tahun yang tidak ada
+   * di dropdown berarti barisnya tidak terjangkau sama sekali — bukan sekadar
+   * tidak terlihat. PO masuk seluruhnya 2019–2020; dengan pilihan yang berhenti
+   * di 2024, halamannya selalu kosong dan tidak ada cara menampilkannya.
+   */
+  const [tahunOpsi, setTahunOpsi] = useState<number[]>([]);
+
+  /**
+   * Daftar tahun sudah selesai diambil (berhasil maupun tidak).
+   *
+   * Pengambilan data DITAHAN sampai ini true. Tanpa penahan itu halamannya
+   * mengambil data untuk tahun pengisi lebih dulu, lalu mengambil ulang begitu
+   * tahun yang benar tiba — dan di antara keduanya user melihat kedipan
+   * "No data available" untuk modul yang datanya bukan dari tahun berjalan.
+   */
+  const [tahunSiap, setTahunSiap] = useState(false);
+
+  useEffect(() => {
+    const ambil = async () => {
+      try {
+        const daftar = await getTahun();
+
+        if (daftar.length === 0) return;
+
+        setTahunOpsi(daftar);
+
+        // Pindah ke tahun TERBARU yang ada datanya, bukan tahun berjalan. Untuk
+        // modul yang datanya sampai hari ini keduanya sama dan tidak ada yang
+        // berubah; untuk yang datanya berhenti beberapa tahun lalu, inilah yang
+        // membuat halamannya tidak terbuka dalam keadaan kosong.
+        //
+        // Dijaga perbandingan supaya tidak memicu pengambilan data kedua saat
+        // nilainya memang sudah sama.
+        setFilter((s) =>
+          Number(s.tahun) === daftar[0] ? s : { ...s, tahun: daftar[0] },
+        );
+      } finally {
+        // Juga saat gagal: menahan selamanya berarti halamannya tidak pernah
+        // memuat apa pun hanya karena satu endpoint pembantu tidak menjawab.
+        setTahunSiap(true);
+      }
+    };
+
+    ambil();
+  }, []);
 
   const [quotationData, setQuotationData] = useState([] as QuotationProps[]);
 
@@ -94,8 +147,10 @@ export default function QuotationView(props: QuotationViewProps) {
   }, [searchTerm]);
 
   useEffect(() => {
+    if (!tahunSiap) return;
+
     fetchData(debouncedSearchTerm, filter, currentPage);
-  }, [debouncedSearchTerm, filter, currentPage]);
+  }, [tahunSiap, debouncedSearchTerm, filter, currentPage]);
 
   /**
    * Cerminkan halaman aktif ke URL supaya form bisa kembali ke sini.
@@ -263,7 +318,7 @@ export default function QuotationView(props: QuotationViewProps) {
                 setCurrentPage(1);
               }}
             >
-              <FilterTahun />
+              <FilterTahun daftar={tahunOpsi} semua />
             </select>
           </div>
         </div>

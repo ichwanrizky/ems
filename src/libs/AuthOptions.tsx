@@ -17,7 +17,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
  * - `accessToken`, JWT terbitan backend yang dipakai `ApiClient` untuk setiap
  *   pemanggilan berikutnya.
  *
- * Session NextAuth tetap 8 jam, sama dengan masa berlaku token backend, supaya
+ * Session NextAuth 1 jam, sama dengan masa berlaku token backend, supaya
  * keduanya kedaluwarsa bersamaan — session yang masih hidup dengan token yang
  * sudah mati hanya akan menghasilkan "Sesi berakhir" di setiap halaman.
  */
@@ -27,7 +27,7 @@ const BASE_URL = (process.env.BACKEND_URL || "").replace(/\/+$/, "");
 export const authOptions: NextAuthOptions = {
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60 * 8, // 8 jam
+    maxAge: 60 * 60, // 1 jam
   },
   secret: process.env.JWT,
   providers: [
