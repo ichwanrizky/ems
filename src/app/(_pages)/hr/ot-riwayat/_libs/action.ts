@@ -103,6 +103,7 @@ export const getRiwayatOt = async (
           },
         },
         approve_date: true,
+        approve_via_link: true,
       },
       ...condition,
       orderBy: {

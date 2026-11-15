@@ -386,6 +386,7 @@ model tanggal_merah_list {
 
 model pengajuan_overtime {
   id                         Int                          @id @default(autoincrement())
+  uuid                       String                       @unique @default(uuid())
   tanggal                    DateTime                     @db.Date
   jam_from                   DateTime                     @db.Time(0)
   jam_to                     DateTime                     @db.Time(0)
@@ -401,6 +402,7 @@ model pengajuan_overtime {
   approve_by                 Int?
   user                       user?                        @relation(fields: [approve_by], references: [id])
   approve_date               DateTime?                    @db.DateTime(0)
+  approve_via_link           Boolean                      @default(false)
   pengajuan_overtime_pegawai pengajuan_overtime_pegawai[]
   overtime                   overtime[]
 }

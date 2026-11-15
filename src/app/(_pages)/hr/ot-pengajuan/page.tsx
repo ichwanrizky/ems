@@ -34,6 +34,7 @@ export default async function OTPengajuanPage() {
           accessDepartment={session.user.access_department || []}
           accessMenu={foundMenu.access[0] || {}}
           accessSubDepartment={session.user.access_sub_department || []}
+          isAdmin={session.user.role_id === 1}
         />
       ) : (
         <div className="d-flex justify-content-center align-items-center text-danger">

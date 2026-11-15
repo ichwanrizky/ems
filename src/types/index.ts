@@ -343,6 +343,7 @@ export type RiwayatIzinProps = {
 
 export interface PengajuanOvertimeProps {
   id: number;
+  uuid: string | null;
   pengajuan_overtime_pegawai: {
     pegawai: {
       id: number;
@@ -386,8 +387,35 @@ export interface RiwayatOvertimeProps {
   status: number;
   user: {
     name: string;
-  };
+  } | null;
   approve_date: Date;
+  approve_via_link: boolean;
+}
+
+export interface ApprovalOvertimeProps {
+  department: {
+    nama_department: string;
+  };
+  sub_department: {
+    nama_sub_department: string;
+  };
+  pengajuan_overtime_pegawai: {
+    pegawai: {
+      id: number;
+      nama: string;
+    };
+  }[];
+  tanggal: Date;
+  jam_from: Date;
+  jam_to: Date;
+  job_desc: string | null;
+  remark: string | null;
+  status: number;
+  approve_date: Date | null;
+  approve_via_link: boolean;
+  user: {
+    name: string;
+  } | null;
 }
 
 export type AttendanceMonthlyProps = {

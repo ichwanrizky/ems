@@ -24,10 +24,11 @@ type Props = {
   accessDepartment: AccessDepartmentProps;
   accessMenu: AccessProps;
   accessSubDepartment: AccessSubDepartmentProps;
+  isAdmin: boolean;
 };
 
 export default function OTPengajuanView(props: Props) {
-  const { accessDepartment, accessMenu, accessSubDepartment } = props;
+  const { accessDepartment, accessMenu, accessSubDepartment, isAdmin } = props;
 
   const [loadingPage, setLoadingPage] = useState(true);
   const [isLoadingAction, setIsLoadingAction] = useState<isLoadingProps>({});
@@ -182,6 +183,22 @@ export default function OTPengajuanView(props: Props) {
     }
 
     return;
+  };
+
+  const handleCopyLink = async (uuid: string) => {
+    const link = `${window.location.origin}/approval-ot/${uuid}`;
+    try {
+      await navigator.clipboard.writeText(link);
+      setAlertPage({
+        status: true,
+        color: "success",
+        message: "Success",
+        subMessage: "Link approval copied",
+      });
+    } catch (error) {
+      // navigator.clipboard tidak tersedia di non-HTTPS → tampilkan link untuk dicopy manual
+      window.prompt("Copy link approval:", link);
+    }
   };
 
   return (
@@ -347,6 +364,17 @@ export default function OTPengajuanView(props: Props) {
                                 </button>
                               </div>
                             ))}
+                          {isAdmin && item.uuid && (
+                            <div className="d-grid mt-2">
+                              <button
+                                className="btn btn-outline-primary btn-sm"
+                                type="button"
+                                onClick={() => handleCopyLink(item.uuid!)}
+                              >
+                                Copy Link
+                              </button>
+                            </div>
+                          )}
                         </td>
                       </tr>
                     ))

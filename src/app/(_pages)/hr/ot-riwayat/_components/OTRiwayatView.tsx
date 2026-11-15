@@ -337,7 +337,9 @@ export default function OTRiwayatView(props: Props) {
                             <span className="badge bg-danger">Rejected By</span>
                           )}
                           <br />
-                          {item.user.name?.toUpperCase()}
+                          {item.approve_via_link
+                            ? "LINK APPROVAL"
+                            : item.user?.name?.toUpperCase()}
                         </td>
                       </tr>
                     ))
